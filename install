@@ -1,0 +1,23 @@
+#!/bin/bash
+# Installs messenger
+#
+# Requires Python 3.
+cmd=messenger
+python=python3
+
+# Determine the version of python we are using
+vers=$($python -c 'import sys; print("%s.%s" % (sys.version_info[0], sys.version_info[1]))')
+echo "Installing $cmd to ~/.home/bin (Python$vers)."
+
+# remove build directories from a previous install to assure a clean install
+rm -rf build dist $cmd.egg-info install.out
+
+# install $cmd
+python$vers setup.py install --quiet --user >& install.out
+if [[ $? -ne 0 ]] ; then
+    echo "Problems found, aborting (see install.out)"
+    exit 1
+fi
+
+# remove build directories, because I like a clean directory
+rm -rf build dist $cmd.egg-info
