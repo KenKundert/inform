@@ -7,15 +7,15 @@ requires the use of Python 3.
 
 Defines a collection of 'print' functions (messengers) that have different 
 roles.  These functions are declared under the Messengers section and include 
-log, comment, narrate, display, output, debug, warn, error, and panic.  Each of 
-these functions takes arguments like the standard print function: unnamed 
-arguments must all be strings and they are joined together to produce the 
-output, the named arguments act to control the process. The available controls 
-(named arguments) are:
+*log*, *comment*, *narrate*, *display*, *output*, *debug*, *warn*, *error*, 
+*fatal* and *panic*.  Each of these functions takes arguments like the standard 
+print function: unnamed arguments must all be strings and they are joined 
+together to produce the output, the named arguments act to control the process.  
+The available controls (named arguments) are:
 
 sep=' ':
    Specifies the string used to join the unnamed arguments.
-end='\n':
+end='\\n':
    Specifies a string to append to the message.
 file=stdout:
    The destination stream (a file pointer).
@@ -25,8 +25,9 @@ prefix=None:
    A string that is added to the start of a message as a prefix.  It will be 
    separated from the message by a colon.
 
-With the simplest use of the program, you simply import the functions you need 
-and call them:
+With the simplest use of the program, you simply import the messengers you need 
+and call them (they take the same arguments as does the *print* function built 
+in to Python:
 
 .. code-block:: python
 
@@ -148,6 +149,7 @@ For example:
     ...     )
     ... )
     Reading CSV files: a, b and d.
+
     >>> contents = {}
     >>> for name in filenames:
     ...     try:
@@ -159,9 +161,9 @@ For example:
     myprog error: b: No such file or directory.
     myprog error: d: No such file or directory.
 
-*filetype* was passed into *fmt* even though it is not necessary to do so to 
-work around an issue in doctests. Normally *filetype=filetype* could be left out 
-of the arguments to *fmt*.
+*filetype* was passed into *fmt* even though it is not necessary to do so in 
+order to work around an issue in doctests. Normally *filetype=filetype* could be 
+left out of the arguments to *fmt*.
 
 Finally, an exception, *UserError*, is provided that takes the same arguments as 
 a messenger.  This allows you to catch the exception and handle it if you like.  
@@ -181,7 +183,7 @@ error:
     myprog error: must not be zero: 0
 
 Any keyword arguments provided will be available in *e.kwargs*, but certain 
-keyword arguments are reserved by messenger.
+keyword arguments are reserved by messenger (see above).
 
 Messenger Class
 ---------------
