@@ -96,7 +96,7 @@ You can create your own messengers:
 Several utility functions are provided that are sometimes helpful when creating 
 messages.
 
-conjoin(iterable, cong=' and ', sep=', '):
+conjoin(iterable, conj=' and ', sep=', '):
     Like ''.join(), but allows you to specify a conjunction that is placed 
     between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
     generates 'a, b or c'.
