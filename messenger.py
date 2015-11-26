@@ -25,8 +25,6 @@ import sys
 
 # Globals {{{1
 MESSENGER = None
-EMAIL = 'mim@designers-guide.com'
-
 
 # Messenger Utilities {{{1
 # cull {{{2
@@ -216,17 +214,18 @@ class MessengerGenerator:
 
 # Messengers {{{1
 log = MessengerGenerator(
-    output=False
+    output=False,
+    log=lambda messenger: not messenger.mute,
 )
 comment = MessengerGenerator(
     output=lambda messenger: messenger.verbose and not messenger.mute,
     log=lambda messenger: not messenger.mute,
-    message_color='cyan'
+    message_color='cyan',
 )
 narrate = MessengerGenerator(
     output=lambda messenger: messenger.narrate and not messenger.mute,
     log=lambda messenger: not messenger.mute,
-    message_color='blue'
+    message_color='blue',
 )
 display = MessengerGenerator(
     output=lambda messenger: not messenger.quiet and not messenger.mute,
@@ -239,6 +238,7 @@ output = MessengerGenerator(
 debug = MessengerGenerator(
     severity='DEBUG',
     output=True,
+    log=True,
     header_color='magenta',
 )
 warn = MessengerGenerator(
@@ -263,7 +263,7 @@ fatal = MessengerGenerator(
     log=True,
 )
 panic = MessengerGenerator(
-    severity='internal error (please report to %s)' % EMAIL,
+    severity='internal error (please report)',
     is_error=True,
     terminate=3,
     header_color='red',

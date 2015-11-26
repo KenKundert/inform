@@ -107,7 +107,7 @@ cull(collection, remove=None):
     of Nones. remove may be a function, in which case it takes a single item as 
     an argument and returns True if that item should be removed from the list.
 
-fmt(msg, *args, **kwargs):
+fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
 
 plural(count, singular_form, plural_form=None):
@@ -211,7 +211,7 @@ stdout (stream):
 stderr (stream):
    Termination messages are sent here by default. Generally used for 
    testing.  If not given, sys.stderr is used.
-**kwargs:
+\**kwargs:
    Any additional keyword arguments are made attributes that are ignored by 
    Messenger, but may be accessed by the messengers.  The default messages 
    assume the presence of the following additional keyword arguments (if not 
@@ -250,3 +250,130 @@ message_color=None:
    *yellow*, *blue*, *magenta*, *cyan*, *white*.
 header_color=None:
    Color used to display the header, if one is produced.
+
+Standard Messengers
+-------------------
+
+The following messengers are provided. All of the messengers except those that 
+process fatal error messages and debugging messages do not produce any output if 
+*mute* is set.
+
+.. code-block:: python
+
+   log = MessengerGenerator(
+       output=False,
+       log=lambda messenger: not messenger.mute,
+   )
+
+Saves a message to the log file without displaying it.
+
+.. code-block:: python
+
+   comment = MessengerGenerator(
+       output=lambda messenger: messenger.verbose and not messenger.mute,
+       log=lambda messenger: not messenger.mute,
+       message_color='cyan',
+   )
+
+Displays a message only if *verbose* is set. Logs the message. The message is 
+displayed in cyan.
+
+.. code-block:: python
+
+   narrate = MessengerGenerator(
+       output=lambda messenger: messenger.narrate and not messenger.mute,
+       log=lambda messenger: not messenger.mute,
+       message_color='blue',
+   )
+
+Displays a message only if *narrate* is set. Logs the message. The message is 
+displayed in blue.
+
+.. code-block:: python
+
+   display = MessengerGenerator(
+       output=lambda messenger: not messenger.quiet and not messenger.mute,
+       log=lambda messenger: not messenger.mute,
+   )
+
+
+Displays a message if *quiet* is not set. Logs the message.
+
+.. code-block:: python
+
+   output = MessengerGenerator(
+       output=lambda messenger: not messenger.mute,
+       log=lambda messenger: not messenger.mute,
+   )
+
+Displays and logs a message.
+
+.. code-block:: python
+
+   debug = MessengerGenerator(
+       severity='DEBUG',
+       output=True,
+       log=True,
+       header_color='magenta',
+   )
+
+Displays and logs a debugging message. A header with the label *DEBUG* is added 
+to the message and the header is colored magenta.
+
+Displays and logs a message.
+
+.. code-block:: python
+
+   warn = MessengerGenerator(
+       severity='warning',
+       header_color='yellow',
+       output=lambda messenger: not messenger.mute,
+       log=lambda messenger: not messenger.mute,
+   )
+
+Displays and logs a warning message. A header with the label *warning* is added 
+to the message and the header is colored yellow.
+
+.. code-block:: python
+
+   error = MessengerGenerator(
+       severity='error',
+       is_error=True,
+       header_color='red',
+       output=lambda messenger: not messenger.mute,
+       log=lambda messenger: not messenger.mute,
+   )
+
+Displays and logs an error message. A header with the label *error* is added to 
+the message and the header is colored red.
+
+.. code-block:: python
+
+   fatal = MessengerGenerator(
+       severity='error',
+       is_error=True,
+       terminate=1,
+       header_color='red',
+       output=True,
+       log=True,
+   )
+
+Displays and logs an error message. A header with the label *error* is added to 
+the message and the header is colored red. The program is terminated with an 
+exit status of 1.
+
+.. code-block:: python
+
+   panic = MessengerGenerator(
+       severity='internal error (please report)',
+       is_error=True,
+       terminate=3,
+       header_color='red',
+       output=True,
+       log=True,
+   )
+
+Displays and logs a panic message. A header with the label *internal error* is 
+added to the message and the header is colored red. The program is terminated 
+with an exit status of 3.
+
