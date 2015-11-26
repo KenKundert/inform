@@ -79,8 +79,8 @@ normally printed output of your code:
     >>> error_text
     ''
 
-    >>> logfile_text[:10]
-    'Invoked as'
+    >>> logfile_text[:10], logfile_text[-13:]
+    ('Invoked as', 'running test\n')
 
 You can create your own messengers:
 
