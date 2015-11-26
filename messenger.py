@@ -419,13 +419,16 @@ class Messenger:
 
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
-        return {
+        opts= {
             'file': kwargs.get(
                 'file',
                 self.stderr if action.terminate else self.stdout
             ),
-            'flush': kwargs.get('flush', False),
         }
+        # do not add flush needlessly because it is not supported in python2
+        if 'flush' in kwargs:
+            opts['flush'] = kwargs.get('flush')
+        return opts
 
     # _render_message {{{2
     @staticmethod

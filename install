@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installs messenger
 #
-# Requires Python 3.
+# Requires Python2.7 or Python 3.3.
 cmd=messenger
 python=python3
 

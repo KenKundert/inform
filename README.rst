@@ -2,8 +2,7 @@ Messenger
 =========
 
 A light-weight package with few dependencies that provides various print-like 
-functions to communicate to user with logging and output control. Messenger 
-requires the use of Python 3.
+functions to communicate to user with logging and output control.
 
 Defines a collection of 'print' functions (messengers) that have different 
 roles.  These functions are declared under the Messengers section and include 
