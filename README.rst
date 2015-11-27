@@ -236,7 +236,8 @@ The Messenger class provides the following user accessible methods. These
 methods are available as functions, which act on the current Messenger.
 
 suppress_output(mute):
-   If the argument is true, all output is suppressed except for fatal errors.
+   If the argument is true, all output from the provided messengers is 
+   suppressed except for fatal errors.
 
 done():
    Terminates the program normally (exit status is 0).
