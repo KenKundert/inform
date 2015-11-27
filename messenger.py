@@ -282,7 +282,6 @@ class Messenger:
     # constructor {{{2
     def __init__(
         self,
-        mute=False,
         quiet=False,
         verbose=False,
         narrate=False,
@@ -298,8 +297,6 @@ class Messenger:
     ):
         """
         Arguments:
-        mute (bool)
-            All output is suppressed.
         quiet (bool)
             Normal output is suppressed if this is set (it is still logged)
         verbose (bool)
@@ -341,7 +338,7 @@ class Messenger:
         self.__dict__.update(kwargs)
 
         # make verbosity flags consistent
-        self.mute = mute
+        self.mute = False
         self.quiet = quiet
         if quiet:
             self.verbose = self.narrate = False
@@ -388,6 +385,7 @@ class Messenger:
             now = ""
         log("Invoked as '%s'%s." % (' '.join(argv), now))
 
+    # __getattr__ {{{2
     def __getattr__(self, name):
         return self.__dict__.get(name)
 
@@ -450,6 +448,10 @@ class Messenger:
             return header
         return ''
 
+    # suppress_output {{{2
+    def suppress_output(self, mute):
+        self.mute = bool(mute)
+
     # done {{{2
     def done(self):
         "Normal termination"
@@ -462,19 +464,19 @@ class Messenger:
         sys.exit()
 
     # terminate {{{2
-    def terminate(self, status=True):
+    def terminate(self, status=None):
         """Abnormal termination
 
-        error codes:
-            True: return 1 if errors occurred and 0 otherwise
+        status codes:
+            None: return 1 if errors occurred and 0 otherwise
             0: success
             1: unexpected error
             2: invalid invocation
             3: panic
         """
-        assert status in [True,0,1,2,3]
-        if status is True:
+        if status is None:
             status = 1 if self.errors_accrued() else 0;
+        assert 0 <= status and status < 128
         if self.termination_callback:                                                                                  
             self.termination_callback()
         log('%s: terminates with status %s.' % (self.prog_name, status))
@@ -482,14 +484,6 @@ class Messenger:
             self.logfile.close()
             self.logfile = None
         sys.exit(status)
-
-    # disconnect {{{2
-    def disconnect(self):
-        "Disconnect messenger"
-        if self.logfile:
-            self.logfile.flush()
-        global MESSENGER
-        MESSENGER = None
 
     # terminate_if_errors {{{2
     def terminate_if_errors(self, status=1):
@@ -501,6 +495,14 @@ class Messenger:
         # returns number of errors that have accrued
         return self.errors
 
+    # disconnect {{{2
+    def disconnect(self):
+        "Disconnect messenger"
+        if self.logfile:
+            self.logfile.flush()
+        global MESSENGER
+        MESSENGER = None
+
     # __enter__ {{{2
     def __enter__(self):
         return self
@@ -510,6 +512,10 @@ class Messenger:
         self.disconnect()
 
 # Direct access to class methods {{{2
+# suppress_output {{{3
+def suppress_output(mute):
+    MESSENGER.suppress_output(mute)
+
 # done {{{3
 def done():
     MESSENGER.done()

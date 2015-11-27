@@ -2,15 +2,16 @@ Messenger
 =========
 
 A light-weight package with few dependencies that provides various print-like 
-functions to communicate to user with logging and output control.
+functions to communicate to the user. Messenger provides logging and output 
+control.
 
 Defines a collection of 'print' functions (messengers) that have different 
 roles.  These functions are declared under the Messengers section and include 
 *log*, *comment*, *narrate*, *display*, *output*, *debug*, *warn*, *error*, 
 *fatal* and *panic*.  Each of these functions takes arguments like the standard 
-print function: unnamed arguments must all be strings and they are joined 
-together to produce the output, the named arguments act to control the process.  
-The available controls (named arguments) are:
+print function: unnamed arguments are converted to strings and joined together 
+to produce the output, the named arguments act to control the process.  The 
+available controls (named arguments) are:
 
 sep=' ':
    Specifies the string used to join the unnamed arguments.
@@ -30,8 +31,8 @@ in to Python:
 
 .. code-block:: python
 
-    >>> from messenger import output
-    >>> output('ice', 9)
+    >>> from messenger import display
+    >>> display('ice', 9)
     ice 9
 
 More typical is to import and instantiate the Messenger class yourself. This 
@@ -39,10 +40,10 @@ gives you the ability to specify the desired options:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, output
+    >>> from messenger import Messenger, display
     >>> Messenger(logfile=False)
     <...>
-    >>> output('test')
+    >>> display('test')
     test
 
 You can also use a *with* statement to invoke the messenger. This closes the 
@@ -53,11 +54,11 @@ normally printed output of your code:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, output
+    >>> from messenger import Messenger, display
     >>> import io
 
     >>> def run_test():
-    ...     output('running test')
+    ...     display('running test')
 
     >>> with io.StringIO() as stdout, \
     ...      io.StringIO() as stderr, \
@@ -92,6 +93,33 @@ You can create your own messengers:
     >>> with Messenger():
     ...     red('Oh No!')
     Oh No!
+
+
+Exception
+---------
+An exception, *UserError*, is provided that takes the same arguments as 
+a messenger.  This allows you to catch the exception and handle it if you like.  
+The exception provides the *report* method that processes the exception as an 
+error if you find that you can do nothing else with the exception:
+
+.. code-block:: python
+
+    >>> from messenger import Messenger, UserError
+
+    >>> Messenger(prog_name='myprog')
+    <...>
+    >>> try:
+    ...     raise UserError('must not be zero:', 0)
+    ... except UserError as e:
+    ...     e.report()
+    myprog error: must not be zero: 0
+
+Any keyword arguments provided will be available in *e.kwargs*, but certain 
+keyword arguments are reserved by messenger (see above).
+
+
+Utilities
+---------
 
 Several utility functions are provided that are sometimes helpful when creating 
 messages.
@@ -132,14 +160,14 @@ For example:
 .. code-block:: python
 
     >>> from messenger import (
-    ...     Messenger, output, error, conjoin, cull, fmt, plural, os_error
+    ...     Messenger, display, error, conjoin, cull, fmt, plural, os_error
     ... )
 
     >>> Messenger(prog_name='myprog')
     <...>
     >>> filenames = cull(['a', 'b', None, 'd'])
     >>> filetype = 'CSV'
-    >>> output(
+    >>> display(
     ...     fmt(
     ...         'Reading {filetype} {files}: {names}.',
     ...         filetype=filetype,  # see comment below
@@ -164,30 +192,20 @@ For example:
 order to work around an issue in doctests. Normally *filetype=filetype* could be 
 left out of the arguments to *fmt*.
 
-Finally, an exception, *UserError*, is provided that takes the same arguments as 
-a messenger.  This allows you to catch the exception and handle it if you like.  
-The exception provides the *report* method that processes the exception as an 
-error:
-
-.. code-block:: python
-
-    >>> from messenger import Messenger, UserError
-
-    >>> Messenger(prog_name='myprog')
-    <...>
-    >>> try:
-    ...     raise UserError('must not be zero:', 0)
-    ... except UserError as e:
-    ...     e.report()
-    myprog error: must not be zero: 0
-
-Any keyword arguments provided will be available in *e.kwargs*, but certain 
-keyword arguments are reserved by messenger (see above).
 
 Messenger Class
 ---------------
 The Messenger class takes the following arguments:
 
+quiet (bool):
+    With the provided messengers normal output is suppressed if this is set (it 
+    is still logged)
+verbose (bool):
+    With the provided messengers comments are output to user, normally they are 
+    just logged.
+narrate (bool):
+    With the provided messengers narration is output to user, normally it is 
+    just logged.
 logfile (string or stream):
    Path to logfile. By default, .<prog_name>.log is used. May also 
    pass an open stream. Pass False if no logfile is desired.
@@ -212,19 +230,39 @@ stderr (stream):
    testing.  If not given, sys.stderr is used.
 \**kwargs:
    Any additional keyword arguments are made attributes that are ignored by 
-   Messenger, but may be accessed by the messengers.  The default messages 
-   assume the presence of the following additional keyword arguments (if not 
-   specified they are assumed to be None):
+   Messenger, but may be accessed by the messengers.
 
-   mute (bool):
-       All output is suppressed except on fatal errors. Logging is also 
-       suppressed.
-   quiet (bool):
-       Normal output is suppressed if this is set (it is still logged)
-   verbose (bool):
-       Comments are output to user, normally they are just logged.
-   narrate (bool):
-       Narration is output to user, normally it is just logged.
+The Messenger class provides the following user accessible methods. These 
+methods are available as functions, which act on the current Messenger.
+
+suppress_output(mute):
+   If the argument is true, all output is suppressed except for fatal errors.
+
+done():
+   Terminates the program normally (exit status is 0).
+
+terminate(status=None):
+   Terminate the program with the given exit status. If specified, the exit 
+   status should be a positive integer less than 128. Usually, the following 
+   values are used:
+
+   | 0: success  
+   | 1: unexpected error 
+   | 2: invalid invocation
+   | 3: panic
+
+   If the exit status is not specified, then the exit status is set to 1 if an 
+   error occurred and 0 otherwise.
+
+terminate_if_errors(status=1):
+   Terminate the program with the given exit status if an error has occurred.  
+
+errors_accrued():
+   Return the number of errors that have accrued.
+
+disconnect():
+   Deactivate the current Messenger, leaving no active Messenger.
+
 
 MessengerGenerator Class
 ------------------------
@@ -249,6 +287,7 @@ message_color=None:
    *yellow*, *blue*, *magenta*, *cyan*, *white*.
 header_color=None:
    Color used to display the header, if one is produced.
+
 
 Standard Messengers
 -------------------
