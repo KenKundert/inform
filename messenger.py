@@ -394,11 +394,11 @@ class Messenger:
     def report(self, args, kwargs, action):
         if action.is_error:
             self.errors += 1
-        prefix = kwargs.get('prefix')
+        culprit = kwargs.get('culprit')
         if action.produce_output(self):
             options = self._get_print_options(kwargs, action)
             message = self._render_message(args, kwargs)
-            header = self._render_header(action, prefix)
+            header = self._render_header(action, culprit)
             msgcolor = action.message_color
             hdrcolor = action.header_color
             if action.write_output(self):
@@ -435,17 +435,17 @@ class Messenger:
         return kwargs.get('sep', ' ').join(str(arg) for arg in args)
 
     # _render_header {{{2
-    def _render_header(self, action, prefix):
+    def _render_header(self, action, culprit):
         if action.severity:
             if self.prog_name:
                 header = '%s %s: ' % (self.prog_name, action.severity)
             else:
                 header = '%s: ' % action.severity
 
-            if prefix:
-                if is_collection(prefix):
-                    prefix = '.'.join(str(c) for c in prefix)
-                header += str(prefix) + ': '
+            if culprit:
+                if is_collection(culprit):
+                    culprit = '.'.join(str(c) for c in culprit)
+                header += str(culprit) + ': '
             return header
         return ''
 

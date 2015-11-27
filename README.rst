@@ -21,9 +21,10 @@ file = stdout:
    The destination stream (a file pointer).
 flush = *False*:
    Whether the message should flush the destination stream.
-prefix = *None*:
-   A string that is added to the start of a message as a prefix.  It will be 
-   separated from the message by a colon.
+culprit = *None*:
+   A string that is added to the end of the message header that identifies the 
+   culprit (the object for which the problem being reported was found). It is 
+   ignored if the message does not header.
 
 With the simplest use of the program, you simply import the messengers you need 
 and call them (they take the same arguments as does the *print* function built 
