@@ -195,9 +195,7 @@ class MessengerGenerator:
         MESSENGER.report(args, kwargs, self)
 
     def produce_output(self, messenger):
-        if self.output == True or self.terminate:
-            return True
-        return False if messenger.mute else True
+        return self.write_output(messenger) or self.write_logfile(messenger)
 
     def write_output(self, messenger):
         try:
@@ -215,25 +213,25 @@ class MessengerGenerator:
 # Messengers {{{1
 log = MessengerGenerator(
     output=False,
-    log=lambda messenger: not messenger.mute,
+    log=True,
 )
 comment = MessengerGenerator(
-    output=lambda messenger: messenger.verbose and not messenger.mute,
-    log=lambda messenger: not messenger.mute,
+    output=lambda messenger: messenger.verbose,
+    log=True,
     message_color='cyan',
 )
 narrate = MessengerGenerator(
-    output=lambda messenger: messenger.narrate and not messenger.mute,
-    log=lambda messenger: not messenger.mute,
+    output=lambda messenger: messenger.narrate,
+    log=True,
     message_color='blue',
 )
 display = MessengerGenerator(
-    output=lambda messenger: not messenger.quiet and not messenger.mute,
-    log=lambda messenger: not messenger.mute,
+    output=lambda messenger: not messenger.quiet,
+    log=True,
 )
 output = MessengerGenerator(
-    output=lambda messenger: not messenger.mute,
-    log=lambda messenger: not messenger.mute,
+    output=True,
+    log=True,
 )
 debug = MessengerGenerator(
     severity='DEBUG',
@@ -244,15 +242,15 @@ debug = MessengerGenerator(
 warn = MessengerGenerator(
     severity='warning',
     header_color='yellow',
-    output=lambda messenger: not messenger.mute,
-    log=lambda messenger: not messenger.mute,
+    output=True,
+    log=True,
 )
 error = MessengerGenerator(
     severity='error',
     is_error=True,
     header_color='red',
-    output=lambda messenger: not messenger.mute,
-    log=lambda messenger: not messenger.mute,
+    output=True,
+    log=True,
 )
 fatal = MessengerGenerator(
     severity='error',
@@ -338,7 +336,6 @@ class Messenger:
         self.__dict__.update(kwargs)
 
         # make verbosity flags consistent
-        self.mute = False
         self.quiet = quiet
         if quiet:
             self.verbose = self.narrate = False
@@ -448,10 +445,6 @@ class Messenger:
             return header
         return ''
 
-    # suppress_output {{{2
-    def suppress_output(self, mute):
-        self.mute = bool(mute)
-
     # done {{{2
     def done(self):
         "Normal termination"
@@ -512,10 +505,6 @@ class Messenger:
         self.disconnect()
 
 # Direct access to class methods {{{2
-# suppress_output {{{3
-def suppress_output(mute):
-    MESSENGER.suppress_output(mute)
-
 # done {{{3
 def done():
     MESSENGER.done()

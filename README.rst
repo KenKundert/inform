@@ -202,10 +202,13 @@ quiet (bool):
     is still logged)
 verbose (bool):
     With the provided messengers comments are output to user, normally they are 
-    just logged.
+    just logged. Comments are generally used to document unusual occurrences 
+    that might warrant the user's attention.
 narrate (bool):
     With the provided messengers narration is output to user, normally it is 
-    just logged.
+    just logged. Narration is generally used to inform the user as to what is 
+    going on. This can help place errors and warnings in context so that they 
+    are easier to understand.
 logfile (string or stream):
    Path to logfile. By default, .<prog_name>.log is used. May also pass an open 
    stream. Pass *False* if no log file is desired.
@@ -233,10 +236,6 @@ stderr (stream):
 
 The Messenger class provides the following user accessible methods. These 
 methods are available as functions, which act on the current Messenger.
-
-suppress_output(mute):
-   If the argument is true, all output from the provided messengers is 
-   suppressed except for fatal errors.
 
 done():
    Terminates the program normally (exit status is 0).
@@ -292,15 +291,13 @@ header_color = *None*:
 Standard Messengers
 -------------------
 
-The following messengers are provided. All of the messengers except those that 
-process fatal error messages and debugging messages do not produce any output if 
-*mute* is set.
+The following messengers are provided:
 
 .. code-block:: python
 
    log = MessengerGenerator(
        output=False,
-       log=lambda messenger: not messenger.mute,
+       log=True,
    )
 
 Saves a message to the log file without displaying it.
@@ -308,8 +305,8 @@ Saves a message to the log file without displaying it.
 .. code-block:: python
 
    comment = MessengerGenerator(
-       output=lambda messenger: messenger.verbose and not messenger.mute,
-       log=lambda messenger: not messenger.mute,
+       output=lambda messenger: messenger.verbose,
+       log=True,
        message_color='cyan',
    )
 
@@ -319,8 +316,8 @@ displayed in cyan.
 .. code-block:: python
 
    narrate = MessengerGenerator(
-       output=lambda messenger: messenger.narrate and not messenger.mute,
-       log=lambda messenger: not messenger.mute,
+       output=lambda messenger: messenger.narrate,
+       log=True,
        message_color='blue',
    )
 
@@ -330,8 +327,8 @@ displayed in blue.
 .. code-block:: python
 
    display = MessengerGenerator(
-       output=lambda messenger: not messenger.quiet and not messenger.mute,
-       log=lambda messenger: not messenger.mute,
+       output=lambda messenger: not messenger.quiet,
+       log=True,
    )
 
 
@@ -340,8 +337,8 @@ Displays a message if *quiet* is not set. Logs the message.
 .. code-block:: python
 
    output = MessengerGenerator(
-       output=lambda messenger: not messenger.mute,
-       log=lambda messenger: not messenger.mute,
+       output=True,
+       log=True,
    )
 
 Displays and logs a message.
@@ -365,8 +362,8 @@ Displays and logs a message.
    warn = MessengerGenerator(
        severity='warning',
        header_color='yellow',
-       output=lambda messenger: not messenger.mute,
-       log=lambda messenger: not messenger.mute,
+       output=True,
+       log=True,
    )
 
 Displays and logs a warning message. A header with the label *warning* is added 
@@ -378,8 +375,8 @@ to the message and the header is colored yellow.
        severity='error',
        is_error=True,
        header_color='red',
-       output=lambda messenger: not messenger.mute,
-       log=lambda messenger: not messenger.mute,
+       output=True,
+       log=True,
    )
 
 Displays and logs an error message. A header with the label *error* is added to 
