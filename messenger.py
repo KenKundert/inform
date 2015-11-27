@@ -474,7 +474,7 @@ class Messenger:
             2: invalid invocation
             3: panic
         """
-        if status is None:
+        if status is None or status is True:
             status = 1 if self.errors_accrued() else 0;
         assert 0 <= status and status < 128
         if self.termination_callback:                                                                                  

@@ -13,15 +13,15 @@ print function: unnamed arguments are converted to strings and joined together
 to produce the output, the named arguments act to control the process.  The 
 available controls (named arguments) are:
 
-sep=' ':
+sep = ' ':
    Specifies the string used to join the unnamed arguments.
-end='\\n':
+end = '\\n':
    Specifies a string to append to the message.
-file=stdout:
+file = stdout:
    The destination stream (a file pointer).
-flush=False:
+flush = *False*:
    Whether the message should flush the destination stream.
-prefix=None:
+prefix = *None*:
    A string that is added to the start of a message as a prefix.  It will be 
    separated from the message by a colon.
 
@@ -129,15 +129,15 @@ conjoin(iterable, conj=' and ', sep=', '):
     between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
     generates 'a, b or c'.
 
-cull(collection, remove=None):
+cull(collection, remove = *None*):
     Strips a list of a particular value (remove). By default, it strips a list 
     of Nones. remove may be a function, in which case it takes a single item as 
-    an argument and returns True if that item should be removed from the list.
+    an argument and returns *True* if that item should be removed from the list.
 
 fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
 
-plural(count, singular_form, plural_form=None):
+plural(count, singular_form, plural_form = *None*):
     Produces either the singular or plural form of a word based on a count.
     The count may be an integer, or an iterable, in which case its length is 
     used. If the plural form is not give, the singular form is used with an 's' 
@@ -147,13 +147,13 @@ os_error(exception):
     Generates clean messages for operating system errors.
 
 is_str(obj):
-    Returns True if its argument is a string-like object.
+    Returns *True* if its argument is a string-like object.
 
 is_iterable(obj):
-    Returns True if its argument is iterable.
+    Returns *True* if its argument is iterable.
 
 is_collection(obj):
-    Returns True if its argument is iterable but is not a string.
+    Returns *True* if its argument is iterable but is not a string.
 
 For example:
 
@@ -207,10 +207,10 @@ narrate (bool):
     With the provided messengers narration is output to user, normally it is 
     just logged.
 logfile (string or stream):
-   Path to logfile. By default, .<prog_name>.log is used. May also 
-   pass an open stream. Pass False if no logfile is desired.
+   Path to logfile. By default, .<prog_name>.log is used. May also pass an open 
+   stream. Pass *False* if no log file is desired.
 prog_name (string):
-   Program name. By default, basename(argv[0]) is used. Use False to indicate 
+   Program name. By default, basename(argv[0]) is used. Use *False* to indicate 
    that program name should not be added to message headers.
 argv (list of strings):
    System command line arguments (logged). By default, sys.argv is used.
@@ -218,10 +218,9 @@ version (string):
    Program version (logged if provided).
 termination_callback (func):
    A function that is called at program termination.
-colorscheme (None, 'light', or 'dark'):
-   Color scheme to use. None indicates that messages should not be 
-   colorized. Colors are not used if desired output stream is not 
-   a TTY.
+colorscheme (*None*, 'light', or 'dark'):
+   Color scheme to use. *None* indicates that messages should not be colorized.  
+   Colors are not used if desired output stream is not a TTY.
 stdout (stream):
    Messages are sent here by default. Generally used for testing. If 
    not given, sys.stdout is used.
@@ -242,7 +241,7 @@ suppress_output(mute):
 done():
    Terminates the program normally (exit status is 0).
 
-terminate(status=None):
+terminate(status = *None*):
    Terminate the program with the given exit status. If specified, the exit 
    status should be a positive integer less than 128. Usually, the following 
    values are used:
@@ -269,24 +268,24 @@ MessengerGenerator Class
 ------------------------
 The MessengerGenerator class takes the following arguments:
 
-severity=None:
+severity = *None*:
    Messages with severities get headers and the severity acts as label.
-is_error=False:
-   Message is counted as an error.
-log=True:
-   Send to the log file, may be a boolean or a function that accepts the 
-   messenger as an argument and returns a boolean.
-output=True:
-   Send to the output stream, may be a boolean or a function that accepts the 
-   messenger as an argument and returns a boolean.
-terminate=False:
+is_error = *False*:
+   Should message be counted as errors.
+log = *True*:
+   Send message to the log file. May be a boolean or a function that accepts the 
+   Messenger object as an argument and returns a boolean.
+output = *True*:
+   Send to the output stream. May be a boolean or a function that accepts the 
+   Messenger object as an argument and returns a boolean.
+terminate = *False*:
    Terminate the program, exit status is the value of the terminate unless 
-   terminate==True, in which case 1 is returned if an error occurred and 
+   *terminate* is *True*, in which case 1 is returned if an error occurred and 
    0 otherwise.
-message_color=None:
+message_color = *None*:
    Color used to display the message. Choose from *black*, *red*, *green*, 
    *yellow*, *blue*, *magenta*, *cyan*, *white*.
-header_color=None:
+header_color = *None*:
    Color used to display the header, if one is produced.
 
 
