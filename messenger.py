@@ -216,21 +216,21 @@ log = MessengerGenerator(
     log=True,
 )
 comment = MessengerGenerator(
-    output=lambda messenger: messenger.verbose,
+    output=lambda messenger: messenger.verbose and not messenger.mute,
     log=True,
     message_color='cyan',
 )
 narrate = MessengerGenerator(
-    output=lambda messenger: messenger.narrate,
+    output=lambda messenger: messenger.narrate and not messenger.mute,
     log=True,
     message_color='blue',
 )
 display = MessengerGenerator(
-    output=lambda messenger: not messenger.quiet,
+    output=lambda messenger: not messenger.quiet and not messenger.mute,
     log=True,
 )
 output = MessengerGenerator(
-    output=True,
+    output=lambda messenger: not messenger.mute,
     log=True,
 )
 debug = MessengerGenerator(
@@ -242,14 +242,14 @@ debug = MessengerGenerator(
 warn = MessengerGenerator(
     severity='warning',
     header_color='yellow',
-    output=True,
+    output=lambda messenger: not messenger.quiet and not messenger.mute,
     log=True,
 )
 error = MessengerGenerator(
     severity='error',
     is_error=True,
     header_color='red',
-    output=True,
+    output=lambda messenger: not messenger.mute,
     log=True,
 )
 fatal = MessengerGenerator(
@@ -257,7 +257,7 @@ fatal = MessengerGenerator(
     is_error=True,
     terminate=1,
     header_color='red',
-    output=True,
+    output=lambda messenger: not messenger.mute,
     log=True,
 )
 panic = MessengerGenerator(
@@ -280,6 +280,7 @@ class Messenger:
     # constructor {{{2
     def __init__(
         self,
+        mute=False,
         quiet=False,
         verbose=False,
         narrate=False,
@@ -295,8 +296,10 @@ class Messenger:
     ):
         """
         Arguments:
+        mute (bool)
+            All output is suppressed (it is still logged).
         quiet (bool)
-            Normal output is suppressed if this is set (it is still logged)
+            Normal output is suppressed (it is still logged).
         verbose (bool)
             Comments are output to user, normally they are just logged.
         narrate (bool)
@@ -336,6 +339,7 @@ class Messenger:
         self.__dict__.update(kwargs)
 
         # make verbosity flags consistent
+        self.mute = mute
         self.quiet = quiet
         if quiet:
             self.verbose = self.narrate = False

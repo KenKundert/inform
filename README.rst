@@ -197,18 +197,26 @@ Messenger Class
 ---------------
 The Messenger class takes the following arguments:
 
+mute (bool)
+   With the provided messengers all output is suppressed when set (it is still 
+   logged). This is generally used the program being run is being run by another 
+   program that is generating its own messages and does not want the user 
+   confused by additional message. In this case, the calling program is 
+   responsible for observing and reacting to the exit status of the program.
 quiet (bool):
-    With the provided messengers normal output is suppressed if this is set (it 
-    is still logged)
+   With the provided messengers normal output is suppressed when set (it is 
+   still logged). This is used when the user has indicated that they are 
+   uninterested in any conversational messages and just want to see the 
+   essentials (generally error messages).
 verbose (bool):
-    With the provided messengers comments are output to user, normally they are 
-    just logged. Comments are generally used to document unusual occurrences 
-    that might warrant the user's attention.
+   With the provided messengers comments are output to user when set, normally 
+   they are just logged. Comments are generally used to document unusual 
+   occurrences that might warrant the user's attention.
 narrate (bool):
-    With the provided messengers narration is output to user, normally it is 
-    just logged. Narration is generally used to inform the user as to what is 
-    going on. This can help place errors and warnings in context so that they 
-    are easier to understand.
+   With the provided messengers narration is output to user when set, normally 
+   it is just logged.  Narration is generally used to inform the user as to what 
+   is going on. This can help place errors and warnings in context so that they 
+   are easier to understand.
 logfile (string or stream):
    Path to logfile. By default, .<prog_name>.log is used. May also pass an open 
    stream. Pass *False* if no log file is desired.
@@ -291,7 +299,8 @@ header_color = *None*:
 Standard Messengers
 -------------------
 
-The following messengers are provided:
+The following messengers are provided. All of the messengers except panic and 
+debug do not produce any output if *mute* is set.
 
 .. code-block:: python
 
@@ -305,7 +314,7 @@ Saves a message to the log file without displaying it.
 .. code-block:: python
 
    comment = MessengerGenerator(
-       output=lambda messenger: messenger.verbose,
+       output=lambda messenger: messenger.verbose and not messenger.mute,
        log=True,
        message_color='cyan',
    )
@@ -313,10 +322,13 @@ Saves a message to the log file without displaying it.
 Displays a message only if *verbose* is set. Logs the message. The message is 
 displayed in cyan.
 
+Comments are generally used to document unusual occurrences that might warrant 
+the user's attention.
+
 .. code-block:: python
 
    narrate = MessengerGenerator(
-       output=lambda messenger: messenger.narrate,
+       output=lambda messenger: messenger.narrate and not messenger.mute,
        log=True,
        message_color='blue',
    )
@@ -324,10 +336,15 @@ displayed in cyan.
 Displays a message only if *narrate* is set. Logs the message. The message is 
 displayed in blue.
 
+Narration is generally used to inform the user as to what is going on. This can 
+help place errors and warnings in context so that they are easier to understand.
+Distinguishing narration from comments allows them to colored differently and 
+controlled separately.
+
 .. code-block:: python
 
    display = MessengerGenerator(
-       output=lambda messenger: not messenger.quiet,
+       output=lambda messenger: not messenger.quiet and not messenger.mute,
        log=True,
    )
 
@@ -337,11 +354,13 @@ Displays a message if *quiet* is not set. Logs the message.
 .. code-block:: python
 
    output = MessengerGenerator(
-       output=True,
+       output=lambda messenger: not messenger.mute,
        log=True,
    )
 
-Displays and logs a message.
+Displays and logs a message. This is used for messages that are not errors that 
+are noteworthy enough that they need to get through even though the user has 
+asked for quiet.
 
 .. code-block:: python
 
@@ -362,7 +381,7 @@ Displays and logs a message.
    warn = MessengerGenerator(
        severity='warning',
        header_color='yellow',
-       output=True,
+       output=lambda messenger: not messenger.quiet and not messenger.mute,
        log=True,
    )
 
@@ -375,7 +394,7 @@ to the message and the header is colored yellow.
        severity='error',
        is_error=True,
        header_color='red',
-       output=True,
+       output=lambda messenger: not messenger.mute,
        log=True,
    )
 
@@ -389,7 +408,7 @@ the message and the header is colored red.
        is_error=True,
        terminate=1,
        header_color='red',
-       output=True,
+       output=lambda messenger: not messenger.mute,
        log=True,
    )
 
@@ -411,4 +430,3 @@ exit status of 1.
 Displays and logs a panic message. A header with the label *internal error* is 
 added to the message and the header is colored red. The program is terminated 
 with an exit status of 3.
-
