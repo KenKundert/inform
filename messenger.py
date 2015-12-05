@@ -284,12 +284,13 @@ class Messenger:
         quiet=False,
         verbose=False,
         narrate=False,
-        logfile=None,
-        prog_name=None,
+        logfile=False,
+        prog_name=True,
         argv=None,
         version=None,
         termination_callback=None,
         colorscheme='dark',
+        flush=False,
         stdout=None,
         stderr=None,
         **kwargs
@@ -304,13 +305,20 @@ class Messenger:
             Comments are output to user, normally they are just logged.
         narrate (bool)
             Narration is output to user, normally it is just logged.
-        logfile (string or stream)
-            Path to logfile. By default, .<prog_name>.log is used. May also 
-            pass an open stream. Pass False if no logfile is desired.
+        logfile (string or stream or bool)
+            May be a string, in which case it is taken to be the path of the 
+            logfile.  May be *True*, in which case ./.<prog_name>.log is used.  
+            May be an open stream.  Or it may be *False*, in which case no log 
+            file is created.
         prog_name (string)
+            The program name. Is appended to the message headers and used to 
+            create the default logfile name. May be a string, in which case it 
+            is used as the name of the program.  May be *True*, in which case 
+            basename(argv[0]) is used.  May be *False* to indicate that program 
+            name should not be added to message headers.
+        argv (list of strings)
             Program name By default, basename(argv[0]) is used. Use False to 
             indicate that program name should not be added to message headers.
-        argv (list of strings)
             System command line arguments (logged). By default, sys.argv is 
             used.
         version (string)
@@ -322,6 +330,11 @@ class Messenger:
             Color scheme to use. None indicates that messages should not be 
             colorized. Colors are not used if desired output stream is not 
             a TTY.
+        flush (bool)
+            Flush the stream after each write. Is useful if you program is 
+            crashing, causing loss of the latest writes. Can cause programs to 
+            run considerably slower if they produce a lot of output. Not 
+            available with python2.
         stdout (stream)
             Messages are sent here by default. Generally used for testing. If 
             not given, sys.stdout is used.
@@ -334,6 +347,7 @@ class Messenger:
         """
         self.errors = 0
         self.termination_callback = termination_callback
+        self.flush = flush
         self.stdout = stdout if stdout else sys.stdout
         self.stderr = stderr if stderr else sys.stderr
         self.__dict__.update(kwargs)
@@ -350,21 +364,18 @@ class Messenger:
         # determine program name
         if not argv:
             argv = sys.argv
+        if prog_name is True:
+            prog_name = os.path.basename(argv[0]) if argv else None
         self.prog_name = prog_name
-        if argv and not prog_name:
-            self.prog_name = os.path.basename(argv[0])
-        if prog_name is False:
-            self.prog_name = None
 
         # open logfile if is given as a string
-        if is_str(logfile) or logfile is None:
-            if self.prog_name and not logfile:
-                logfile = '.%s.log' % self.prog_name
-            if logfile:
-                try:
-                    logfile = open(logfile, 'w')
-                except (IOError, OSError) as err:
-                    print(os_error(err), file=sys.stderr)
+        if logfile is True:
+            logfile = '.%s.log' % prog_name if prog_name else '.log'
+        if is_str(logfile):
+            try:
+                logfile = open(logfile, 'w')
+            except (IOError, OSError) as err:
+                print(os_error(err), file=sys.stderr)
         self.logfile = logfile
 
         # Save the color scheme
@@ -376,12 +387,12 @@ class Messenger:
         MESSENGER = self
 
         # write header to log file
-        if version:
-            self.log("%s version %s" % (self.prog_name, version))
+        if prog_name and version:
+            log("%s version %s" % (prog_name, version))
         try:
-            from datetime import datetime
-            now = datetime.now().strftime(
-                " on %A, %d %B %Y at %I:%M:%S %p")
+            import arrow
+            now = arrow.now().strftime(
+                " on %A, %-d %B %Y at %-I:%M:%S %p")
         except:
             now = ""
         log("Invoked as '%s'%s." % (' '.join(argv), now))
@@ -418,15 +429,16 @@ class Messenger:
 
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
-        opts= {
+        opts = {
             'file': kwargs.get(
                 'file',
                 self.stderr if action.terminate else self.stdout
             ),
+            'flush': kwargs.get('flush', self.flush),
         }
-        # do not add flush needlessly because it is not supported in python2
-        if 'flush' in kwargs:
-            opts['flush'] = kwargs.get('flush')
+        if sys.version[0] == '2':
+            # flush is not supported in python2
+            opts.pop('flush')
         return opts
 
     # _render_message {{{2

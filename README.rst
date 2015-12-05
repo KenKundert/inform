@@ -110,10 +110,10 @@ error if you find that you can do nothing else with the exception:
     >>> Messenger(prog_name='myprog')
     <...>
     >>> try:
-    ...     raise UserError('must not be zero:', 0)
+    ...     raise UserError('must not be zero.', culprit='0')
     ... except UserError as e:
     ...     e.report()
-    myprog error: must not be zero: 0
+    myprog error: 0: must not be zero.
 
 Any keyword arguments provided will be available in *e.kwargs*, but certain 
 keyword arguments are reserved by messenger (see above).
@@ -219,11 +219,15 @@ narrate (bool):
    is going on. This can help place errors and warnings in context so that they 
    are easier to understand.
 logfile (string or stream):
-   Path to logfile. By default, .<prog_name>.log is used. May also pass an open 
-   stream. Pass *False* if no log file is desired.
+   May be a string, in which case it is taken to be the path of the logfile.  
+   May be *True*, in which case ./.<prog_name>.log is used.  May be an open 
+   stream.  Or it may be *False*, in which case no log file is created.
 prog_name (string):
-   Program name. By default, basename(argv[0]) is used. Use *False* to indicate 
-   that program name should not be added to message headers.
+   The program name. Is appended to the message headers and used to create the 
+   default logfile name. May be a string, in which case it is used as the name 
+   of the program.  May be *True*, in which case basename(argv[0]) is used.  May 
+   be *False* to indicate that program name should not be added to message 
+   headers.
 argv (list of strings):
    System command line arguments (logged). By default, sys.argv is used.
 version (string):
@@ -233,6 +237,10 @@ termination_callback (func):
 colorscheme (*None*, 'light', or 'dark'):
    Color scheme to use. *None* indicates that messages should not be colorized.  
    Colors are not used if desired output stream is not a TTY.
+flush (bool):
+   Flush the stream after each write. Is useful if you program is crashing, 
+   causing loss of the latest writes. Can cause programs to run considerably 
+   slower if they produce a lot of output. Not available with python2.
 stdout (stream):
    Messages are sent here by default. Generally used for testing. If 
    not given, sys.stdout is used.
@@ -244,7 +252,7 @@ stderr (stream):
    Messenger, but may be accessed by the messengers.
 
 The Messenger class provides the following user accessible methods. These 
-methods are available as functions, which act on the current Messenger.
+methods are also available as functions, which act on the current Messenger.
 
 done():
    Terminates the program normally (exit status is 0).
@@ -374,8 +382,6 @@ asked for quiet.
 
 Displays and logs a debugging message. A header with the label *DEBUG* is added 
 to the message and the header is colored magenta.
-
-Displays and logs a message.
 
 .. code-block:: python
 
