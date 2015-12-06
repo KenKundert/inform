@@ -362,8 +362,6 @@ class Messenger:
             basename(argv[0]) is used.  May be *False* to indicate that program 
             name should not be added to message headers.
         argv (list of strings)
-            Program name By default, basename(argv[0]) is used. Use False to 
-            indicate that program name should not be added to message headers.
             System command line arguments (logged). By default, sys.argv is 
             used.
         version (string)
@@ -408,7 +406,7 @@ class Messenger:
             self.narrate = narrate
 
         # determine program name
-        if not argv:
+        if argv is None:
             argv = sys.argv
         if prog_name is True:
             prog_name = os.path.basename(argv[0]) if argv else None
@@ -430,11 +428,13 @@ class Messenger:
             log("%s version %s" % (prog_name, version))
         try:
             import arrow
-            now = arrow.now().strftime(
-                " on %A, %-d %B %Y at %-I:%M:%S %p")
+            now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p")
         except:
             now = ""
-        log("Invoked as '%s'%s." % (' '.join(argv), now))
+        if argv:
+            log("Invoked as '%s'%s." % (' '.join(argv), now))
+        elif now:
+            log("Invoked%s." % now)
 
     # __getattr__ {{{2
     def __getattr__(self, name):

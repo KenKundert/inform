@@ -37,8 +37,9 @@ in to Python:
     >>> display('ice', 9)
     ice 9
 
-More typical is to import and instantiate the Messenger class yourself. This 
-gives you the ability to specify the desired options:
+More typical is to import and instantiate the Messenger class yourself along 
+with the desired messengers.  This gives you the ability to specify the desired 
+options:
 
 .. code-block:: python
 
@@ -91,10 +92,23 @@ You can create your own messengers:
 
     >>> from messenger import Messenger, MessengerGenerator
 
-    >>> red = MessengerGenerator(message_color='red')
-    >>> with Messenger():
-    ...     red('Oh No!')
-    Oh No!
+    >>> verbose2 = MessengerGenerator(output=lambda m: m.verbosity >= 2)
+    >>> verbose3 = MessengerGenerator(output=lambda m: m.verbosity >= 3)
+    >>> with Messenger(verbosity=2):
+    ...     verbose2('Lorem ipsum 2')
+    ...     verbose3('Lorem ipsum 3')
+    Lorem ipsum 2
+
+    >>> with Messenger(verbosity=3):
+    ...     verbose2('Lorem ipsum 2')
+    ...     verbose3('Lorem ipsum 3')
+    Lorem ipsum 2
+    Lorem ipsum 3
+
+In this case *verbosity* is not a supported argument to Messenger. In this case 
+Messenger simply saves the value and makes it available as an attribute, and it 
+is this attribute that is queried by the lambda function passed to the 
+MessengerGenerator when creating the messengers.
 
 
 Exception
@@ -230,14 +244,16 @@ prog_name (string):
    be *False* to indicate that program name should not be added to message 
    headers.
 argv (list of strings):
-   System command line arguments (logged). By default, sys.argv is used.
+   System command line arguments (logged). By default, sys.argv is used. If 
+   False is passed in, argv is not logged and argv[0] is not available to be the 
+   program name.
 version (string):
    Program version (logged if provided).
 termination_callback (func):
    A function that is called at program termination.
 colorscheme (*None*, 'light', or 'dark'):
    Color scheme to use. *None* indicates that messages should not be colorized.  
-   Colors are not used if desired output stream is not a TTY.
+   Colors are not used if output stream is not a TTY.
 flush (bool):
    Flush the stream after each write. Is useful if you program is crashing, 
    causing loss of the latest writes. Can cause programs to run considerably 
@@ -252,11 +268,12 @@ stderr (stream):
    Any additional keyword arguments are made attributes that are ignored by 
    Messenger, but may be accessed by the messengers.
 
-The Messenger class provides the following user accessible methods. These 
-methods are also available as functions, which act on the current Messenger.
+The Messenger class provides the following user accessible methods. Most of 
+these methods are also available as functions, which act on the current 
+Messenger.
 
 set_logfile():
-   Allows you to change the logfile.
+   Allows you to change the logfile (only available as a method).
 
 done():
    Terminates the program normally (exit status is 0).
