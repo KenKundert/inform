@@ -414,15 +414,8 @@ class Messenger:
             prog_name = os.path.basename(argv[0]) if argv else None
         self.prog_name = prog_name
 
-        # open logfile if is given as a string
-        if logfile is True:
-            logfile = '.%s.log' % prog_name if prog_name else '.log'
-        if is_str(logfile):
-            try:
-                logfile = open(logfile, 'w')
-            except (IOError, OSError) as err:
-                print(os_error(err), file=sys.stderr)
-        self.logfile = logfile
+        # save the logfile (and open if it is a string)
+        self.set_logfile(logfile)
 
         # Save the color scheme
         assert colorscheme in [None, 'light', 'dark']
@@ -445,7 +438,26 @@ class Messenger:
 
     # __getattr__ {{{2
     def __getattr__(self, name):
+        if name.startswith('__'):
+            raise AttributeError(name)
         return self.__dict__.get(name)
+
+    # set_logfile {{{2
+    def set_logfile(self, logfile):
+        try:
+            if self.logfile:
+                self.logfile.close()
+        except:
+            pass
+
+        if logfile is True:
+            logfile = '.%s.log' % prog_name if prog_name else '.log'
+        if is_str(logfile):
+            try:
+                logfile = open(logfile, 'w')
+            except (IOError, OSError) as err:
+                print(os_error(err), file=sys.stderr)
+        self.logfile = logfile
 
     # report {{{2
     def report(self, args, kwargs, action):

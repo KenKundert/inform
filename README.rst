@@ -254,6 +254,9 @@ stderr (stream):
 The Messenger class provides the following user accessible methods. These 
 methods are also available as functions, which act on the current Messenger.
 
+set_logfile():
+   Allows you to change the logfile.
+
 done():
    Terminates the program normally (exit status is 0).
 
