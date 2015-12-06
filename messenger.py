@@ -451,7 +451,7 @@ class Messenger:
             pass
 
         if logfile is True:
-            logfile = '.%s.log' % prog_name if prog_name else '.log'
+            logfile = '.%s.log' % self.prog_name if self.prog_name else '.log'
         if is_str(logfile):
             try:
                 logfile = open(logfile, 'w')
@@ -618,6 +618,6 @@ class UserError(Exception):
         self.args = args
         self.kwargs = kwargs
     def __str__(self):
-        return kwargs.get('sep', ' ').join(str(a) for a in self.args)
+        return self.kwargs.get('sep', ' ').join(str(a) for a in self.args)
     def report(self):
         error(*self.args, **self.kwargs)
