@@ -7,6 +7,7 @@ from __future__ import print_function, division
 from runtests import cmdLineOpts, writeSummary
 from textcolors import Colors
 from textwrap import dedent, indent
+from difflib import Differ
 import re
 import io
 import sys
@@ -36,6 +37,22 @@ def format(text):
 invokeTimeRegex = r"(?<=Invoked as )'.*' on .*(?=\.)"
 def stripInvokeTime(text):
     return re.sub(invokeTimeRegex, '<exe> on <date>', text)
+
+# showDiff {{{2
+def showDiff(achieved, expected, indent=''):
+    diff = Differ().compare(
+        expected.splitlines(),
+        achieved.splitlines()
+    )
+    for each in diff:
+        if each[0] == '+':
+            print(indent+succeed(each))
+        elif each[0] == '-':
+            print(indent+info(each))
+        elif each[0] == '?':
+            print(indent+status(each))
+        else:
+            print(indent+each)
 
 
 # Case class {{{1
@@ -73,9 +90,8 @@ class Case():
                 self.error = stderr.getvalue().strip()
                 self.log = stripInvokeTime(logfile.getvalue().strip())
 
-        except Exception as exception:
-            print(exception.__dict__)
-            return (self.name, self.stimulus, None, None, 'exception')
+        except Exception as err:
+            return (self.name, self.stimulus, str(err), None, 'exception')
 
         if self.error != self.expected_error:
             return (self.name, self.stimulus, self.error, self.expected_error, 'stderr result')
@@ -98,13 +114,13 @@ captureAll = ', '.join([
     'logfile=logfile',
     'stdout=stdout',
     'stderr=stderr',
-    'prog_name="test-messenger"',
+    'prog_name="messenger"',
 ])
 noLog = ', '.join([
     'logfile=False',
     'stdout=stdout',
     'stderr=stderr',
-    'prog_name="test-messenger"',
+    'prog_name="messenger"',
 ])
 testCases = [
     Case(
@@ -124,7 +140,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='overspend',
@@ -136,7 +152,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='alarm',
@@ -148,7 +164,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This_is_a_test.
-        ''')
+        '''),
     ),
     Case(
         name='harden',
@@ -159,7 +175,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='outflank',
@@ -171,7 +187,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='elope',
@@ -182,7 +198,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='sunset',
@@ -194,7 +210,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='wheezy',
@@ -205,7 +221,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='claim',
@@ -217,7 +233,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='behind',
@@ -228,7 +244,7 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a test.
-        ''')
+        '''),
     ),
     Case(
         name='overhead',
@@ -236,11 +252,11 @@ testCases = [
             Messenger({stdargs})
             debug('This is a test.')
         '''.format(stdargs=captureAll)),
-        stdout="test-messenger DEBUG: This is a test.",
+        stdout="messenger DEBUG: This is a test.",
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            test-messenger DEBUG: This is a test.
-        ''')
+            messenger DEBUG: This is a test.
+        '''),
     ),
     Case(
         name='instill',
@@ -248,11 +264,11 @@ testCases = [
             Messenger({stdargs})
             warn('This is a test.')
         '''.format(stdargs=captureAll)),
-        stdout="test-messenger warning: This is a test.",
+        stdout="messenger warning: This is a test.",
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            test-messenger warning: This is a test.
-        ''')
+            messenger warning: This is a test.
+        '''),
     ),
     Case(
         name='blister',
@@ -260,11 +276,114 @@ testCases = [
             Messenger({stdargs})
             error('This is a test.')
         '''.format(stdargs=captureAll)),
-        stdout="test-messenger error: This is a test.",
+        stdout="messenger error: This is a test.",
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            test-messenger error: This is a test.
-        ''')
+            messenger error: This is a test.
+        '''),
+    ),
+    Case(
+        name='lattice',
+        stimulus=dedent('''
+            Messenger({stdargs})
+            warn('This is a test.')
+            codicil('This is an appendage.')
+        '''.format(stdargs=captureAll)),
+        stdout=dedent('''
+            messenger warning: This is a test.
+               This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            messenger warning: This is a test.
+               This is an appendage.
+        '''),
+    ),
+    Case(
+        name='seventh',
+        stimulus=dedent('''
+            Messenger({stdargs})
+            error()
+            codicil('This is the first appendage.')
+            codicil('This is the second appendage.')
+            codicil('This is the third appendage.')
+        '''.format(stdargs=captureAll)),
+        stdout=dedent('''
+            messenger error: 
+               This is the first appendage.
+               This is the second appendage.
+               This is the third appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            messenger error: 
+               This is the first appendage.
+               This is the second appendage.
+               This is the third appendage.
+        '''),
+    ),
+    Case(
+        name='primary',
+        stimulus=dedent(r'''
+            Messenger({stdargs})
+            error()
+            codicil('This is the first appendage.')
+            codicil('This is the second appendage,\n   and the third.')
+        '''.format(stdargs=captureAll)),
+        stdout=dedent('''
+            messenger error: 
+               This is the first appendage.
+               This is the second appendage,
+                  and the third.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            messenger error: 
+               This is the first appendage.
+               This is the second appendage,
+                  and the third.
+        '''),
+    ),
+    Case(
+        name='sensitize',
+        stimulus=dedent('''
+            Messenger({stdargs})
+            output('This is main message.')
+            codicil('This is the first appendage.')
+            codicil('This is the second appendage.')
+            codicil('This is the third appendage.')
+        '''.format(stdargs=captureAll)),
+        stdout=dedent('''
+            This is main message.
+            This is the first appendage.
+            This is the second appendage.
+            This is the third appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is main message.
+            This is the first appendage.
+            This is the second appendage.
+            This is the third appendage.
+        '''),
+    ),
+    Case(
+        name='mullah',
+        stimulus=dedent(r'''
+            Messenger({stdargs})
+            error('Error message.\nAdditional info.')
+        '''.format(stdargs=captureAll)),
+        stdout=dedent('''
+            messenger error:
+               Error message.
+               Additional info.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            messenger error:
+               Error message.
+               Additional info.
+        '''),
     ),
 ]
 
@@ -287,6 +406,10 @@ for case in testCases:
         print(info('    Given   :'), format(stimulus))
         print(info('    Result  :'), format(result))
         print(info('    Expected:'), format(expected))
+        if result and expected:
+            print(info('    Diff:'))
+            showDiff(result, expected, indent=8*' ')
+
 
 # Print test summary {{{1
 numTests = len(testCases)

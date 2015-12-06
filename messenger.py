@@ -27,6 +27,22 @@ import sys
 MESSENGER = None
 
 # Messenger Utilities {{{1
+# indent {{{2
+def indent(text, leader = '   '):
+    r"""{
+    Add indentation.
+
+    Examples:
+    >>> from logger import indent
+    >>> print(indent('Hello\nWorld!', '    '))
+        Hello
+        World!
+
+    }"""
+    return '\n'.join([
+        leader+line if line else line for line in text.split('\n')
+    ])
+
 # cull {{{2
 def cull(collection, remove=None):
     if callable(remove):
@@ -159,34 +175,57 @@ def plural(count, singular, plural=None):
     else:
         return singular if count == 1 else plural
 
+
 # MessengerGenerator class {{{1
 class MessengerGenerator:
     def __init__(
         self,
         severity=None,
-            # messages with severities get headers and severity acts as label
         is_error=False,
-            # is counted as an error
         log=True,
-            # send to the log file, may be a boolean or a function that accepts 
-            # the messenger as an argument and returns a boolean
         output=True,
-            # send to the output stream, may be a boolean or a function that 
-            # accepts the messenger as an argument and returns a boolean
         terminate=False,
-            # terminate the program, exit status is the value of the terminate 
-            # unless terminate==True, in which case 1 is returned if an error 
-            # occurred and 0 otherwise
+        is_continuation=False,
         message_color=None,
-            # color used to display the message
         header_color=None,
-            # color used to display the header, if one is produced
     ):
+        """
+        Arguments:
+        severity (string)
+            Messages with severities get headers; the severity acts as label.
+            If the message has a header and the message text contains 
+            a newline, then the text is indented and placed on the line that 
+            follows the header.
+        is_error (bool)
+            Message is counted as an error.
+        log (bool)
+            Send message to the log file.  May be a boolean or a function that 
+            accepts the messenger as an argument and returns a boolean.
+        output (bool)
+            Send message to the output stream.  May be a boolean or a function 
+            that accepts the messenger as an argument and returns a boolean.
+        terminate (bool or integer)
+            Terminate the program.  Exit status is the value of terminate 
+            unless terminate==True, in which case 1 is returned if an error 
+            occurred and 0 otherwise.
+        is_continuation (bool)
+            This message is a continuation of the previous message.  It will 
+            use the properties of the previous message (output, log, message 
+            color, etc) and if the previous message had a header, that header 
+            is not output and instead the message is indented.
+        message_color (string)
+            Color used to display the message.  Choose from: black, red, green, 
+            yellow, blue, magenta, cyan or white.
+        header_color (string)
+            Color used to display the header, if one is produced.  Choose from: 
+            black, red, green, yellow, blue, magenta, cyan or white.
+        """
         self.severity = severity
         self.is_error = is_error
         self.log = log
         self.output = output
         self.terminate = terminate
+        self.is_continuation = is_continuation
         self.message_color = Color(message_color)
         self.header_color = Color(header_color)
         self.stream = sys.stderr if self.terminate else sys.stdout
@@ -195,15 +234,18 @@ class MessengerGenerator:
         MESSENGER.report(args, kwargs, self)
 
     def produce_output(self, messenger):
+        # returns a boolean
         return self.write_output(messenger) or self.write_logfile(messenger)
 
     def write_output(self, messenger):
+        # returns a boolean
         try:
             return self.output(messenger)
         except TypeError:
             return self.output
 
     def write_logfile(self, messenger):
+        # returns a boolean
         try:
             return self.log(messenger)
         except TypeError:
@@ -219,6 +261,9 @@ comment = MessengerGenerator(
     output=lambda messenger: messenger.verbose and not messenger.mute,
     log=True,
     message_color='cyan',
+)
+codicil = MessengerGenerator(
+    is_continuation=True,
 )
 narrate = MessengerGenerator(
     output=lambda messenger: messenger.narrate and not messenger.mute,
@@ -351,6 +396,7 @@ class Messenger:
         self.stdout = stdout if stdout else sys.stdout
         self.stderr = stderr if stderr else sys.stderr
         self.__dict__.update(kwargs)
+        self.previous_action = None
 
         # make verbosity flags consistent
         self.mute = mute
@@ -403,13 +449,25 @@ class Messenger:
 
     # report {{{2
     def report(self, args, kwargs, action):
-        if action.is_error:
-            self.errors += 1
+        is_continuation = action.is_continuation
+        if is_continuation:
+            action = self.previous_action
+            assert(action)
+        else:
+            if action.is_error:
+                self.errors += 1
         culprit = kwargs.get('culprit')
         if action.produce_output(self):
             options = self._get_print_options(kwargs, action)
             message = self._render_message(args, kwargs)
             header = self._render_header(action, culprit)
+            if header:
+                if is_continuation:
+                    header = ''
+                    message = indent(message)
+                elif '\n' in message:
+                    header = header.rstrip() + '\n'
+                    message = indent(message)
             msgcolor = action.message_color
             hdrcolor = action.header_color
             if action.write_output(self):
@@ -426,6 +484,7 @@ class Messenger:
                 print('%s%s' % (header, message), **options)
         if action.terminate is not False:
             self.terminate(status=action.terminate)
+        self.previous_action = action
 
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
