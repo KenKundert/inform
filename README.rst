@@ -345,6 +345,9 @@ The following messengers are provided. All of the messengers except panic and
 debug do not produce any output if *mute* is set.
 
 
+log
+"""
+
 .. code-block:: python
 
    log = MessengerGenerator(
@@ -354,6 +357,9 @@ debug do not produce any output if *mute* is set.
 
 Saves a message to the log file without displaying it.
 
+
+comment
+"""""""
 
 .. code-block:: python
 
@@ -369,6 +375,8 @@ displayed in cyan.
 Comments are generally used to document unusual occurrences that might warrant 
 the user's attention.
 
+codicil
+"""""""
 
 .. code-block:: python
 
@@ -378,6 +386,9 @@ Continues a previous message. Continued messages inherit the properties (output,
 log, message color, etc) of the previous message.  If the previous message had 
 a header, that header is not output and instead the message is indented.
 
+
+narrate
+"""""""
 
 .. code-block:: python
 
@@ -396,6 +407,9 @@ Distinguishing narration from comments allows them to colored differently and
 controlled separately.
 
 
+display
+"""""""
+
 .. code-block:: python
 
    display = MessengerGenerator(
@@ -406,6 +420,9 @@ controlled separately.
 
 Displays a message if *quiet* is not set. Logs the message.
 
+
+output
+""""""
 
 .. code-block:: python
 
@@ -418,6 +435,9 @@ Displays and logs a message. This is used for messages that are not errors that
 are noteworthy enough that they need to get through even though the user has 
 asked for quiet.
 
+
+debug
+"""""
 
 .. code-block:: python
 
@@ -432,6 +452,9 @@ Displays and logs a debugging message. A header with the label *DEBUG* is added
 to the message and the header is colored magenta.
 
 
+warn
+""""
+
 .. code-block:: python
 
    warn = MessengerGenerator(
@@ -444,6 +467,9 @@ to the message and the header is colored magenta.
 Displays and logs a warning message. A header with the label *warning* is added 
 to the message and the header is colored yellow.
 
+
+error
+"""""
 
 .. code-block:: python
 
@@ -458,6 +484,9 @@ to the message and the header is colored yellow.
 Displays and logs an error message. A header with the label *error* is added to 
 the message and the header is colored red.
 
+
+fatal
+"""""
 
 .. code-block:: python
 
@@ -474,6 +503,9 @@ Displays and logs an error message. A header with the label *error* is added to
 the message and the header is colored red. The program is terminated with an 
 exit status of 1.
 
+
+panic
+"""""
 
 .. code-block:: python
 
