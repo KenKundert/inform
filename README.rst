@@ -20,7 +20,8 @@ end = '\\n':
 file = stdout:
    The destination stream (a file pointer).
 flush = *False*:
-   Whether the message should flush the destination stream.
+   Whether the message should flush the destination stream (not available in 
+   python2).
 culprit = *None*:
    A string that is added to the end of the message header that identifies the 
    culprit (the object for which the problem being reported was found). It is 
