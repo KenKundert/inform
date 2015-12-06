@@ -92,20 +92,24 @@ You can create your own messengers:
 
     >>> from messenger import Messenger, MessengerGenerator
 
+    >>> verbose1 = MessengerGenerator(output=lambda m: m.verbosity >= 1)
     >>> verbose2 = MessengerGenerator(output=lambda m: m.verbosity >= 2)
-    >>> verbose3 = MessengerGenerator(output=lambda m: m.verbosity >= 3)
+    >>> with Messenger(verbosity=0):
+    ...     verbose1('First level of verbosity.')
+    ...     verbose2('Second level of verbosity.')
+
+    >>> with Messenger(verbosity=1):
+    ...     verbose1('First level of verbosity.')
+    ...     verbose2('Second level of verbosity.')
+    First level of verbosity.
+
     >>> with Messenger(verbosity=2):
-    ...     verbose2('Lorem ipsum 2')
-    ...     verbose3('Lorem ipsum 3')
-    Lorem ipsum 2
+    ...     verbose1('First level of verbosity.')
+    ...     verbose2('Second level of verbosity.')
+    First level of verbosity.
+    Second level of verbosity.
 
-    >>> with Messenger(verbosity=3):
-    ...     verbose2('Lorem ipsum 2')
-    ...     verbose3('Lorem ipsum 3')
-    Lorem ipsum 2
-    Lorem ipsum 3
-
-In this case *verbosity* is not a supported argument to Messenger. In this case 
+Notice that *verbosity* is not a supported argument to Messenger. In this case 
 Messenger simply saves the value and makes it available as an attribute, and it 
 is this attribute that is queried by the lambda function passed to the 
 MessengerGenerator when creating the messengers.
