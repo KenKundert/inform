@@ -69,15 +69,17 @@ class Color:
     COLORS = ['black','red','green','yellow','blue','magenta','cyan','white'] 
         # The order of the above colors must match order of the standard 
         # terminal
-    REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
+    COLOR_CODE_REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
     def __init__(self, color, scheme='dark'):
         self.color = color
         self.scheme = scheme
+        self.enable = True
 
-    def __call__(self, text, scheme=None):
-        scheme = self.scheme if scheme is None else scheme
-        if scheme and self.color:
+    def __call__(self, text, scheme=False):
+        # scheme is acting as an override, and False prevents the override.
+        scheme = self.scheme if scheme is False else scheme
+        if scheme and self.color and self.enable:
             assert self.color in self.COLORS
             bright = 1 if scheme == 'light' else 0
             prefix = '\033[%s;3%dm' %(bright, self.COLORS.index(self.color))
@@ -94,8 +96,8 @@ class Color:
             return False
 
     @classmethod
-    def stripColors(cls, text):
-        return cls.REGEX.sub('', text)
+    def strip_colors(cls, text):
+        return cls.COLOR_CODE_REGEX.sub('', text)
 
 
 # User Utilities {{{1
@@ -485,7 +487,7 @@ class Messenger:
             msgcolor = action.message_color
             hdrcolor = action.header_color
             if action.write_output(self):
-                cs = self.colorscheme if Color.isTTY(options['file']) else False
+                cs = self.colorscheme if Color.isTTY(options['file']) else None
                 if header:
                     print(
                         hdrcolor(header, cs) + msgcolor(message, cs),

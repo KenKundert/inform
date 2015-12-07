@@ -138,81 +138,6 @@ Any keyword arguments provided will be available in *e.kwargs*, but certain
 keyword arguments are reserved by messenger (see above).
 
 
-Utilities
----------
-
-Several utility functions are provided that are sometimes helpful when creating 
-messages.
-
-conjoin(iterable, conj=' and ', sep=', '):
-    Like ''.join(), but allows you to specify a conjunction that is placed 
-    between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
-    generates 'a, b or c'.
-
-cull(collection, remove = *None*):
-    Strips a list of a particular value (remove). By default, it strips a list 
-    of Nones. remove may be a function, in which case it takes a single item as 
-    an argument and returns *True* if that item should be removed from the list.
-
-fmt(msg, \*args, \**kwargs):
-    Similar to ''.format(), but it can pull arguments from the local scope.
-
-plural(count, singular_form, plural_form = *None*):
-    Produces either the singular or plural form of a word based on a count.
-    The count may be an integer, or an iterable, in which case its length is 
-    used. If the plural form is not give, the singular form is used with an 's' 
-    added to the end.
-
-os_error(exception):
-    Generates clean messages for operating system errors.
-
-is_str(obj):
-    Returns *True* if its argument is a string-like object.
-
-is_iterable(obj):
-    Returns *True* if its argument is iterable.
-
-is_collection(obj):
-    Returns *True* if its argument is iterable but is not a string.
-
-For example:
-
-.. code-block:: python
-
-    >>> from messenger import (
-    ...     Messenger, display, error, conjoin, cull, fmt, plural, os_error
-    ... )
-
-    >>> Messenger(prog_name='myprog')
-    <...>
-    >>> filenames = cull(['a', 'b', None, 'd'])
-    >>> filetype = 'CSV'
-    >>> display(
-    ...     fmt(
-    ...         'Reading {filetype} {files}: {names}.',
-    ...         filetype=filetype,  # see comment below
-    ...         files=plural(filenames, 'file'),
-    ...         names=conjoin(filenames),
-    ...     )
-    ... )
-    Reading CSV files: a, b and d.
-
-    >>> contents = {}
-    >>> for name in filenames:
-    ...     try:
-    ...         with open(name) as f:
-    ...             contents[name] = f.read()
-    ...     except IOError as e:
-    ...         error(os_error(e))
-    myprog error: a: No such file or directory.
-    myprog error: b: No such file or directory.
-    myprog error: d: No such file or directory.
-
-*filetype* was passed into *fmt* even though it is not necessary to do so in 
-order to work around an issue in doctests. Normally *filetype=filetype* could be 
-left out of the arguments to *fmt*.
-
-
 Messenger Class
 ---------------
 The Messenger class takes the following arguments:
@@ -521,3 +446,139 @@ panic
 Displays and logs a panic message. A header with the label *internal error* is 
 added to the message and the header is colored red. The program is terminated 
 with an exit status of 3.
+
+
+Utilities
+---------
+
+Several utility functions are provided that are sometimes helpful when creating 
+messages.
+
+conjoin(iterable, conj=' and ', sep=', '):
+    Like ''.join(), but allows you to specify a conjunction that is placed 
+    between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
+    generates 'a, b or c'.
+
+cull(collection, remove = *None*):
+    Strips a list of a particular value (remove). By default, it strips a list 
+    of Nones. remove may be a function, in which case it takes a single item as 
+    an argument and returns *True* if that item should be removed from the list.
+
+fmt(msg, \*args, \**kwargs):
+    Similar to ''.format(), but it can pull arguments from the local scope.
+
+plural(count, singular_form, plural_form = *None*):
+    Produces either the singular or plural form of a word based on a count.
+    The count may be an integer, or an iterable, in which case its length is 
+    used. If the plural form is not give, the singular form is used with an 's' 
+    added to the end.
+
+os_error(exception):
+    Generates clean messages for operating system errors.
+
+is_str(obj):
+    Returns *True* if its argument is a string-like object.
+
+is_iterable(obj):
+    Returns *True* if its argument is iterable.
+
+is_collection(obj):
+    Returns *True* if its argument is iterable but is not a string.
+
+For example:
+
+.. code-block:: python
+
+    >>> from messenger import (
+    ...     Messenger, display, error, conjoin, cull, fmt, plural, os_error
+    ... )
+
+    >>> Messenger(prog_name='myprog')
+    <...>
+    >>> filenames = cull(['a', 'b', None, 'd'])
+    >>> filetype = 'CSV'
+    >>> display(
+    ...     fmt(
+    ...         'Reading {filetype} {files}: {names}.',
+    ...         filetype=filetype,  # see comment below
+    ...         files=plural(filenames, 'file'),
+    ...         names=conjoin(filenames),
+    ...     )
+    ... )
+    Reading CSV files: a, b and d.
+
+    >>> contents = {}
+    >>> for name in filenames:
+    ...     try:
+    ...         with open(name) as f:
+    ...             contents[name] = f.read()
+    ...     except IOError as e:
+    ...         error(os_error(e))
+    myprog error: a: No such file or directory.
+    myprog error: b: No such file or directory.
+    myprog error: d: No such file or directory.
+
+*filetype* was passed into *fmt* even though it is not necessary to do so in 
+order to work around an issue in doctests. Normally *filetype=filetype* could be 
+left out of the arguments to *fmt*.
+
+Color Class
+"""""""""""
+
+The Color class creates colorizers, which are used to render text in 
+a particular color.  For example::
+
+   >> from messenger import Color
+
+   >> pass = Color('green')
+   >> fail = Color('red')
+   >> testname = 'outrigger'
+   >> print(pass('pass:'), testname)
+   pass: outrigger
+
+   >> print(fail('FAIL:'), testname)
+   FAIL: outrigger
+
+When the first message prints, the string 'pass:' will print in green. When the 
+second message prints, the string 'FAIL:' prints in red.
+    
+The Color class has the concept of a colorscheme. There are three supported 
+schemes: *None*, light, and dark. With *None* the text is not colored. In 
+general it is best to use the light colorscheme on dark backgrounds and the dark 
+colorscheme on light backgrounds.
+
+The Color class takes the following arguments when creating a colorizer:
+
+color:
+   Render the text in the specified color. Choose from *None*, 'black', 'red', 
+   'green', 'yellow', 'blue', 'magenta', 'cyan' or 'white'.
+
+colorscheme = 'dark':
+   Use the specified colorscheme when rendering the text.
+   Choose from *None*, 'light' or 'dark'.
+
+A colorizer takes the following arguments:
+
+text:
+   The text to be colored.
+
+colorscheme = *False*:
+   Use to override the colorscheme when rendering the text.  Choose from *None*, 
+   *False*, 'light' or 'dark'.  If you specify *False* (the default), the 
+   colorscheme specified when creating the colorizer is used.
+
+Colorizers have one user settable attribute: *enable*. By default *enable* is 
+True. If you set it to *False* the colorizer no longer renders the text in 
+color.
+
+The Color class has the following class methods:
+
+isTTY:
+   Takes a stream as an argument and returns true if it is a TTY. A typical use 
+   is::
+
+      fail = Color('red')
+      fail.active = Color.isTTY(sys.stdout))
+
+strip_colors:
+   Takes a string as its input and return that text stripped of any color codes.
