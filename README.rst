@@ -1,4 +1,4 @@
-Messenger
+'myprog'Messenger
 =========
 
 A light-weight package with few dependencies that provides various print-like 
@@ -493,7 +493,7 @@ For example:
     ...     Messenger, display, error, conjoin, cull, fmt, plural, os_error
     ... )
 
-    >>> Messenger(prog_name='myprog')
+    >>> Messenger(prog_name=False)
     <...>
     >>> filenames = cull(['a', 'b', None, 'd'])
     >>> filetype = 'CSV'
@@ -514,9 +514,9 @@ For example:
     ...             contents[name] = f.read()
     ...     except IOError as e:
     ...         error(os_error(e))
-    myprog error: a: No such file or directory.
-    myprog error: b: No such file or directory.
-    myprog error: d: No such file or directory.
+    error: a: No such file or directory.
+    error: b: No such file or directory.
+    error: d: No such file or directory.
 
 *filetype* was passed into *fmt* even though it is not necessary to do so in 
 order to work around an issue in doctests. Normally *filetype=filetype* could be 
