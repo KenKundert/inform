@@ -4,8 +4,9 @@
 
 # Imports {{{1
 from __future__ import print_function, division
-from runtests import cmdLineOpts, writeSummary
-from textcolors import Colors
+from runtests import (
+    cmdLineOpts, writeSummary, succeed, fail, info, status, warning
+)
 from textwrap import dedent, indent
 from difflib import Differ
 import re
@@ -13,15 +14,8 @@ import io
 import sys
 import os
 
-# Initialization (fold)
+# Initialization {{{1
 fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
-
-colors = Colors(colorize)
-succeed = colors.colorizer('green')
-fail = colors.colorizer('red')
-info = colors.colorizer('magenta')
-status = colors.colorizer('cyan')
-warning = colors.colorizer('yellow')
 
 
 # Utilities {{{1

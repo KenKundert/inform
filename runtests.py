@@ -47,16 +47,18 @@ from __future__ import division, print_function
 import os, sys
 # use json if available, otherwise use pickle
 from json import load as loadSummary, dump as dumpSummary
-from textcolors import Colors, isTTY
+from messenger import Color
 import argparse
 
-# define useful colors  {{{2
-colors = Colors()
-status = colors.colorizer('blue')
-info = colors.colorizer('magenta')
-fail = colors.colorizer('red')
-succeed = colors.colorizer('green')
-exception = colors.colorizer('Red')
+# Globals {{{2
+status = Color('blue', 'dark')
+info = Color('magenta', 'dark')
+succeed = Color('green', 'dark')
+fail = Color('red', 'dark')
+warning = Color('yellow', 'dark')
+error = Color('red', 'dark')
+exception = Color('red', 'light')
+
 
 # default python
 defaultPython = "python{0}.{1}".format(*sys.version_info)
@@ -101,7 +103,7 @@ class CommandLine():
             # command line has already been processed
             return
 
-        # process the command line {{{2
+        # process the command line
         cmdline_args = self.cmdline_parser.parse_args()
         if cmdline_args.help:
             self.cmdline_parser.print_help()
@@ -118,6 +120,16 @@ class CommandLine():
         self.parent = cmdline_args.parent
         self.args = cmdline_args.tests
 
+        if not self.colorize:
+            status.scheme = None
+            info.scheme = None
+            succeed.scheme = None
+            fail.scheme = None
+            warning.scheme = None
+            error.scheme = None
+            exception.scheme = None
+
+
 # Install the command line processor
 clp = CommandLine()
 
@@ -127,8 +139,6 @@ def cmdLineOpts():
     get command line options using something like:
         fast, printSummary, printTests, printResults, colorize, parent = runtests.cmdLineOpts()
     """
-    global defaultPython
-
     clp.process()
 
     if clp.coverage and not clp.parent:
@@ -201,7 +211,6 @@ def runTests(tests, pythonCmd=None, pythonPath=None, testKey='test'):
         pythonCmd = '%s /usr/bin/coverage run -a --branch' % pythonCmd
     pythonPath = ('PYTHONPATH=%s; ' % pythonPath) if pythonPath else ''
 
-    colors.colorize(clp.colorize and isTTY())
     if len(clp.args) == 0:
         clp.args = tests
 

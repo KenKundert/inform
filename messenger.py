@@ -71,10 +71,12 @@ class Color:
         # terminal
     REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
-    def __init__(self, color):
+    def __init__(self, color, scheme='dark'):
         self.color = color
+        self.scheme = scheme
 
-    def __call__(self, text, scheme):
+    def __call__(self, text, scheme=None):
+        scheme = self.scheme if scheme is None else scheme
         if scheme and self.color:
             assert self.color in self.COLORS
             bright = 1 if scheme == 'light' else 0
@@ -483,7 +485,7 @@ class Messenger:
             msgcolor = action.message_color
             hdrcolor = action.header_color
             if action.write_output(self):
-                cs = self.colorscheme if Color.isTTY(options['file']) else None
+                cs = self.colorscheme if Color.isTTY(options['file']) else False
                 if header:
                     print(
                         hdrcolor(header, cs) + msgcolor(message, cs),

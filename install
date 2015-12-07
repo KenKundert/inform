@@ -1,23 +1,26 @@
 #!/bin/bash
-# Installs messenger
+# Install into ~/.local for the versions of python listed in 'pythons' below.
 #
 # Requires Python2.7 or Python 3.3.
 cmd=messenger
-python=python3
+pythons=(python2 python3)
+    # Add the versions of python you would like to install to above
 
-# Determine the version of python we are using
-vers=$($python -c 'import sys; print("%s.%s" % (sys.version_info[0], sys.version_info[1]))')
-echo "Installing $cmd to ~/.home/bin (Python$vers)."
+for python in ${pythons[*]}; do
+    # Determine the version of python we are using
+    vers=$($python -c 'import sys; print("%s.%s" % (sys.version_info[0], sys.version_info[1]))')
+    echo "Installing $cmd to ~/.home/bin (Python$vers)."
 
-# remove build directories from a previous install to assure a clean install
-rm -rf build dist $cmd.egg-info install.out
+    # remove build directories from a previous install to assure a clean install
+    rm -rf build dist $cmd.egg-info install.out
 
-# install $cmd
-python$vers setup.py install --quiet --user >& install.out
-if [[ $? -ne 0 ]] ; then
-    echo "Problems found, aborting (see install.out)"
-    exit 1
-fi
+    # install $cmd
+    $python setup.py install --quiet --user >& install.out
+    if [[ $? -ne 0 ]] ; then
+        echo "Problems found, aborting (see install.out)"
+        exit 1
+    fi
+done
 
 # remove build directories, because I like a clean directory
 rm -rf build dist $cmd.egg-info
