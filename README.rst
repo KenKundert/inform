@@ -23,13 +23,13 @@ flush = *False*:
    Whether the message should flush the destination stream (not available in 
    python2).
 culprit = *None*:
-   A string that is added to the end of the message header that identifies the 
-   culprit (the object for which the problem being reported was found). It is 
-   ignored if the message does not header.
+   A string that is added to the beginning of the message that identifies the 
+   culprit (the object for which the problem being reported was found). May also 
+   be a collection of strings, in which case they are joined with '.'.
 
 With the simplest use of the program, you simply import the messengers you need 
 and call them (they take the same arguments as does the *print* function built 
-in to Python:
+into Python:
 
 .. code-block:: python
 
@@ -108,10 +108,10 @@ You can create your own messengers:
     First level of verbosity.
     Second level of verbosity.
 
-Notice that *verbosity* is not a supported argument to Messenger. In this case 
-Messenger simply saves the value and makes it available as an attribute, and it 
-is this attribute that is queried by the lambda function passed to the 
-MessengerGenerator when creating the messengers.
+The argument *verbosity* is not an explicitly supported argument to Messenger.  
+In this case Messenger simply saves the value and makes it available as an 
+attribute, and it is this attribute that is queried by the lambda function 
+passed to the MessengerGenerator when creating the messengers.
 
 
 Exception
@@ -144,21 +144,23 @@ keyword arguments are reserved by messenger (see above).
 
 Messenger Class
 ---------------
-The Messenger class takes the following arguments:
+The Messenger class controls the active messengers. It takes the following 
+arguments as options:
 
 mute (bool)
    With the provided messengers all output is suppressed when set (it is still 
-   logged). This is generally used the program being run is being run by another 
-   program that is generating its own messages and does not want the user 
-   confused by additional message. In this case, the calling program is 
-   responsible for observing and reacting to the exit status of the program.
+   logged). This is generally used when the program being run is being run by 
+   another program that is generating its own messages and does not want the 
+   user confused by additional messages. In this case, the calling program is 
+   responsible for observing and reacting to the exit status of the called 
+   program.
 quiet (bool):
    With the provided messengers normal output is suppressed when set (it is 
    still logged). This is used when the user has indicated that they are 
    uninterested in any conversational messages and just want to see the 
    essentials (generally error messages).
 verbose (bool):
-   With the provided messengers comments are output to user when set, normally 
+   With the provided messengers comments are output to user when set; normally 
    they are just logged. Comments are generally used to document unusual 
    occurrences that might warrant the user's attention.
 narrate (bool):
@@ -546,8 +548,7 @@ a particular color.  For example::
    FAIL: outrigger
    pass: signalman
 
-When the first message prints, the string 'pass:' will print in green. When the 
-second message prints, the string 'FAIL:' prints in red.
+When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
     
 The Color class has the concept of a colorscheme. There are three supported 
 schemes: *None*, light, and dark. With *None* the text is not colored. In 

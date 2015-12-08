@@ -472,11 +472,10 @@ class Messenger:
         else:
             if action.is_error:
                 self.errors += 1
-        culprit = kwargs.get('culprit')
         if action.produce_output(self):
             options = self._get_print_options(kwargs, action)
             message = self._render_message(args, kwargs)
-            header = self._render_header(action, culprit)
+            header = self._render_header(action)
             if header:
                 if is_continuation:
                     header = ''
@@ -521,21 +520,21 @@ class Messenger:
     # _render_message {{{2
     @staticmethod
     def _render_message(args, kwargs):
-        return kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        culprit = kwargs.get('culprit')
+        if culprit:
+            if is_collection(culprit):
+                culprit = '.'.join(str(c) for c in culprit)
+            return '%s: %s' % (culprit, message)
+        return message
 
     # _render_header {{{2
-    def _render_header(self, action, culprit):
+    def _render_header(self, action):
         if action.severity:
             if self.prog_name:
-                header = '%s %s: ' % (self.prog_name, action.severity)
+                return '%s %s: ' % (self.prog_name, action.severity)
             else:
-                header = '%s: ' % action.severity
-
-            if culprit:
-                if is_collection(culprit):
-                    culprit = '.'.join(str(c) for c in culprit)
-                header += str(culprit) + ': '
-            return header
+                return '%s: ' % action.severity
         return ''
 
     # done {{{2
@@ -629,7 +628,7 @@ class Error(Exception):
 
     def get_culprit(self):
         culprit = kwargs.get('culprit')
-        return '.'.join(culprit) if is_collection(culprit) else culprit
+        return '.'.join(str(c) for c in culprit) if is_collection(culprit) else culprit
 
     def __str__(self):
         message = self.get_message()
