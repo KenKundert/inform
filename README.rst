@@ -116,22 +116,27 @@ MessengerGenerator when creating the messengers.
 
 Exception
 ---------
-An exception, *UserError*, is provided that takes the same arguments as 
-a messenger.  This allows you to catch the exception and handle it if you like.  
-The exception provides the *report* method that processes the exception as an 
-error if you find that you can do nothing else with the exception:
+An exception, *Error*, is provided that takes the same arguments as a messenger.  
+This allows you to catch the exception and handle it if you like.  The exception 
+provides the *report* method that processes the exception as an error if you 
+find that you can do nothing else with the exception:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, UserError
+    >>> from messenger import Messenger, Error
 
     >>> Messenger(prog_name='myprog')
     <...>
     >>> try:
-    ...     raise UserError('must not be zero.', culprit='0')
-    ... except UserError as e:
+    ...     raise Error('must not be zero.', culprit='naught')
+    ... except Error as e:
     ...     e.report()
-    myprog error: 0: must not be zero.
+    myprog error: naught: must not be zero.
+
+*Error* also provides get_message() and get_culprit() methods, which return the 
+message and the culprit. You can also cast the exception to a string to get 
+a string that contains both the message and the culprit formatted so that it can 
+be shown to the user.
 
 Any keyword arguments provided will be available in *e.kwargs*, but certain 
 keyword arguments are reserved by messenger (see above).

@@ -152,7 +152,7 @@ testCases = [
         name='alarm',
         stimulus=dedent('''
             Messenger({stdargs})
-            output('This', 'is', 'a', 'test.', sep='_')
+            output('This', 'is', 'a', 'test', sep='_', end='.')
         '''.format(stdargs=captureAll)),
         stdout="This_is_a_test.",
         logfile=dedent('''

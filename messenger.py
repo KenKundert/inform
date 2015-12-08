@@ -505,6 +505,8 @@ class Messenger:
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
         opts = {
+            #'sep': kwargs.get('sep', ' '), -- handled in _render_message
+            'end': kwargs.get('end', '\n'),
             'file': kwargs.get(
                 'file',
                 self.stderr if action.terminate else self.stdout
@@ -616,12 +618,23 @@ def errors_accrued():
 MESSENGER = Messenger()
 
 # Exceptions {{{1
-# UserError {{{2
-class UserError(Exception):
+# Error {{{2
+class Error(Exception):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
-    def __str__(self):
+
+    def get_message(self):
         return self.kwargs.get('sep', ' ').join(str(a) for a in self.args)
+
+    def get_culprit(self):
+        culprit = kwargs.get('culprit')
+        return '.'.join(culprit) if is_collection(culprit) else culprit
+
+    def __str__(self):
+        message = self.get_message()
+        culprit = self.get_culprit()
+        return "%s: %s" % (culprit, message) if culprit else message
+
     def report(self):
         error(*self.args, **self.kwargs)
