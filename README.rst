@@ -534,8 +534,8 @@ a particular color.  For example::
    >> success = green('pass:')
    >> failure = red('FAIL:')
 
-   >> failures = [('outrigger', True), ('signalman', False)]
-   >> for name, fails in failures:
+   >> failures = {'outrigger': True, 'signalman': False}
+   >> for name, fails in failures.iters():
    ..     result = failure if fails else success
    ..     display(result, name)
    FAIL: outrigger
