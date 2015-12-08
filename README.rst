@@ -38,8 +38,7 @@ in to Python:
     ice 9
 
 More typical is to import and instantiate the Messenger class yourself along 
-with the desired messengers.  This gives you the ability to specify the desired 
-options:
+with the desired messengers.  This gives you the ability to specify options:
 
 .. code-block:: python
 
@@ -514,9 +513,9 @@ For example:
     ...             contents[name] = f.read()
     ...     except IOError as e:
     ...         error(os_error(e))
-    error: a: No such file or directory.
-    error: b: No such file or directory.
-    error: d: No such file or directory.
+    error: a: no such file or directory.
+    error: b: no such file or directory.
+    error: d: no such file or directory.
 
 *filetype* was passed into *fmt* even though it is not necessary to do so in 
 order to work around an issue in doctests. Normally *filetype=filetype* could be 
@@ -530,14 +529,14 @@ a particular color.  For example::
 
    >> from messenger import Color
 
-   >> pass = Color('green')
-   >> fail = Color('red')
-   >> testname = 'outrigger'
-   >> print(pass('pass:'), testname)
-   pass: outrigger
-
-   >> print(fail('FAIL:'), testname)
+   >> success = Color('green')('pass:')
+   >> failure = Color('red')('FAIL:')
+   >> failures = {'outrigger': True, 'signalman': False}
+   >> for name, fails in failures.items():
+   ..     result = failure if fails else success:
+   ..     print(result, name)
    FAIL: outrigger
+   pass: signalman
 
 When the first message prints, the string 'pass:' will print in green. When the 
 second message prints, the string 'FAIL:' prints in red.

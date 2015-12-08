@@ -143,9 +143,9 @@ def fmt(message, *args, **kwargs):
 # Generates a reasonable error message for an operating system error
 def os_error(err):
     if err.filename:
-        return "%s: %s." % (err.filename, err.strerror)
+        return "%s: %s." % (err.filename, err.strerror.lower())
     else:
-        return "%s." % (err.strerror)
+        return "%s." % (err.strerror.lower())
 
 # conjoin {{{2
 # Like join, but supports conjunction
