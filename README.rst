@@ -1,4 +1,4 @@
-'myprog'Messenger
+Messenger
 =========
 
 A light-weight package with few dependencies that provides various print-like 
