@@ -527,17 +527,17 @@ Color Class
 The Color class creates colorizers, which are used to render text in 
 a particular color.  For example::
 
-   >> from messenger import Color
+   >> from messenger import Color, display
 
    >> green = Color('green')
    >> red = Color('red')
    >> success = green('pass:')
    >> failure = red('FAIL:')
 
-   >> failures = {'outrigger': True, 'signalman': False}
-   >> for name, fails in failures.items():
-   ..     result = failure if fails else success:
-   ..     print(result, name)
+   >> failures = [('outrigger', True), ('signalman', False)]
+   >> for name, fails in failures:
+   ..     result = failure if fails else success
+   ..     display(result, name)
    FAIL: outrigger
    pass: signalman
 
