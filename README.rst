@@ -529,8 +529,11 @@ a particular color.  For example::
 
    >> from messenger import Color
 
-   >> success = Color('green')('pass:')
-   >> failure = Color('red')('FAIL:')
+   >> green = Color('green')
+   >> red = Color('red')
+   >> success = green('pass:')
+   >> failure = red('FAIL:')
+
    >> failures = {'outrigger': True, 'signalman': False}
    >> for name, fails in failures.items():
    ..     result = failure if fails else success:
