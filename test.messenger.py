@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Test the Messenger Generator
 
 # Imports {{{1
-from __future__ import print_function, division
+from __future__ import print_function, unicode_literals
 from runtests import (
     cmdLineOpts, writeSummary, succeed, fail, info, status, warning
 )
-from textwrap import dedent, indent
+from messenger import indent
+from textwrap import dedent
 from difflib import Differ
 import re
 import io
@@ -53,7 +54,7 @@ def showDiff(achieved, expected, indent=''):
 class Case():
     names = set()
     messenger = __import__('messenger', fromlist='*')
-     
+
     def __init__(self, name, stimulus, stdout='', stderr='', logfile=''):
         self.name = name
         self.stimulus = stimulus.strip()

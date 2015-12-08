@@ -76,13 +76,13 @@ normally printed output of your code:
     >>> num_errors
     0
 
-    >>> output_text
+    >>> str(output_text)
     'running test\n'
 
-    >>> error_text
+    >>> str(error_text)
     ''
 
-    >>> logfile_text[:10], logfile_text[-13:]
+    >>> str(logfile_text[:10]), str(logfile_text[-13:])
     ('Invoked as', 'running test\n')
 
 You can create your own messengers:

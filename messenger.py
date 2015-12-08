@@ -17,7 +17,7 @@
 # this program.  If not, see http://www.gnu.org/licenses/.
 
 # Imports {{{1
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 from copy import copy
 import re
 import os

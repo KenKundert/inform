@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Run doctests in README.rst
 
 # Imports {{{1
+from __future__ import print_function
 from runtests import cmdLineOpts, writeSummary, succeed, fail
 import doctest
 import sys
