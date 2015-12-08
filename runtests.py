@@ -121,13 +121,13 @@ class CommandLine():
         self.args = cmdline_args.tests
 
         if not self.colorize:
-            status.scheme = None
-            info.scheme = None
-            succeed.scheme = None
-            fail.scheme = None
-            warning.scheme = None
-            error.scheme = None
-            exception.scheme = None
+            status.active = False
+            info.active = False
+            succeed.active = False
+            fail.active = False
+            warning.active = False
+            error.active = False
+            exception.active = False
 
 
 # Install the command line processor
