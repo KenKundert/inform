@@ -640,3 +640,11 @@ class Error(Exception):
 
     def terminate(self):
         fatal(*self.args, **self.kwargs)
+
+    # __getattr__ {{{2
+    def __getattr__(self, name):
+        # returns the value associated with name in kwargs if it exists, 
+        # otherwise None
+        if name.startswith('__'):
+            raise AttributeError(name)
+        return self.kwargs.get(name)
