@@ -45,6 +45,7 @@ def indent(text, leader = '   '):
 
 # cull {{{2
 def cull(collection, remove=None):
+    """Cull items of a particular value from a list."""
     if callable(remove):
         return [each for each in collection if not remove(each)]
     else:
@@ -53,19 +54,27 @@ def cull(collection, remove=None):
 # is_str {{{2
 from six import string_types
 def is_str(obj):
+    """Identifies strings in all their various guises."""
     return isinstance(obj, string_types)
 
 # is_iterable {{{2
 import collections
 def is_iterable(obj):
+    """Identifies objects that can be iterated over, including strings."""
     return isinstance(obj, collections.Iterable)
 
 # is_collection {{{2
 def is_collection(obj):
+    """Identifies objects that can be iterated over, excluding strings."""
     return is_iterable(obj) and not is_str(obj)
 
 # Color class {{{2
 class Color:
+    """Color
+
+    Used to create colorizers, which are used to render text in a particular 
+    color.
+    """
     COLORS = ['black','red','green','yellow','blue','magenta','cyan','white'] 
         # The order of the above colors must match order of the standard 
         # terminal
@@ -156,14 +165,19 @@ def conjoin(iterable, conj=' and ', sep=', '):
     two items in the list, and sep is used to join the others.
 
     Examples:
-    >>> conjoin([], ' or ')
-    ''
-    >>> conjoin(['a'], ' or ')
-    'a'
-    >>> conjoin(['a', 'b'], ' or ')
-    'a or b'
-    >>> conjoin(['a', 'b', 'c'])
-    'a, b and c'
+    >>> from messenger import conjoin
+    >>> print(conjoin([], ' or '))
+    <BLANKLINE>
+
+    >>> print(conjoin(['a'], ' or '))
+    a
+
+    >>> print(conjoin(['a', 'b'], ' or '))
+    a or b
+
+    >>> print(conjoin(['a', 'b', 'c']))
+    a, b and c
+
     """
     lst = list(iterable)
     if conj != None and len(lst) > 1:

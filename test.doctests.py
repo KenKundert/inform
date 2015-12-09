@@ -18,10 +18,16 @@ fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
 # will be imported again after doctest has replaced stdout.
 del sys.modules['messenger']
 
-failures, testsRun = doctest.testfile("README.rst", optionflags=doctest.ELLIPSIS)
+# Tests {{{1
+failures = tests_run = 0
+for test in ['README.rst', 'messenger.py']:
+    fails, tests = doctest.testfile(test, optionflags=doctest.ELLIPSIS)
+    failures += fails
+    tests_run += tests
+
 if printSummary:
     result = fail('FAIL:') if failures else succeed('PASS:')
-    print(result, '%s tests run, %s failures detected.' % (testsRun, failures))
+    print(result, tests_run, 'tests run,', failures, 'failures detected.')
 
-writeSummary(testsRun, failures)
+writeSummary(tests_run, failures)
 exit(failures != 0)
