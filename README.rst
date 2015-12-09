@@ -118,8 +118,9 @@ Exception
 ---------
 An exception, *Error*, is provided that takes the same arguments as a messenger.  
 This allows you to catch the exception and handle it if you like.  The exception 
-provides the *report* method that processes the exception as an error if you 
-find that you can do nothing else with the exception:
+provides the *report* and *terminate* methods that processes the exception as an 
+error or fatal error if you find that you can do nothing else with the 
+exception:
 
 .. code-block:: python
 

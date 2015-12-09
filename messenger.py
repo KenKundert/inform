@@ -627,7 +627,7 @@ class Error(Exception):
         return self.kwargs.get('sep', ' ').join(str(a) for a in self.args)
 
     def get_culprit(self):
-        culprit = kwargs.get('culprit')
+        culprit = self.kwargs.get('culprit')
         return '.'.join(str(c) for c in culprit) if is_collection(culprit) else culprit
 
     def __str__(self):
@@ -637,3 +637,6 @@ class Error(Exception):
 
     def report(self):
         error(*self.args, **self.kwargs)
+
+    def terminate(self):
+        fatal(*self.args, **self.kwargs)
