@@ -600,7 +600,7 @@ class Messenger:
         if self.logfile:
             self.logfile.flush()
         global MESSENGER
-        MESSENGER = None
+        MESSENGER = DEFAULT_MESSENGER
 
     # __enter__ {{{2
     def __enter__(self):
@@ -628,7 +628,8 @@ def errors_accrued():
     return MESSENGER.errors_accrued()
 
 # Instantiate default messenger {{{1
-MESSENGER = Messenger()
+DEFAULT_MESSENGER = Messenger()
+MESSENGER = DEFAULT_MESSENGER
 
 # Exceptions {{{1
 # Error {{{2

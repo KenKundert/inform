@@ -234,7 +234,7 @@ errors_accrued():
    Return the number of errors that have accrued.
 
 disconnect():
-   Deactivate the current Messenger, leaving no active Messenger.
+   Deactivate the current Messenger, restoring the default.
 
 
 MessengerGenerator Class
