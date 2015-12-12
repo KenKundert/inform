@@ -286,12 +286,12 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
             messenger warning: This is a test.
-               This is an appendage.
+                This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             messenger warning: This is a test.
-               This is an appendage.
+                This is an appendage.
         '''),
     ),
     Case(
@@ -305,16 +305,16 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
             messenger error: 
-               This is the first appendage.
-               This is the second appendage.
-               This is the third appendage.
+                This is the first appendage.
+                This is the second appendage.
+                This is the third appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             messenger error: 
-               This is the first appendage.
-               This is the second appendage.
-               This is the third appendage.
+                This is the first appendage.
+                This is the second appendage.
+                This is the third appendage.
         '''),
     ),
     Case(
@@ -327,16 +327,16 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
             messenger error: 
-               This is the first appendage.
-               This is the second appendage,
-                  and the third.
+                This is the first appendage.
+                This is the second appendage,
+                   and the third.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             messenger error: 
-               This is the first appendage.
-               This is the second appendage,
-                  and the third.
+                This is the first appendage.
+                This is the second appendage,
+                   and the third.
         '''),
     ),
     Case(
@@ -370,14 +370,14 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
             messenger error:
-               Error message.
-               Additional info.
+                Error message.
+                Additional info.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             messenger error:
-               Error message.
-               Additional info.
+                Error message.
+                Additional info.
         '''),
     ),
 ]

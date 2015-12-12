@@ -28,12 +28,12 @@ MESSENGER = None
 
 # Messenger Utilities {{{1
 # indent {{{2
-def indent(text, leader = '   '):
+def indent(text, leader = '    '):
     r"""{
     Add indentation.
 
     Examples:
-    >>> from logger import indent
+    >>> from messenger import indent
     >>> print(indent('Hello\nWorld!', '    '))
         Hello
         World!
@@ -118,7 +118,7 @@ def fmt(message, *args, **kwargs):
     come from the local scope (found by introspection).
 
     Examples:
-    >>> from logger import fmt
+    >>> from messenger import fmt
     >>> s = 'str var'
     >>> d = {'msg': 'dict val'}
     >>> class Class:
