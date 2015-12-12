@@ -39,9 +39,9 @@ def indent(text, leader = '    '):
         World!
 
     }"""
-    return '\n'.join([
+    return '\n'.join(
         leader+line if line else line for line in text.split('\n')
-    ])
+    )
 
 # cull {{{2
 def cull(collection, remove=None):
@@ -80,14 +80,15 @@ class Color:
         # terminal
     COLOR_CODE_REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
-    def __init__(self, color, scheme='dark'):
+    def __init__(self, color, scheme=True):
         self.color = color
-        self.scheme = scheme
+        self.scheme = 'dark' if scheme is True else scheme
         self.enable = True
 
-    def __call__(self, text, scheme=False):
+    def __call__(self, *args, **kwargs):
         # scheme is acting as an override, and False prevents the override.
-        scheme = self.scheme if scheme is False else scheme
+        text = kwargs.get('sep', ' ').join(str(a) for a in args)
+        scheme = kwargs.get('scheme', self.scheme)
         if scheme and self.color and self.enable:
             assert self.color in self.COLORS
             bright = 1 if scheme == 'light' else 0
@@ -497,17 +498,18 @@ class Messenger:
                 elif '\n' in message:
                     header = header.rstrip() + '\n'
                     message = indent(message)
-            msgcolor = action.message_color
-            hdrcolor = action.header_color
+            messege_color = action.message_color
+            header_color = action.header_color
             if action.write_output(self):
                 cs = self.colorscheme if Color.isTTY(options['file']) else None
                 if header:
                     print(
-                        hdrcolor(header, cs) + msgcolor(message, cs),
+                        header_color(header, scheme=cs)
+                      + messege_color(message, scheme=cs),
                         **options
                     )
                 else:
-                    print(msgcolor(message, cs), **options)
+                    print(messege_color(message, scheme=cs), **options)
             if action.write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
                 print('%s%s' % (header, message), **options)

@@ -533,7 +533,10 @@ Color Class
 """""""""""
 
 The Color class creates colorizers, which are used to render text in 
-a particular color.  For example::
+a particular color.  They are like the Python print function in that they take 
+any number of unnamed arguments that are converted to strings and then join into 
+a single string. The string is then coded for the chosen color and returned. For 
+example::
 
    >> from messenger import Color, display
 
