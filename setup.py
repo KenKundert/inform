@@ -18,6 +18,7 @@ setup(
     zip_safe=True,
     keywords=[
         'messenger',
+        'quicksilver',
     ],
     py_modules=['messenger'],
     classifiers=[
