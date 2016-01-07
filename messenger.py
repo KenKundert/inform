@@ -1,4 +1,5 @@
-# messenger -- utilities for communicating directly with the user
+# Quicksilver Messenger Service
+# Utilities for communicating directly with the user.
 
 # License {{{1
 # Copyright (C) 2014-16 Kenneth S. Kundert

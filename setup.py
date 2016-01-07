@@ -1,13 +1,33 @@
-from setuptools import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-longDesc='Messenger: utilities for communicating directly with the user.'
+with open('README.rst') as f:
+    readme = f.read()
 
 setup(
-    name='messenger'
-  , version='1.0.0'
-  , description='Messenger utility'
-  , long_description=longDesc
-  , author="Ken Kundert"
-  , author_email='ken@designers-guide.com'
-  , py_modules=['messenger']
+    name='messenger',
+    version='1.0.0',
+    description='Quicksilver Messenger Service',
+    long_description=readme,
+    author="Ken Kundert",
+    author_email='messenger@nurdletech.com',
+    url='https://github.com/kenkundert/messenger',
+    license='GPLv3+',
+    zip_safe=True,
+    keywords=[
+        'messenger',
+    ],
+    py_modules=['messenger'],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'Natural Language :: English',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
+        'Topic :: Utilities',
+    ],
 )

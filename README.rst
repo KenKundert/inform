@@ -1,17 +1,21 @@
-Messenger
-=========
+Quicksilver Messenger Service
+=============================
 
 A light-weight package with few dependencies that provides various print-like 
-functions to communicate to the user. Messenger provides logging and output 
+functions to communicate to the user. It also provides logging and output 
 control.
 
-Defines a collection of 'print' functions (messengers) that have different 
-roles.  These functions are declared under the Messengers section and include 
-*log*, *comment*, *codicil*. *narrate*, *display*, *output*, *debug*, *warn*, 
-*error*, *fatal* and *panic*.  Each of these functions takes arguments like the 
-standard print function: unnamed arguments are converted to strings and joined 
-together to produce the output, the named arguments act to control the process.  
-The available controls (named arguments) are:
+Install with::
+
+    pip install messenger
+
+This package defines a collection of 'print' functions (messengers) that have 
+different roles.  These functions are declared under the Messengers section and 
+include *log*, *comment*, *codicil*. *narrate*, *display*, *output*, *debug*, 
+*warn*, *error*, *fatal* and *panic*.  Each of these functions takes arguments 
+like the standard print function: unnamed arguments are converted to strings and 
+joined together to produce the output, the named arguments act to control the 
+process.  The available controls (named arguments) are:
 
 sep = ' ':
    Specifies the string used to join the unnamed arguments.
