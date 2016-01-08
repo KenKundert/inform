@@ -46,11 +46,13 @@ with the desired messengers.  This gives you the ability to specify options:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, display
-    >>> Messenger(logfile=False)
+    >>> from messenger import Messenger, display, error, log
+    >>> Messenger(logfile=False, prog_name=False)
     <...>
-    >>> display('test')
-    test
+    >>> display('hello')
+    hello
+    >>> error('file not found.', culprit='data.in')
+    error: data.in: file not found.
 
 You can also use a *with* statement to invoke the messenger. This closes the 
 messenger when the *with* statement terminates (you must not use the messenger 
@@ -251,7 +253,7 @@ severity = *None*:
    text does not contain a newline it is appended to the header.  Otherwise the 
    message text is indented and placed on the next line.
 is_error = *False*:
-   Should message be counted as errors.
+   Should message be counted as an error.
 log = *True*:
    Send message to the log file. May be a boolean or a function that accepts the 
    Messenger object as an argument and returns a boolean.
@@ -531,16 +533,18 @@ For example:
 
 *filetype* was passed into *fmt* even though it is not necessary to do so in 
 order to work around an issue in doctests. Normally *filetype=filetype* could be 
-left out of the arguments to *fmt*.
+left out of the arguments to *fmt* because if *fmt* does not find a named 
+argument in its argument list, it will look for a variable of the same name in 
+the local scope.
 
 Color Class
 """""""""""
 
 The Color class creates colorizers, which are used to render text in 
 a particular color.  They are like the Python print function in that they take 
-any number of unnamed arguments that are converted to strings and then join into 
-a single string. The string is then coded for the chosen color and returned. For 
-example::
+any number of unnamed arguments that are converted to strings and then joined 
+into a single string. The string is then coded for the chosen color and 
+returned. For example::
 
    >> from messenger import Color, display
 
@@ -594,7 +598,7 @@ isTTY:
    is::
 
       fail = Color('red')
-      fail.active = Color.isTTY(sys.stdout))
+      fail.enable = Color.isTTY(sys.stdout))
 
 strip_colors:
    Takes a string as its input and return that text stripped of any color codes.
