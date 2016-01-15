@@ -8,7 +8,7 @@ with open('README.rst') as f:
 
 setup(
     name='messenger',
-    version='1.0.0',
+    version='1.0.5',
     description='Quicksilver Messenger Service',
     long_description=readme,
     author="Ken Kundert",
@@ -19,8 +19,10 @@ setup(
     keywords=[
         'messenger',
         'quicksilver',
+        'logging',
+        'printing',
     ],
-    py_modules=['messenger'],
+    packages=['messenger'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

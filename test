@@ -1,6 +1,11 @@
-#!/bin/sh
-echo Python 2:
-./test2
-echo
-echo Python 3:
-./test3
+#!/usr/bin/env python
+
+# Run module self tests
+#
+# To run with default python version use: ./test
+# To run with python2 use               : python2 test
+# To run with python3 use               : python3 test
+
+from runtests import runTests
+
+runTests(['messenger', 'doctests'])

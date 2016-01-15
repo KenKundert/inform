@@ -1,6 +1,12 @@
 #!/bin/bash
 # Install into ~/.local for the versions of python listed in 'pythons' below.
 #
+# If instead you want to install into /usr/lib or into a virtual environment, 
+# use:
+#     pip install messenger
+# or
+#     pip3 install messenger
+#
 # Requires Python2.7 or Python 3.3.
 cmd=messenger
 pythons=(python2 python3)

@@ -1,6 +1,0 @@
-#!/usr/bin/env python2
-# Run module self tests
-
-from runtests import runTests
-
-runTests(['messenger', 'doctests'])

@@ -53,7 +53,7 @@ def showDiff(achieved, expected, indent=''):
 # Case class {{{1
 class Case():
     names = set()
-    messenger = __import__('messenger', fromlist='*')
+    messenger = __import__('messenger')
 
     def __init__(self, name, stimulus, stdout='', stderr='', logfile=''):
         self.name = name
