@@ -16,9 +16,9 @@ fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
 # can capture the output of the program being tested. Messenger was imported 
 # from runtests, and it already saved away stdout. By unloading it here, it 
 # will be imported again after doctest has replaced stdout.
-for module in sys.modules.keys():
-    if module.startswith('messenger'):
-        del sys.modules[module]
+to_delete = [m for m in sys.modules.keys() if m.startswith('messenger')]
+for module in to_delete:
+    del sys.modules[module]
 
 # Tests {{{1
 failures = tests_run = 0
