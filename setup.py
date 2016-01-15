@@ -16,13 +16,17 @@ setup(
     url='https://github.com/kenkundert/messenger',
     license='GPLv3+',
     zip_safe=True,
+    packages=['messenger'],
+    install_requires=[
+        'arrow',
+        'six',
+    ],
     keywords=[
         'messenger',
         'quicksilver',
         'logging',
         'printing',
     ],
-    packages=['messenger'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
