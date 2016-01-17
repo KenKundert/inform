@@ -47,7 +47,7 @@ from __future__ import division, print_function
 import os, sys
 # use json if available, otherwise use pickle
 from json import load as loadSummary, dump as dumpSummary
-from messenger import Color
+from inform import Color
 import argparse
 
 # Globals {{{2
