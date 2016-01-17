@@ -8,4 +8,4 @@
 
 from runtests import runTests
 
-runTests(['messenger', 'doctests'])
+runTests(['inform', 'doctests'])

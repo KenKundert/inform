@@ -3,12 +3,12 @@
 #
 # If instead you want to install into /usr/lib or into a virtual environment, 
 # use:
-#     pip install messenger
+#     pip install inform
 # or
-#     pip3 install messenger
+#     pip3 install inform
 #
 # Requires Python2.7 or Python 3.3.
-cmd=messenger
+cmd=inform
 pythons=(python2 python3)
     # Add the versions of python you would like to install to above
 

@@ -7,23 +7,22 @@ with open('README.rst') as f:
     readme = f.read()
 
 setup(
-    name='messenger',
+    name='inform',
     version='1.0.5',
-    description='Quicksilver Messenger Service',
+    description='print & logging utilities for communicating with user',
     long_description=readme,
     author="Ken Kundert",
-    author_email='messenger@nurdletech.com',
-    url='https://github.com/kenkundert/messenger',
+    author_email='inform@nurdletech.com',
+    url='https://github.com/kenkundert/inform',
     license='GPLv3+',
     zip_safe=True,
-    packages=['messenger'],
+    packages=['inform'],
     install_requires=[
         'arrow',
         'six',
     ],
     keywords=[
-        'messenger',
-        'quicksilver',
+        'inform',
         'logging',
         'printing',
     ],

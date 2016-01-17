@@ -1,5 +1,5 @@
-Quicksilver Messenger Service
-=============================
+Inform - Print & Logging Utilities
+==================================
 
 A light-weight package with few dependencies that provides various print-like 
 functions to communicate to the user. It also provides logging and output 
@@ -7,10 +7,10 @@ control.
 
 Install with::
 
-    pip install messenger
+    pip install inform
 
-This package defines a collection of 'print' functions (messengers) that have 
-different roles.  These functions are declared under the Messengers section and 
+This package defines a collection of 'print' functions (informants) that have 
+different roles.  These functions are declared under the Informants section and 
 include *log*, *comment*, *codicil*. *narrate*, *display*, *output*, *debug*, 
 *warn*, *error*, *fatal* and *panic*.  Each of these functions takes arguments 
 like the standard print function: unnamed arguments are converted to strings and 
@@ -31,38 +31,41 @@ culprit = *None*:
    culprit (the object for which the problem being reported was found). May also 
    be a collection of strings, in which case they are joined with '.'.
 
-With the simplest use of the program, you simply import the messengers you need 
+With the simplest use of the program, you simply import the informants you need 
 and call them (they take the same arguments as does the *print* function built 
 into Python:
 
 .. code-block:: python
 
-    >>> from messenger import display
+    >>> from inform import display
     >>> display('ice', 9)
     ice 9
 
-More typical is to import and instantiate the Messenger class yourself along 
-with the desired messengers.  This gives you the ability to specify options:
+More typical is to import and instantiate the Inform class yourself along with 
+the desired informants.  This gives you the ability to specify options:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, display, error, log
-    >>> Messenger(logfile=False, prog_name=False)
+    >>> from inform import Inform, display, error, log
+    >>> Inform(logfile=False, prog_name=False)
     <...>
     >>> display('hello')
     hello
     >>> error('file not found.', culprit='data.in')
     error: data.in: file not found.
 
-You can also use a *with* statement to invoke the messenger. This closes the 
-messenger when the *with* statement terminates (you must not use the messenger 
-functions when no messenger is present). This is useful when writing tests. In 
+An object of the Inform class is referred to as an informer whereas the objects 
+of the InformantGenerator class are referred to as informants.
+
+You can also use a *with* statement to invoke the informer. This closes the 
+informer when the *with* statement terminates (you must not use the informants 
+functions when no informer is present). This is useful when writing tests. In 
 this case you can provide your own output streams so that you can access the 
 normally printed output of your code:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, display
+    >>> from inform import Inform, display
     >>> import io
 
     >>> def run_test():
@@ -71,7 +74,7 @@ normally printed output of your code:
     >>> with io.StringIO() as stdout, \
     ...      io.StringIO() as stderr, \
     ...      io.StringIO() as logfile, \
-    ...      Messenger(stdout=stdout, stderr=stderr, logfile=logfile) as msg:
+    ...      Inform(stdout=stdout, stderr=stderr, logfile=logfile) as msg:
     ...         run_test()
     ...
     ...         num_errors = msg.errors_accrued()
@@ -91,48 +94,48 @@ normally printed output of your code:
     >>> str(logfile_text[:10]), str(logfile_text[-13:])
     ('Invoked as', 'running test\n')
 
-You can create your own messengers:
+You can create your own informants:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, MessengerGenerator
+    >>> from inform import Inform, InformantGenerator
 
-    >>> verbose1 = MessengerGenerator(output=lambda m: m.verbosity >= 1)
-    >>> verbose2 = MessengerGenerator(output=lambda m: m.verbosity >= 2)
-    >>> with Messenger(verbosity=0):
+    >>> verbose1 = InformantGenerator(output=lambda m: m.verbosity >= 1)
+    >>> verbose2 = InformantGenerator(output=lambda m: m.verbosity >= 2)
+    >>> with Inform(verbosity=0):
     ...     verbose1('First level of verbosity.')
     ...     verbose2('Second level of verbosity.')
 
-    >>> with Messenger(verbosity=1):
+    >>> with Inform(verbosity=1):
     ...     verbose1('First level of verbosity.')
     ...     verbose2('Second level of verbosity.')
     First level of verbosity.
 
-    >>> with Messenger(verbosity=2):
+    >>> with Inform(verbosity=2):
     ...     verbose1('First level of verbosity.')
     ...     verbose2('Second level of verbosity.')
     First level of verbosity.
     Second level of verbosity.
 
-The argument *verbosity* is not an explicitly supported argument to Messenger.  
-In this case Messenger simply saves the value and makes it available as an 
-attribute, and it is this attribute that is queried by the lambda function 
-passed to the MessengerGenerator when creating the messengers.
+The argument *verbosity* is not an explicitly supported argument to Inform.  In 
+this case Inform simply saves the value and makes it available as an attribute, 
+and it is this attribute that is queried by the lambda function passed to the 
+InformantGenerator when creating the informants.
 
 
 Exception
 ---------
-An exception, *Error*, is provided that takes the same arguments as a messenger.  
-This allows you to catch the exception and handle it if you like.  The exception 
-provides the *report* and *terminate* methods that processes the exception as an 
-error or fatal error if you find that you can do nothing else with the 
-exception:
+An exception, *Error*, is provided that takes the same arguments as an 
+informant.  This allows you to catch the exception and handle it if you like.  
+The exception provides the *report* and *terminate* methods that processes the 
+exception as an error or fatal error if you find that you can do nothing else 
+with the exception:
 
 .. code-block:: python
 
-    >>> from messenger import Messenger, Error
+    >>> from inform import Inform, Error
 
-    >>> Messenger(prog_name='myprog')
+    >>> Inform(prog_name='myprog')
     <...>
     >>> try:
     ...     raise Error('must not be zero.', culprit='naught')
@@ -146,32 +149,32 @@ a string that contains both the message and the culprit formatted so that it can
 be shown to the user.
 
 Any keyword arguments provided will be available in *e.kwargs*, but certain 
-keyword arguments are reserved by messenger (see above).
+keyword arguments are reserved by inform (see above).
 
 
-Messenger Class
----------------
-The Messenger class controls the active messengers. It takes the following 
+Inform Class
+------------
+The Inform class controls the active informants. It takes the following 
 arguments as options:
 
 mute (bool)
-   With the provided messengers all output is suppressed when set (it is still 
+   With the provided informants all output is suppressed when set (it is still 
    logged). This is generally used when the program being run is being run by 
    another program that is generating its own messages and does not want the 
    user confused by additional messages. In this case, the calling program is 
    responsible for observing and reacting to the exit status of the called 
    program.
 quiet (bool):
-   With the provided messengers normal output is suppressed when set (it is 
+   With the provided informants normal output is suppressed when set (it is 
    still logged). This is used when the user has indicated that they are 
    uninterested in any conversational messages and just want to see the 
    essentials (generally error messages).
 verbose (bool):
-   With the provided messengers comments are output to user when set; normally 
+   With the provided informants comments are output to user when set; normally 
    they are just logged. Comments are generally used to document unusual 
    occurrences that might warrant the user's attention.
 narrate (bool):
-   With the provided messengers narration is output to user when set, normally 
+   With the provided informants narration is output to user when set, normally 
    it is just logged.  Narration is generally used to inform the user as to what 
    is going on. This can help place errors and warnings in context so that they 
    are easier to understand.
@@ -208,11 +211,10 @@ stderr (stream):
    testing.  If not given, sys.stderr is used.
 \**kwargs:
    Any additional keyword arguments are made attributes that are ignored by 
-   Messenger, but may be accessed by the messengers.
+   Inform, but may be accessed by the informants.
 
-The Messenger class provides the following user accessible methods. Most of 
-these methods are also available as functions, which act on the current 
-Messenger.
+The Inform class provides the following user accessible methods. Most of these 
+methods are also available as functions, which act on the current Inform.
 
 set_logfile():
    Allows you to change the logfile (only available as a method).
@@ -240,12 +242,12 @@ errors_accrued():
    Return the number of errors that have accrued.
 
 disconnect():
-   Deactivate the current Messenger, restoring the default.
+   Deactivate the current Inform, restoring the default.
 
 
-MessengerGenerator Class
+InformantGenerator Class
 ------------------------
-The MessengerGenerator class takes the following arguments:
+The InformantGenerator class takes the following arguments:
 
 severity = *None*:
    Messages with severities get headers. The header consists of the severity, 
@@ -256,10 +258,10 @@ is_error = *False*:
    Should message be counted as an error.
 log = *True*:
    Send message to the log file. May be a boolean or a function that accepts the 
-   Messenger object as an argument and returns a boolean.
+   Inform object as an argument and returns a boolean.
 output = *True*:
    Send to the output stream. May be a boolean or a function that accepts the 
-   Messenger object as an argument and returns a boolean.
+   Inform object as an argument and returns a boolean.
 terminate = *False*:
    Terminate the program, exit status is the value of the terminate unless 
    *terminate* is *True*, in which case 1 is returned if an error occurred and 
@@ -276,10 +278,10 @@ header_color = *None*:
    Color used to display the header, if one is produced.
 
 
-Standard Messengers
+Standard Informants
 -------------------
 
-The following messengers are provided. All of the messengers except panic and 
+The following informants are provided. All of the informants except panic and 
 debug do not produce any output if *mute* is set.
 
 
@@ -288,7 +290,7 @@ log
 
 .. code-block:: python
 
-   log = MessengerGenerator(
+   log = InformantGenerator(
        output=False,
        log=True,
    )
@@ -301,8 +303,8 @@ comment
 
 .. code-block:: python
 
-   comment = MessengerGenerator(
-       output=lambda messenger: messenger.verbose and not messenger.mute,
+   comment = InformantGenerator(
+       output=lambda informer: informer.verbose and not informer.mute,
        log=True,
        message_color='cyan',
    )
@@ -318,7 +320,7 @@ codicil
 
 .. code-block:: python
 
-   codicil = MessengerGenerator(is_continuation=True)
+   codicil = InformantGenerator(is_continuation=True)
 
 Continues a previous message. Continued messages inherit the properties (output, 
 log, message color, etc) of the previous message.  If the previous message had 
@@ -330,8 +332,8 @@ narrate
 
 .. code-block:: python
 
-   narrate = MessengerGenerator(
-       output=lambda messenger: messenger.narrate and not messenger.mute,
+   narrate = InformantGenerator(
+       output=lambda informer: informer.narrate and not informer.mute,
        log=True,
        message_color='blue',
    )
@@ -350,8 +352,8 @@ display
 
 .. code-block:: python
 
-   display = MessengerGenerator(
-       output=lambda messenger: not messenger.quiet and not messenger.mute,
+   display = InformantGenerator(
+       output=lambda informer: not informer.quiet and not informer.mute,
        log=True,
    )
 
@@ -364,8 +366,8 @@ output
 
 .. code-block:: python
 
-   output = MessengerGenerator(
-       output=lambda messenger: not messenger.mute,
+   output = InformantGenerator(
+       output=lambda informer: not informer.mute,
        log=True,
    )
 
@@ -379,7 +381,7 @@ debug
 
 .. code-block:: python
 
-   debug = MessengerGenerator(
+   debug = InformantGenerator(
        severity='DEBUG',
        output=True,
        log=True,
@@ -395,10 +397,10 @@ warn
 
 .. code-block:: python
 
-   warn = MessengerGenerator(
+   warn = InformantGenerator(
        severity='warning',
        header_color='yellow',
-       output=lambda messenger: not messenger.quiet and not messenger.mute,
+       output=lambda informer: not informer.quiet and not informer.mute,
        log=True,
    )
 
@@ -411,11 +413,11 @@ error
 
 .. code-block:: python
 
-   error = MessengerGenerator(
+   error = InformantGenerator(
        severity='error',
        is_error=True,
        header_color='red',
-       output=lambda messenger: not messenger.mute,
+       output=lambda informer: not informer.mute,
        log=True,
    )
 
@@ -428,12 +430,12 @@ fatal
 
 .. code-block:: python
 
-   fatal = MessengerGenerator(
+   fatal = InformantGenerator(
        severity='error',
        is_error=True,
        terminate=1,
        header_color='red',
-       output=lambda messenger: not messenger.mute,
+       output=lambda informer: not informer.mute,
        log=True,
    )
 
@@ -447,7 +449,7 @@ panic
 
 .. code-block:: python
 
-   panic = MessengerGenerator(
+   panic = InformantGenerator(
        severity='internal error (please report)',
        is_error=True,
        terminate=3,
@@ -502,11 +504,11 @@ For example:
 
 .. code-block:: python
 
-    >>> from messenger import (
-    ...     Messenger, display, error, conjoin, cull, fmt, plural, os_error
+    >>> from inform import (
+    ...     Inform, display, error, conjoin, cull, fmt, plural, os_error
     ... )
 
-    >>> Messenger(prog_name=False)
+    >>> Inform(prog_name=False)
     <...>
     >>> filenames = cull(['a', 'b', None, 'd'])
     >>> filetype = 'CSV'
@@ -546,7 +548,7 @@ any number of unnamed arguments that are converted to strings and then joined
 into a single string. The string is then coded for the chosen color and 
 returned. For example::
 
-   >> from messenger import Color, display
+   >> from inform import Color, display
 
    >> green = Color('green')
    >> red = Color('red')

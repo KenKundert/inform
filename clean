@@ -6,7 +6,7 @@ set nonomatch
 rm -f *.pyc *.pyo .test*.sum expected result install.out
 rm -rf build *.egg-info dist __pycache__ .coverage .coverage-html 
 rm -f .*.log
-rm -rf messenger/{__pycache__,*.pyc}
+rm -rf **/{__pycache__,*.pyc}
 foreach i (*/clean)
     if ($i == "*/clean") break
     #echo $i

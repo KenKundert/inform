@@ -11,18 +11,18 @@ import sys
 # Initialization {{{1
 fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
 
-# Unload the messenger module so that it is reloaded during the doctests
+# Unload the inform module so that it is reloaded during the doctests
 # This is important because doctest replaces stdout with its own stream so it 
-# can capture the output of the program being tested. Messenger was imported 
-# from runtests, and it already saved away stdout. By unloading it here, it 
-# will be imported again after doctest has replaced stdout.
-to_delete = [m for m in sys.modules.keys() if m.startswith('messenger')]
+# can capture the output of the program being tested. Inform was imported from 
+# runtests, and it already saved away stdout. By unloading it here, it will be 
+# imported again after doctest has replaced stdout.
+to_delete = [m for m in sys.modules.keys() if m.startswith('inform')]
 for module in to_delete:
     del sys.modules[module]
 
 # Tests {{{1
 failures = tests_run = 0
-for test in ['README.rst', 'messenger/messenger.py']:
+for test in ['README.rst', 'inform/inform.py']:
     fails, tests = doctest.testfile(test, optionflags=doctest.ELLIPSIS)
     failures += fails
     tests_run += tests

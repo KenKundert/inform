@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-# Test the Messenger Generator
+# Test Inform and the Informant Generator
 
 # Imports {{{1
 from __future__ import print_function, unicode_literals
 from runtests import (
     cmdLineOpts, writeSummary, succeed, fail, info, status, warning
 )
-from messenger import indent
+from inform import indent
 from textwrap import dedent
 from difflib import Differ
 import re
@@ -53,7 +53,7 @@ def showDiff(achieved, expected, indent=''):
 # Case class {{{1
 class Case():
     names = set()
-    messenger = __import__('messenger')
+    inform = __import__('inform')
 
     def __init__(self, name, stimulus, stdout='', stderr='', logfile=''):
         self.name = name
@@ -79,7 +79,7 @@ class Case():
                     'stderr': stderr,
                     'logfile': logfile,
                 }
-                test_globals = Case.messenger.__dict__
+                test_globals = Case.inform.__dict__
                 exec(self.stimulus, test_globals, test_locals)
                 self.output = stdout.getvalue().strip()
                 self.error = stderr.getvalue().strip()
@@ -109,19 +109,19 @@ captureAll = ', '.join([
     'logfile=logfile',
     'stdout=stdout',
     'stderr=stderr',
-    'prog_name="messenger"',
+    'prog_name="inform"',
 ])
 noLog = ', '.join([
     'logfile=False',
     'stdout=stdout',
     'stderr=stderr',
-    'prog_name="messenger"',
+    'prog_name="inform"',
 ])
 testCases = [
     Case(
         name='endeavor',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             output('this is a test.')
         '''.format(stdargs=noLog)),
         stdout="this is a test.",
@@ -129,7 +129,7 @@ testCases = [
     Case(
         name='kestrel',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             log('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
@@ -140,7 +140,7 @@ testCases = [
     Case(
         name='overspend',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             output('This', 'is', 'a', 'test.')
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
@@ -152,7 +152,7 @@ testCases = [
     Case(
         name='alarm',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             output('This', 'is', 'a', 'test', sep='_', end='.')
         '''.format(stdargs=captureAll)),
         stdout="This_is_a_test.",
@@ -164,7 +164,7 @@ testCases = [
     Case(
         name='harden',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             log('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
@@ -175,7 +175,7 @@ testCases = [
     Case(
         name='outflank',
         stimulus=dedent('''
-            Messenger(verbose=True, {stdargs})
+            Inform(verbose=True, {stdargs})
             comment('This is a test.')
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
@@ -187,7 +187,7 @@ testCases = [
     Case(
         name='elope',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             comment('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
@@ -198,7 +198,7 @@ testCases = [
     Case(
         name='sunset',
         stimulus=dedent('''
-            Messenger(narrate=True, {stdargs})
+            Inform(narrate=True, {stdargs})
             narrate('This is a test.')
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
@@ -210,7 +210,7 @@ testCases = [
     Case(
         name='wheezy',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             narrate('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
@@ -221,7 +221,7 @@ testCases = [
     Case(
         name='claim',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             display('This is a test.')
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
@@ -233,7 +233,7 @@ testCases = [
     Case(
         name='behind',
         stimulus=dedent('''
-            Messenger(quiet=True, {stdargs})
+            Inform(quiet=True, {stdargs})
             display('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
@@ -244,74 +244,74 @@ testCases = [
     Case(
         name='overhead',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             debug('This is a test.')
         '''.format(stdargs=captureAll)),
-        stdout="messenger DEBUG: This is a test.",
+        stdout="inform DEBUG: This is a test.",
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger DEBUG: This is a test.
+            inform DEBUG: This is a test.
         '''),
     ),
     Case(
         name='instill',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             warn('This is a test.')
         '''.format(stdargs=captureAll)),
-        stdout="messenger warning: This is a test.",
+        stdout="inform warning: This is a test.",
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger warning: This is a test.
+            inform warning: This is a test.
         '''),
     ),
     Case(
         name='blister',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             error('This is a test.')
         '''.format(stdargs=captureAll)),
-        stdout="messenger error: This is a test.",
+        stdout="inform error: This is a test.",
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger error: This is a test.
+            inform error: This is a test.
         '''),
     ),
     Case(
         name='lattice',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             warn('This is a test.')
             codicil('This is an appendage.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            messenger warning: This is a test.
+            inform warning: This is a test.
                 This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger warning: This is a test.
+            inform warning: This is a test.
                 This is an appendage.
         '''),
     ),
     Case(
         name='seventh',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             error()
             codicil('This is the first appendage.')
             codicil('This is the second appendage.')
             codicil('This is the third appendage.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            messenger error: 
+            inform error: 
                 This is the first appendage.
                 This is the second appendage.
                 This is the third appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger error: 
+            inform error: 
                 This is the first appendage.
                 This is the second appendage.
                 This is the third appendage.
@@ -320,20 +320,20 @@ testCases = [
     Case(
         name='primary',
         stimulus=dedent(r'''
-            Messenger({stdargs})
+            Inform({stdargs})
             error()
             codicil('This is the first appendage.')
             codicil('This is the second appendage,\n   and the third.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            messenger error: 
+            inform error: 
                 This is the first appendage.
                 This is the second appendage,
                    and the third.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger error: 
+            inform error: 
                 This is the first appendage.
                 This is the second appendage,
                    and the third.
@@ -342,7 +342,7 @@ testCases = [
     Case(
         name='sensitize',
         stimulus=dedent('''
-            Messenger({stdargs})
+            Inform({stdargs})
             output('This is main message.')
             codicil('This is the first appendage.')
             codicil('This is the second appendage.')
@@ -365,17 +365,17 @@ testCases = [
     Case(
         name='mullah',
         stimulus=dedent(r'''
-            Messenger({stdargs})
+            Inform({stdargs})
             error('Error message.\nAdditional info.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            messenger error:
+            inform error:
                 Error message.
                 Additional info.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            messenger error:
+            inform error:
                 Error message.
                 Additional info.
         '''),
