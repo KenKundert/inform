@@ -16,6 +16,7 @@ import io
 import sys
 import os
 
+
 # Initialization {{{1
 fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
 
@@ -118,6 +119,35 @@ noLog = ', '.join([
     'stderr=stderr',
     'prog_name="inform"',
 ])
+fmtStim = dedent("""\
+    Inform({stdargs})
+    def func1():
+        def func2():
+            def func3():
+                lvl = 3
+                try:
+                    display(fmt('func3 -> {{lvl}}', _lvl={lvl}))
+                except KeyError as err:
+                    display("'lvl' not found in func3")
+            lvl = 2
+            try:
+                display(fmt('func2 -> {{lvl}}', _lvl={lvl}))
+            except KeyError as err:
+                display("'lvl' not found in func2")
+            func3()
+        lvl = 1
+        try:
+            display(fmt('func1 -> {{lvl}}', _lvl={lvl}))
+        except KeyError as err:
+            display("'lvl' not found in func1")
+        func2()
+    lvl = 0
+    try:
+        display(fmt('func0 -> {{lvl}}', _lvl={lvl}))
+    except KeyError as err:
+        display("'lvl' not found in func0")
+    func1()
+""")
 testCases = [
     Case(
         name='endeavor',
@@ -379,6 +409,36 @@ testCases = [
             inform error:
                 Error message.
                 Additional info.
+        '''),
+    ),
+    Case(
+        name='goner',
+        stimulus=fmtStim.format(lvl=0, stdargs=noLog),
+        stdout=dedent('''
+            func0 -> 0
+            func1 -> 1
+            func2 -> 2
+            func3 -> 3
+        '''),
+    ),
+    Case(
+        name='shadow',
+        stimulus=fmtStim.format(lvl=-1, stdargs=noLog),
+        stdout=dedent('''
+            'lvl' not found in func0
+            func1 -> 0
+            func2 -> 1
+            func3 -> 2
+        '''),
+    ),
+    Case(
+        name='curdle',
+        stimulus=fmtStim.format(lvl=-2, stdargs=noLog),
+        stdout=dedent('''
+            'lvl' not found in func0
+            'lvl' not found in func1
+            func2 -> 0
+            func3 -> 1
         '''),
     ),
 ]

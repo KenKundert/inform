@@ -135,12 +135,20 @@ def fmt(message, *args, **kwargs):
     The following works, but does not work with doctests
     # >>> print(fmt("by magic: {s}, {d[msg]}, {c.a}."))
     # by magic: str var, dict val, cls attr.
+
+    You can change the level at which the introspection occurs using the _lvl 
+    keyword argument.
+       _lvl=0 searches for variables in the scope that calls fmt(), the default
+       _lvl=-1 searches in the parent of the scope that calls fmt()
+       _lvl=-2 searches in the grandparent, etc.
+       _lvl=1 search root scope, etc.
     """
     import inspect
 
     # Inspect variables from the source frame.
-    level = kwargs.pop('_level', 1)
-    frame = inspect.stack()[-level][0]
+    level = kwargs.pop('_lvl', 0)
+    level = 1 - level if level <= 0 else -level
+    frame = inspect.stack()[level][0]
 
     # Collect all the variables in the scope of the calling code, so they 
     # can be substituted into the message.
