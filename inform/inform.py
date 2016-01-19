@@ -27,6 +27,7 @@ import sys
 # Globals {{{1
 INFORMER = None
 
+
 # Inform Utilities {{{1
 # indent {{{2
 def indent(text, leader = '    '):
@@ -338,6 +339,7 @@ panic = InformantGenerator(
     log=True,
 )
 
+
 # Inform class {{{1
 class Inform:
     """Inform
@@ -634,9 +636,11 @@ def terminate_if_errors(status=1):
 def errors_accrued():
     return INFORMER.errors_accrued()
 
+
 # Instantiate default informer {{{1
 DEFAULT_INFORMER = Inform()
 INFORMER = DEFAULT_INFORMER
+
 
 # Exceptions {{{1
 # Error {{{2

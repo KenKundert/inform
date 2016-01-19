@@ -10,6 +10,7 @@ from runtests import (
 from inform import indent
 from textwrap import dedent
 from difflib import Differ
+from importlib import import_module
 import re
 import io
 import sys
@@ -53,7 +54,7 @@ def showDiff(achieved, expected, indent=''):
 # Case class {{{1
 class Case():
     names = set()
-    inform = __import__('inform')
+    inform = import_module('inform')
 
     def __init__(self, name, stimulus, stdout='', stderr='', logfile=''):
         self.name = name
