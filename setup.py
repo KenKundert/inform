@@ -8,7 +8,7 @@ with open('README.rst') as f:
 
 setup(
     name='inform',
-    version='1.0.7',
+    version='1.0.8',
     description='print & logging utilities for communicating with user',
     long_description=readme,
     author="Ken Kundert",
