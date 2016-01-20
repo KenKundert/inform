@@ -66,14 +66,23 @@ normally printed output of your code:
 .. code-block:: python
 
     >>> from inform import Inform, display
-    >>> import io
+    >>> import sys
+    >>> if sys.version[0] == '2':                             
+    ...     # io assumes unicode, which python2 does not provide by default
+    ...     # so use StringIO instead
+    ...     from StringIO import StringIO
+    ...     # Add support for with statement by monkeypatching
+    ...     StringIO.__enter__ = lambda self: self
+    ...     StringIO.__exit__ = lambda self, exc_type, exc_val, exc_tb: self.close()
+    ... else:
+    ...     from io import StringIO
 
     >>> def run_test():
     ...     display('running test')
 
-    >>> with io.StringIO() as stdout, \
-    ...      io.StringIO() as stderr, \
-    ...      io.StringIO() as logfile, \
+    >>> with StringIO() as stdout, \
+    ...      StringIO() as stderr, \
+    ...      StringIO() as logfile, \
     ...      Inform(stdout=stdout, stderr=stderr, logfile=logfile) as msg:
     ...         run_test()
     ...

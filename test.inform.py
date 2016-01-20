@@ -3,7 +3,7 @@
 # Test Inform and the Informant Generator
 
 # Imports {{{1
-from __future__ import print_function, unicode_literals
+from __future__ import print_function
 from runtests import (
     cmdLineOpts, writeSummary, succeed, fail, info, status, warning
 )
@@ -12,8 +12,16 @@ from textwrap import dedent
 from difflib import Differ
 from importlib import import_module
 import re
-import io
 import sys
+if sys.version[0] == '2':
+    # io assumes unicode, which python2 does not provide by default
+    # so use StringIO instead
+    from StringIO import StringIO
+    # Add support for with statement by monkeypatching
+    StringIO.__enter__ = lambda self: self
+    StringIO.__exit__ = lambda self, exc_type, exc_val, exc_tb: self.close()
+else:
+    from io import StringIO
 import os
 
 
@@ -73,9 +81,9 @@ class Case():
 
     def run(self):
         try:
-            with io.StringIO() as stdout, \
-                 io.StringIO() as stderr, \
-                 io.StringIO() as logfile:
+            with StringIO() as stdout, \
+                 StringIO() as stderr, \
+                 StringIO() as logfile:
                 test_locals = {
                     'stdout': stdout,
                     'stderr': stderr,
