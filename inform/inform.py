@@ -18,7 +18,7 @@
 # this program.  If not, see http://www.gnu.org/licenses/.
 
 # Imports {{{1
-from __future__ import print_function, unicode_literals
+from __future__ import print_function
 from copy import copy
 import re
 import os
@@ -30,7 +30,7 @@ INFORMER = None
 
 # Inform Utilities {{{1
 # indent {{{2
-def indent(text, leader = '    '):
+def indent(text, leader='    ', sep='\n'):
     r"""{
     Add indentation.
 
@@ -41,7 +41,7 @@ def indent(text, leader = '    '):
         World!
 
     }"""
-    return '\n'.join(
+    return sep.join(
         leader+line if line else line for line in text.split('\n')
     )
 
