@@ -9,13 +9,14 @@ Install with::
 
     pip install inform
 
-This package defines a collection of 'print' functions (informants) that have 
-different roles.  These functions are declared under the Informants section and 
-include *log*, *comment*, *codicil*. *narrate*, *display*, *output*, *debug*, 
-*warn*, *error*, *fatal* and *panic*.  Each of these functions takes arguments 
-like the standard print function: unnamed arguments are converted to strings and 
-joined together to produce the output, the named arguments act to control the 
-process.  The available controls (named arguments) are:
+This package defines a collection of 'print' functions that have different 
+roles.  These functions are referred to as 'informants' and are described below 
+in the the Informants section. They include include *log*, *comment*, *codicil*.  
+*narrate*, *display*, *output*, *debug*, *warn*, *error*, *fatal* and *panic*.  
+Each of these functions takes arguments like the standard print function: 
+unnamed arguments are converted to strings and joined together to produce the 
+output, the named arguments act to control the process.  The available controls 
+(named arguments) are:
 
 sep = ' ':
    Specifies the string used to join the unnamed arguments.
@@ -46,7 +47,7 @@ the desired informants.  This gives you the ability to specify options:
 
 .. code-block:: python
 
-    >>> from inform import Inform, display, error, log
+    >>> from inform import Inform, display, error
     >>> Inform(logfile=False, prog_name=False)
     <...>
     >>> display('hello')
@@ -54,14 +55,26 @@ the desired informants.  This gives you the ability to specify options:
     >>> error('file not found.', culprit='data.in')
     error: data.in: file not found.
 
-An object of the Inform class is referred to as an informer whereas the objects 
-of the InformantGenerator class are referred to as informants.
+An object of the Inform class is referred to as an informer (not to be confused 
+with the print functions (objects of the InformantGenerator class), which are  
+referred to as informants). Once instantiated, an informer can be used to 
+terminate the program or return a count of the number of errors that have 
+occurred.
+
+.. code-block:: python
+
+    >>> from inform import Inform, error
+    >>> informer = Inform(logfile=False, prog_name="prog")
+    >>> error('file not found.', culprit='data.in')
+    prog error: data.in: file not found.
+    >>> informer.errors_accrued()
+    1
 
 You can also use a *with* statement to invoke the informer. This closes the 
 informer when the *with* statement terminates (you must not use the informants 
-functions when no informer is present). This is useful when writing tests. In 
-this case you can provide your own output streams so that you can access the 
-normally printed output of your code:
+when no informer is present). This is useful when writing tests. In this case 
+you can provide your own output streams so that you can access the normally 
+printed output of your code:
 
 .. code-block:: python
 
@@ -166,6 +179,9 @@ Inform Class
 The Inform class controls the active informants. It takes the following 
 arguments as options:
 
+Arguments
+"""""""""
+
 mute (bool)
    With the provided informants all output is suppressed when set (it is still 
    logged). This is generally used when the program being run is being run by 
@@ -222,6 +238,9 @@ stderr (stream):
    Any additional keyword arguments are made attributes that are ignored by 
    Inform, but may be accessed by the informants.
 
+Methods
+"""""""
+
 The Inform class provides the following user accessible methods. Most of these 
 methods are also available as functions, which act on the current Inform.
 
@@ -244,15 +263,29 @@ terminate(status = *None*):
    If the exit status is not specified, then the exit status is set to 1 if an 
    error occurred and 0 otherwise.
 
+   You may also pass a string for the status, in which case the program prints 
+   the string to stderr and terminates with an exit status of 1.
+
 terminate_if_errors(status=1):
    Terminate the program with the given exit status if an error has occurred.  
 
-errors_accrued():
+errors_accrued(reset = *False*):
    Return the number of errors that have accrued.
 
 disconnect():
    Deactivate the current Inform, restoring the default.
 
+Functions
+"""""""""
+
+Several of the above methods are also available as stand-alone functions that 
+act on the currently active informer.  This make it easy to use their 
+functionality even if you do not have local access to the informer. They are:
+
+| done()
+| terminate()
+| terminate_if_errors()
+| errors_accrued()
 
 InformantGenerator Class
 ------------------------
@@ -286,13 +319,28 @@ message_color = *None*:
 header_color = *None*:
    Color used to display the header, if one is produced.
 
+An object of InformantGenerator is referred to as an informant. It is generally 
+treated as a function that is called to produce the desired output.
+
+.. code-block:: python
+
+    >>> from inform import InformantGenerator
+
+    >>> succeed = InformantGenerator(message_color='green')
+    >>> fail = InformantGenerator(message_color='red')
+
+    >>> succeed('This message would be green.')
+    This message would be green.
+
+    >>> fail('This message would be red.')
+    This message would be red.
+
 
 Standard Informants
 -------------------
 
 The following informants are provided. All of the informants except panic and 
 debug do not produce any output if *mute* is set.
-
 
 log
 """
@@ -476,7 +524,7 @@ Utilities
 ---------
 
 Several utility functions are provided that are sometimes helpful when creating 
-messages.
+messages for your informants.
 
 conjoin(iterable, conj=' and ', sep=', '):
     Like ''.join(), but allows you to specify a conjunction that is placed 
@@ -524,7 +572,6 @@ For example:
     >>> display(
     ...     fmt(
     ...         'Reading {filetype} {files}: {names}.',
-    ...         filetype=filetype,  # see comment below
     ...         files=plural(filenames, 'file'),
     ...         names=conjoin(filenames),
     ...     )
@@ -542,11 +589,11 @@ For example:
     error: b: no such file or directory.
     error: d: no such file or directory.
 
-*filetype* was passed into *fmt* even though it is not necessary to do so in 
-order to work around an issue in doctests. Normally *filetype=filetype* could be 
-left out of the arguments to *fmt* because if *fmt* does not find a named 
-argument in its argument list, it will look for a variable of the same name in 
-the local scope.
+Notice that *filetype* was not explicitly passed into *fmt()* even though it was 
+explicitly called out in the format string.  *filetype* can be left out of the 
+argument list because if *fmt* does not find a named argument in its argument 
+list, it will look for a variable of the same name in the local scope.
+
 
 Color Class
 """""""""""
