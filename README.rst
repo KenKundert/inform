@@ -56,10 +56,9 @@ the desired informants.  This gives you the ability to specify options:
     error: data.in: file not found.
 
 An object of the Inform class is referred to as an informer (not to be confused 
-with the print functions (objects of the InformantGenerator class), which are  
-referred to as informants). Once instantiated, an informer can be used to 
-terminate the program or return a count of the number of errors that have 
-occurred.
+with the print functions, which are  referred to as informants). Once 
+instantiated, an informer can be used to terminate the program or return a count 
+of the number of errors that have occurred.
 
 .. code-block:: python
 
@@ -383,6 +382,16 @@ Continues a previous message. Continued messages inherit the properties (output,
 log, message color, etc) of the previous message.  If the previous message had 
 a header, that header is not output and instead the message is indented.
 
+.. code-block:: python
+
+    >>> from inform import Inform, warn, codicil
+    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> warn('file not found.', culprit='ghost')
+    myprog warning: ghost: file not found.
+
+    >>> codicil('skipping')
+        skipping
+
 
 narrate
 """""""
@@ -414,8 +423,13 @@ display
        log=True,
    )
 
-
 Displays a message if *quiet* is not set. Logs the message.
+
+.. code-block:: python
+
+    >>> from inform import display
+    >>> display('We the people ...')
+    We the people ...
 
 
 output
@@ -431,6 +445,12 @@ output
 Displays and logs a message. This is used for messages that are not errors that 
 are noteworthy enough that they need to get through even though the user has 
 asked for quiet.
+
+.. code-block:: python
+
+    >>> from inform import output
+    >>> output('We the people ...')
+    We the people ...
 
 
 debug
@@ -448,6 +468,13 @@ debug
 Displays and logs a debugging message. A header with the label *DEBUG* is added 
 to the message and the header is colored magenta.
 
+.. code-block:: python
+
+    >>> from inform import Inform, debug
+    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> debug('HERE!')
+    myprog DEBUG: HERE!
+
 
 warn
 """"
@@ -463,6 +490,13 @@ warn
 
 Displays and logs a warning message. A header with the label *warning* is added 
 to the message and the header is colored yellow.
+
+.. code-block:: python
+
+    >>> from inform import Inform, warn
+    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> warn('file not found, skipping.', culprit='ghost')
+    myprog warning: ghost: file not found, skipping.
 
 
 error
@@ -481,6 +515,12 @@ error
 Displays and logs an error message. A header with the label *error* is added to 
 the message and the header is colored red.
 
+.. code-block:: python
+
+    >>> from inform import Inform, error
+    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> error('invalid value specified, expected number.', culprit='count')
+    myprog error: count: invalid value specified, expected number.
 
 fatal
 """""
@@ -523,8 +563,8 @@ with an exit status of 3.
 Utilities
 ---------
 
-Several utility functions are provided that are sometimes helpful when creating 
-messages for your informants.
+Several utility functions are provided for your convenience. They are often 
+helpful when creating messages.
 
 conjoin(iterable, conj=' and ', sep=', '):
     Like ''.join(), but allows you to specify a conjunction that is placed 
