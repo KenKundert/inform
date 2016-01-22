@@ -267,17 +267,18 @@ class InformantGenerator:
         INFORMER.report(args, kwargs, self)
 
     def produce_output(self, informer):
-        # returns a boolean
+        "Will informant produce output either directly to the user or to the logfile?"
         return self.write_output(informer) or self.write_logfile(informer)
 
     def write_output(self, informer):
-        # returns a boolean
+        "Will informant produce output directly to the user?"
         try:
             return self.output(informer)
         except TypeError:
             return self.output
 
     def write_logfile(self, informer):
+        "Will informant produce output to the logfile?"
         # returns a boolean
         try:
             return self.log(informer)
@@ -352,8 +353,9 @@ panic = InformantGenerator(
 class Inform:
     """Inform
 
-    Handles all user messaging.  Generally copies messages to the logfile while 
-    sending most to standard out as well, however all is controllable.
+    Handles all informants, which in turn handle user messaging.  Generally 
+    copies messages to the logfile while sending most to standard out as well, 
+    however all is controllable.
     """
 
     # constructor {{{2
@@ -581,21 +583,26 @@ class Inform:
 
     # terminate {{{2
     def terminate(self, status=None):
-        """Abnormal termination
+        """Termination
 
-        status codes:
+        Recommended status codes:
             None: return 1 if errors occurred and 0 otherwise
             0: success
             1: unexpected error
             2: invalid invocation
             3: panic
+        Status may also be a string, in which case it is printed to stderr and 
+        the exit status is 1.
         """
         if status is None or status is True:
             status = 1 if self.errors_accrued() else 0;
-        assert 0 <= status and status < 128
-        if self.termination_callback:                                                                                  
+        if is_str(status):
+            log("%s: terminates with status '%s'." % (self.prog_name, status))
+        else:
+            log('%s: terminates with status %s.' % (self.prog_name, status))
+            assert 0 <= status and status < 128
+        if self.termination_callback:
             self.termination_callback()
-        log('%s: terminates with status %s.' % (self.prog_name, status))
         if self.logfile:
             self.logfile.close()
             self.logfile = None
@@ -603,13 +610,17 @@ class Inform:
 
     # terminate_if_errors {{{2
     def terminate_if_errors(self, status=1):
+        "Terminate if error count is nonzero"
         if self.errors:
             self.terminate(status)
 
     # errors_accrued {{{2
-    def errors_accrued(self):
-        # returns number of errors that have accrued
-        return self.errors
+    def errors_accrued(self, reset=False):
+        "Returns number of errors that have accrued"
+        count = self.errors
+        if reset:
+            self.errors = 0
+        return count
 
     # disconnect {{{2
     def disconnect(self):
@@ -641,8 +652,8 @@ def terminate_if_errors(status=1):
     INFORMER.terminate_if_errors(status)
 
 # errors_accrued {{{3
-def errors_accrued():
-    return INFORMER.errors_accrued()
+def errors_accrued(reset=False):
+    return INFORMER.errors_accrued(reset)
 
 
 # Instantiate default informer {{{1
