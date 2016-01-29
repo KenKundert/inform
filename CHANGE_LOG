@@ -9,5 +9,5 @@
     Fixed introspection in fmt().
     General reorganization and improvement.
 
-2016 Jan ??: vers. 1.2.0
+2016 Jan 29: vers. 1.2.0
     Changed default behavior of cull(). 

@@ -63,7 +63,7 @@ of the number of errors that have occurred.
 .. code-block:: python
 
     >>> from inform import Inform, error
-    >>> informer = Inform(logfile=False, prog_name="prog")
+    >>> informer = Inform(prog_name="prog")
     >>> error('file not found.', culprit='data.in')
     prog error: data.in: file not found.
     >>> informer.errors_accrued()
@@ -385,7 +385,7 @@ a header, that header is not output and instead the message is indented.
 .. code-block:: python
 
     >>> from inform import Inform, warn, codicil
-    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> informer = Inform(prog_name="myprog")
     >>> warn('file not found.', culprit='ghost')
     myprog warning: ghost: file not found.
 
@@ -471,7 +471,7 @@ to the message and the header is colored magenta.
 .. code-block:: python
 
     >>> from inform import Inform, debug
-    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> informer = Inform(prog_name="myprog")
     >>> debug('HERE!')
     myprog DEBUG: HERE!
 
@@ -494,7 +494,7 @@ to the message and the header is colored yellow.
 .. code-block:: python
 
     >>> from inform import Inform, warn
-    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> informer = Inform(prog_name="myprog")
     >>> warn('file not found, skipping.', culprit='ghost')
     myprog warning: ghost: file not found, skipping.
 
@@ -518,7 +518,7 @@ the message and the header is colored red.
 .. code-block:: python
 
     >>> from inform import Inform, error
-    >>> informer = Inform(logfile=False, prog_name="myprog")
+    >>> informer = Inform(prog_name="myprog")
     >>> error('invalid value specified, expected number.', culprit='count')
     myprog error: count: invalid value specified, expected number.
 
@@ -571,10 +571,13 @@ conjoin(iterable, conj=' and ', sep=', '):
     between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
     generates 'a, b or c'.
 
-cull(collection, remove = *None*):
-    Strips a list of a particular value (remove). By default, it strips a list 
-    of Nones. remove may be a function, in which case it takes a single item as 
-    an argument and returns *True* if that item should be removed from the list.
+cull(collection):
+    Strips items from a list that have a particular value. By default, it strips 
+    a list of values that if casted to a boolean would have a value of False 
+    (False, None, '', (), [], etc.).  A particular value may be specified using 
+    the 'remove' as a keyword argument.  The value of remove may be a function, 
+    in which case it takes a single item as an argument and returns *True* if 
+    that item should be removed from the list.
 
 fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
@@ -691,12 +694,13 @@ color.
 
 The Color class has the following class methods:
 
-isTTY:
+isTTY(stream):
    Takes a stream as an argument and returns true if it is a TTY. A typical use 
    is::
 
       fail = Color('red')
       fail.enable = Color.isTTY(sys.stdout))
 
-strip_colors:
-   Takes a string as its input and return that text stripped of any color codes.
+strip_colors(text):
+   Takes a string as its input and return that string stripped of any color 
+   codes.

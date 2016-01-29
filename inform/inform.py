@@ -46,12 +46,16 @@ def indent(text, leader='    ', sep='\n'):
     )
 
 # cull {{{2
-def cull(collection, remove=None):
+def cull(collection, **kwargs):
     """Cull items of a particular value from a list."""
-    if callable(remove):
-        return [each for each in collection if not remove(each)]
-    else:
-        return [each for each in collection if each != remove]
+    try:
+        remove = kwargs['remove']
+        if callable(remove):
+            return [each for each in collection if not remove(each)]
+        else:
+            return [each for each in collection if each != remove]
+    except KeyError:
+        return [each for each in collection if each]
 
 # is_str {{{2
 from six import string_types
@@ -596,10 +600,11 @@ class Inform:
         """
         if status is None or status is True:
             status = 1 if self.errors_accrued() else 0;
+        prog_name = self.prog_name if self.prog_name else sys.argv[0]
         if is_str(status):
-            log("%s: terminates with status '%s'." % (self.prog_name, status))
+            log("%s: terminates with status '%s'." % (prog_name, status))
         else:
-            log('%s: terminates with status %s.' % (self.prog_name, status))
+            log('%s: terminates with status %s.' % (prog_name, status))
             assert 0 <= status and status < 128
         if self.termination_callback:
             self.termination_callback()
