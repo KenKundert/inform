@@ -14,7 +14,7 @@ setup(
     author="Ken Kundert",
     author_email='inform@nurdletech.com',
     url='http://nurdletech.com/linux-utilities/inform',
-    download_url='https://github.com/kenkundert/inform/tarball/master')
+    download_url='https://github.com/kenkundert/inform/tarball/master',
     license='GPLv3+',
     zip_safe=True,
     packages=['inform'],
