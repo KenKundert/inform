@@ -579,7 +579,10 @@ class Inform:
         "Normal termination"
         if self.termination_callback:                                                                                  
             self.termination_callback()
-        log('%s: terminates normally.' % self.prog_name)
+        if self.prog_name:
+            log('%s: terminates normally.' % self.prog_name)
+        else:
+            log('program terminates normally.')
         if self.logfile:
             self.logfile.close()
             self.logfile = None
