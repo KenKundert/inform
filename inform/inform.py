@@ -448,8 +448,12 @@ class Inform:
         # determine program name
         if argv is None:
             argv = sys.argv
-        if prog_name is True:
-            prog_name = os.path.basename(argv[0]) if argv else None
+        self.output_prog_name = bool(prog_name)
+        if not is_str(prog_name):
+            if argv[0]:
+                prog_name = os.path.basename(argv[0])
+            else:
+                prog_name = os.path.basename(sys.argv[0])
         self.prog_name = prog_name
 
         # save the logfile (and open if it is a string)
@@ -465,7 +469,7 @@ class Inform:
 
         # write header to log file
         if prog_name and version:
-            log("%s version %s" % (prog_name, version))
+            log("%s - version %s" % (prog_name, version))
         try:
             import arrow
             now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p")
@@ -568,7 +572,7 @@ class Inform:
     # _render_header {{{2
     def _render_header(self, action):
         if action.severity:
-            if self.prog_name:
+            if self.output_prog_name and self.prog_name:
                 return '%s %s: ' % (self.prog_name, action.severity)
             else:
                 return '%s: ' % action.severity
