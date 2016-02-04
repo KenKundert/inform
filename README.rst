@@ -9,6 +9,9 @@ Install with::
 
     pip install inform
 
+.. image:: https://travis-ci.org/KenKundert/inform.svg?branch=master
+    :target: https://travis-ci.org/KenKundert/inform
+
 This package defines a collection of 'print' functions that have different 
 roles.  These functions are referred to as 'informants' and are described below 
 in the the Informants section. They include include *log*, *comment*, *codicil*.  
