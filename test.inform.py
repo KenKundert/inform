@@ -134,6 +134,13 @@ noProg = ', '.join([
     'stderr=stderr',
     'prog_name=False',
 ])
+noHang = ', '.join([
+    'logfile=logfile',
+    'stdout=stdout',
+    'stderr=stderr',
+    'prog_name="inform"',
+    'hanging_indent=False',
+])
 fmtStim = dedent("""\
     Inform({stdargs})
     def func1():
@@ -212,6 +219,19 @@ testCases = [
         stimulus=dedent('''
             Inform({stdargs})
             output('This is an ...{nl}    output test!')
+        ''').format(stdargs=captureAll, nl=r'\n'),
+        stdout="This is an ...\n    output test!",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is an ...
+                output test!
+        '''),
+    ),
+    Case(
+        name='marshy',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('This is an ...{nl}    output test!', hanging=False)
         ''').format(stdargs=captureAll, nl=r'\n'),
         stdout="This is an ...\n    output test!",
         logfile=dedent('''
@@ -340,6 +360,24 @@ testCases = [
             inform warning:
                 This is a ...
                     test.
+        '''),
+    ),
+    Case(
+        name='flounder',
+        stimulus=dedent('''
+            Inform({stdargs})
+            warn('This is a ...{nl}test.', hanging=False)
+        ''').format(stdargs=captureAll, nl=r'\n'),
+        stdout=dedent('''
+            inform warning:
+                This is a ...
+                test.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform warning:
+                This is a ...
+                test.
         '''),
     ),
     Case(
@@ -593,6 +631,508 @@ testCases = [
                     This is the body of the ...
                         error message.
                 This is an appendage.
+        '''),
+    ),
+    Case(
+        name='unknown',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output(
+                'This is the body of the ...{nl}error message.',
+                culprit='This is a very long culprit, indeed it is very very very very very very very long'
+            )
+            codicil('This is an appendage.')
+        ''').format(stdargs=captureAll, nl=r'\n'),
+        stdout=dedent('''
+            This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                    error message.
+            This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                    error message.
+            This is an appendage.
+        '''),
+    ),
+    Case(
+        name='elongate',
+        stimulus=dedent('''
+            Inform({stdargs})
+            log('This is a test.')
+        '''.format(stdargs=noHang)),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='totter',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('This', 'is', 'a', 'test.')
+        '''.format(stdargs=noHang)),
+        stdout="This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='chieftain',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('This', 'is', 'a', 'test', sep='_', end='.{nl}')
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout="This_is_a_test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This_is_a_test.
+        '''),
+    ),
+    Case(
+        name='junction',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('This is an ...{nl}    output test!')
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout="This is an ...\n    output test!",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is an ...
+                output test!
+        '''),
+    ),
+    Case(
+        name='energy',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('This is an ...{nl}    output test!', hanging=True)
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout="This is an ...\n    output test!",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is an ...
+                output test!
+        '''),
+    ),
+    Case(
+        name='accordion',
+        stimulus=dedent('''
+            Inform({stdargs})
+            log('This is a test.')
+        '''.format(stdargs=noHang)),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='church',
+        stimulus=dedent('''
+            Inform(verbose=True, {stdargs})
+            comment('This is a test.')
+        '''.format(stdargs=noHang)),
+        stdout="This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='symbol',
+        stimulus=dedent('''
+            Inform({stdargs})
+            comment('This is a test.')
+        '''.format(stdargs=noHang)),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='emperor',
+        stimulus=dedent('''
+            Inform(narrate=True, {stdargs})
+            narrate('This is a test.')
+        '''.format(stdargs=noHang)),
+        stdout="This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='flirt',
+        stimulus=dedent('''
+            Inform({stdargs})
+            narrate('This is a test.')
+        '''.format(stdargs=noHang)),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='stroller',
+        stimulus=dedent('''
+            Inform({stdargs})
+            display('This is a test.')
+        '''.format(stdargs=noHang)),
+        stdout="This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='array',
+        stimulus=dedent('''
+            Inform(quiet=True, {stdargs})
+            display('This is a test.')
+        '''.format(stdargs=noHang)),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a test.
+        '''),
+    ),
+    Case(
+        name='butcher',
+        stimulus=dedent('''
+            Inform({stdargs})
+            debug('This is a test.')
+        '''.format(stdargs=noHang)),
+        stdout="inform DEBUG: This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform DEBUG: This is a test.
+        '''),
+    ),
+    Case(
+        name='clumsy',
+        stimulus=dedent('''
+            Inform({stdargs})
+            warn('This is a test.')
+        '''.format(stdargs=noHang)),
+        stdout="inform warning: This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform warning: This is a test.
+        '''),
+    ),
+    Case(
+        name='prayer',
+        stimulus=dedent('''
+            Inform({stdargs})
+            warn('This is a ...{nl}test.')
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout=dedent('''
+            inform warning:
+                This is a ...
+                test.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform warning:
+                This is a ...
+                test.
+        '''),
+    ),
+    Case(
+        name='visualize',
+        stimulus=dedent('''
+            Inform({stdargs})
+            warn('This is a ...{nl}test.', hanging=True)
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout=dedent('''
+            inform warning:
+                This is a ...
+                    test.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform warning:
+                This is a ...
+                    test.
+        '''),
+    ),
+    Case(
+        name='discount',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error('This is a test.')
+        '''.format(stdargs=noHang)),
+        stdout="inform error: This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error: This is a test.
+        '''),
+    ),
+    Case(
+        name='scamper',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error('This is a test.')
+        '''.format(stdargs=noProg)),
+        stdout="error: This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            error: This is a test.
+        '''),
+    ),
+    Case(
+        name='recline',
+        stimulus=dedent('''
+            Inform({stdargs})
+            warn('This is a test.')
+            codicil('This is an appendage.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            inform warning: This is a test.
+                This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform warning: This is a test.
+                This is an appendage.
+        '''),
+    ),
+    Case(
+        name='litany',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error()
+            codicil('This is the first appendage.')
+            codicil('This is the second appendage.')
+            codicil('This is the third appendage.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            inform error: 
+                This is the first appendage.
+                This is the second appendage.
+                This is the third appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error: 
+                This is the first appendage.
+                This is the second appendage.
+                This is the third appendage.
+        '''),
+    ),
+    Case(
+        name='misspend',
+        stimulus=dedent(r'''
+            Inform({stdargs})
+            error()
+            codicil('This is the first appendage.')
+            codicil('This is the second appendage,\nand the third.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            inform error: 
+                This is the first appendage.
+                This is the second appendage,
+                and the third.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error: 
+                This is the first appendage.
+                This is the second appendage,
+                and the third.
+        '''),
+    ),
+    Case(
+        name='protector',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('This is main message.')
+            codicil('This is the first appendage.')
+            codicil('This is the second appendage.')
+            codicil('This is the third appendage.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            This is main message.
+            This is the first appendage.
+            This is the second appendage.
+            This is the third appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is main message.
+            This is the first appendage.
+            This is the second appendage.
+            This is the third appendage.
+        '''),
+    ),
+    Case(
+        name='outhouse',
+        stimulus=dedent(r'''
+            Inform({stdargs})
+            error('Error message.\nAdditional info.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            inform error:
+                Error message.
+                Additional info.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error:
+                Error message.
+                Additional info.
+        '''),
+    ),
+    Case(
+        name='fringe',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output('this is a test.', culprit='src')
+        '''.format(stdargs=noHang)),
+        stdout="src: this is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            src: this is a test.
+        '''),
+    ),
+    Case(
+        name='prosy',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error('this is a test.', culprit='src')
+        '''.format(stdargs=noHang)),
+        stdout="inform error: src: this is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error: src: this is a test.
+        '''),
+    ),
+    Case(
+        name='vagrant',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error('this is the ...{nl}error message.', culprit='src')
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout=dedent('''
+            inform error:
+                src: this is the ...
+                error message.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error:
+                src: this is the ...
+                error message.
+        '''),
+    ),
+    Case(
+        name='pirouette',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error('this is a test.', culprit='src1 src2 src3'.split())
+        '''.format(stdargs=noHang)),
+        stdout="inform error: src1, src2, src3: this is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error: src1, src2, src3: this is a test.
+        '''),
+    ),
+    Case(
+        name='relapse',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output(
+                'This is the body of the output message.',
+                culprit='This is a very long culprit, indeed it is very very very very very very very long'
+            )
+            codicil('This is an appendage.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the output message.
+            This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the output message.
+            This is an appendage.
+        '''),
+    ),
+    Case(
+        name='bulwark',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error(
+                'This is the body of the error message.',
+                culprit='This is a very long culprit, indeed it is very very very very very very very long'
+            )
+            codicil('This is an appendage.')
+        '''.format(stdargs=noHang)),
+        stdout=dedent('''
+            inform error:
+                This is a very long culprit, indeed it is very very very very very very very long:
+                    This is the body of the error message.
+                This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error:
+                This is a very long culprit, indeed it is very very very very very very very long:
+                    This is the body of the error message.
+                This is an appendage.
+        '''),
+    ),
+    Case(
+        name='novelty',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error(
+                'This is the body of the ...{nl}error message.',
+                culprit='This is a very long culprit, indeed it is very very very very very very very long'
+            )
+            codicil('This is an appendage.')
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout=dedent('''
+            inform error:
+                This is a very long culprit, indeed it is very very very very very very very long:
+                    This is the body of the ...
+                    error message.
+                This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            inform error:
+                This is a very long culprit, indeed it is very very very very very very very long:
+                    This is the body of the ...
+                    error message.
+                This is an appendage.
+        '''),
+    ),
+    Case(
+        name='lockout',
+        stimulus=dedent('''
+            Inform({stdargs})
+            output(
+                'This is the body of the ...{nl}error message.',
+                culprit='This is a very long culprit, indeed it is very very very very very very very long'
+            )
+            codicil('This is an appendage.')
+        ''').format(stdargs=noHang, nl=r'\n'),
+        stdout=dedent('''
+            This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                error message.
+            This is an appendage.
+        '''),
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                error message.
+            This is an appendage.
         '''),
     ),
     Case(

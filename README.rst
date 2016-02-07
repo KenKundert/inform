@@ -34,6 +34,9 @@ culprit = *None*:
    A string that is added to the beginning of the message that identifies the 
    culprit (the object for which the problem being reported was found). May also 
    be a collection of strings, in which case they are joined with '.'.
+hanging = *True*:
+   Indicates hanging indentation should be used when outputting multiline 
+   message with headers or culprits.
 
 With the simplest use of the program, you simply import the informants you need 
 and call them (they take the same arguments as does the *print* function built 
@@ -179,63 +182,66 @@ keyword arguments are reserved by inform (see above).
 Inform Class
 ------------
 The Inform class controls the active informants. It takes the following 
-arguments as options:
+arguments as options (the value given for the argument is its default):
 
 Arguments
 """""""""
 
-mute (bool)
+mute=False (bool)
    With the provided informants all output is suppressed when set (it is still 
    logged). This is generally used when the program being run is being run by 
    another program that is generating its own messages and does not want the 
    user confused by additional messages. In this case, the calling program is 
    responsible for observing and reacting to the exit status of the called 
    program.
-quiet (bool):
+quiet=False (bool):
    With the provided informants normal output is suppressed when set (it is 
    still logged). This is used when the user has indicated that they are 
    uninterested in any conversational messages and just want to see the 
    essentials (generally error messages).
-verbose (bool):
+verbose=False (bool):
    With the provided informants comments are output to user when set; normally 
    they are just logged. Comments are generally used to document unusual 
    occurrences that might warrant the user's attention.
-narrate (bool):
+narrate=False (bool):
    With the provided informants narration is output to user when set, normally 
    it is just logged.  Narration is generally used to inform the user as to what 
    is going on. This can help place errors and warnings in context so that they 
    are easier to understand.
-logfile (string or stream):
+logfile=False (string or stream):
    May be a string, in which case it is taken to be the path of the logfile.  
    May be *True*, in which case ./.<prog_name>.log is used.  May be an open 
    stream.  Or it may be *False*, in which case no log file is created.
-prog_name (string):
+prog_name=True (string):
    The program name. Is appended to the message headers and used to create the 
    default logfile name. May be a string, in which case it is used as the name 
    of the program.  May be *True*, in which case basename(argv[0]) is used.  May 
    be *False* to indicate that program name should not be added to message 
    headers.
-argv (list of strings):
+argv=None (list of strings):
    System command line arguments (logged). By default, sys.argv is used. If 
    False is passed in, argv is not logged and argv[0] is not available to be the 
    program name.
-version (string):
+version=None (string):
    Program version (logged if provided).
-termination_callback (func):
+termination_callback=None (func):
    A function that is called at program termination.
-colorscheme (*None*, 'light', or 'dark'):
+colorscheme='dark' (*None*, 'light', or 'dark'):
    Color scheme to use. *None* indicates that messages should not be colorized.  
    Colors are not used if output stream is not a TTY.
-flush (bool):
+flush=False (bool):
    Flush the stream after each write. Is useful if you program is crashing, 
    causing loss of the latest writes. Can cause programs to run considerably 
    slower if they produce a lot of output. Not available with python2.
-stdout (stream):
+stdout=None (stream):
    Messages are sent here by default. Generally used for testing. If 
    not given, sys.stdout is used.
-stderr (stream):
+stderr=None (stream):
    Termination messages are sent here by default. Generally used for 
    testing.  If not given, sys.stderr is used.
+hanging_indent=True (bool):
+   Indicates hanging indentation should be used by default when outputting 
+   multiline message with headers or culprits.
 \**kwargs:
    Any additional keyword arguments are made attributes that are ignored by 
    Inform, but may be accessed by the informants.
@@ -569,10 +575,12 @@ Utilities
 Several utility functions are provided for your convenience. They are often 
 helpful when creating messages.
 
-indent(text, leader='    ', sep='\n', first=None):
-    Indents the text. If first is None, the leader is added to the beginning of 
-    every line, otherwise first is added to the first line and leader is added 
-    to every other.
+indent(text, leader='    ',  first=0, stops=1, sep='\n'):
+    Indents the text. Multiples of *leader* are added to the beginning of the 
+    lines to indent.  *first* is the number of indentations used for the first 
+    line relative to the others (may be negative but (first + stops) should not 
+    be. *stops* is the default number of indentations to use. *sep* is the 
+    string used to separate the lines.
 
 conjoin(iterable, conj=' and ', sep=', '):
     Like ''.join(), but allows you to specify a conjunction that is placed 

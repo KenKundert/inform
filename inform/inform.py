@@ -30,20 +30,28 @@ INFORMER = None
 
 # Inform Utilities {{{1
 # indent {{{2
-def indent(text, leader='    ', sep='\n', first=None):
+def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     r"""{
     Add indentation.
 
+    leader (string):
+        the string added to be beginning of a line to indent it.
+    first (integer):
+        number of indentations for the first line relative to others (may be 
+        negative but (first + stops) should not be).
+    stops (integer):
+        number of indentations (number of leaders to add to beginning lines).
+    sep (string):
+        the string used to separate the lines
+
     Examples:
     >>> from inform import indent
-    >>> print(indent('Hello\nWorld!', '    '))
-        Hello
-        World!
+    >>> print(indent('And the answer is ...\n42!', first=-1))
+    And the answer is ...
+        42!
 
     }"""
-    if first is None:
-        first = leader
-    return first + (sep+leader).join(text.split('\n'))
+    return (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
 
 # cull {{{2
 def cull(collection, **kwargs):
@@ -378,6 +386,7 @@ class Inform:
         flush=False,
         stdout=None,
         stderr=None,
+        hanging_indent=True,
         **kwargs
     ):
         """
@@ -433,6 +442,7 @@ class Inform:
         self.flush = flush
         self.stdout = stdout if stdout else sys.stdout
         self.stderr = stderr if stderr else sys.stderr
+        self.hanging_indent = bool(hanging_indent)
         self.__dict__.update(kwargs)
         self.previous_action = None
 
@@ -518,21 +528,21 @@ class Inform:
             culprit = self._render_culprit(kwargs)
             header = self._render_header(action)
             body = message
-            outdent = lambda s: indent(s, leader='        ', first='    ')
+            hang = 1*bool(kwargs.get('hanging', self.hanging_indent))
             if culprit:
                 if len(culprit) + len(header) > 40:
                     body = '%s:\n%s' % (
                         culprit,
-                        indent(body, first='' if header else None)
+                        indent(body, first=-hang, stops=1 + (not header)*hang)
                     )
                 else:
                     body = '%s: %s' % (culprit, body)
             if header:
                 if is_continuation:
                     header = ''
-                    body = outdent(body)
+                    body = indent(body, first=-hang, stops=1+hang)
                 elif '\n' in body:
-                    body = '\n' + outdent(body)
+                    body = '\n' + indent(body, first=-hang, stops=1+hang)
                     header = header.rstrip()
             messege_color = action.message_color
             header_color = action.header_color
