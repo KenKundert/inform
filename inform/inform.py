@@ -30,7 +30,7 @@ INFORMER = None
 
 # Inform Utilities {{{1
 # indent {{{2
-def indent(text, leader='    ', sep='\n'):
+def indent(text, leader='    ', sep='\n', first=None):
     r"""{
     Add indentation.
 
@@ -41,9 +41,9 @@ def indent(text, leader='    ', sep='\n'):
         World!
 
     }"""
-    return sep.join(
-        leader+line if line else line for line in text.split('\n')
-    )
+    if first is None:
+        first = leader
+    return first + (sep+leader).join(text.split('\n'))
 
 # cull {{{2
 def cull(collection, **kwargs):
@@ -515,14 +515,25 @@ class Inform:
         if action.produce_output(self):
             options = self._get_print_options(kwargs, action)
             message = self._render_message(args, kwargs)
+            culprit = self._render_culprit(kwargs)
             header = self._render_header(action)
+            body = message
+            outdent = lambda s: indent(s, leader='        ', first='    ')
+            if culprit:
+                if len(culprit) + len(header) > 40:
+                    body = '%s:\n%s' % (
+                        culprit,
+                        indent(body, first='' if header else None)
+                    )
+                else:
+                    body = '%s: %s' % (culprit, body)
             if header:
                 if is_continuation:
                     header = ''
-                    message = indent(message)
-                elif '\n' in message:
-                    header = header.rstrip() + '\n'
-                    message = indent(message)
+                    body = outdent(body)
+                elif '\n' in body:
+                    body = '\n' + outdent(body)
+                    header = header.rstrip()
             messege_color = action.message_color
             header_color = action.header_color
             if action.write_output(self):
@@ -530,14 +541,14 @@ class Inform:
                 if header:
                     print(
                         header_color(header, scheme=cs)
-                      + messege_color(message, scheme=cs),
+                      + messege_color(body, scheme=cs),
                         **options
                     )
                 else:
-                    print(messege_color(message, scheme=cs), **options)
+                    print(messege_color(body, scheme=cs), **options)
             if action.write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
-                print('%s%s' % (header, message), **options)
+                print('%s%s' % (header, body), **options)
         if action.terminate is not False:
             self.terminate(status=action.terminate)
         self.previous_action = action
@@ -561,13 +572,15 @@ class Inform:
     # _render_message {{{2
     @staticmethod
     def _render_message(args, kwargs):
-        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        return kwargs.get('sep', ' ').join(str(arg) for arg in args)
+
+    # _render_culprit {{{2
+    @staticmethod
+    def _render_culprit(kwargs):
         culprit = kwargs.get('culprit')
-        if culprit:
-            if is_collection(culprit):
-                culprit = '.'.join(str(c) for c in culprit)
-            return '%s: %s' % (culprit, message)
-        return message
+        if culprit and is_collection(culprit):
+            culprit = ', '.join(str(c) for c in culprit)
+        return culprit
 
     # _render_header {{{2
     def _render_header(self, action):

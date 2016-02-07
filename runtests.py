@@ -45,7 +45,6 @@ summary files should contain a dictionary with keys: 'tests', 'failures'.
 # imports {{{2
 from __future__ import division, print_function
 import os, sys
-# use json if available, otherwise use pickle
 from json import load as loadSummary, dump as dumpSummary
 from inform import Color
 import argparse

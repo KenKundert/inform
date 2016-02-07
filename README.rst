@@ -569,6 +569,11 @@ Utilities
 Several utility functions are provided for your convenience. They are often 
 helpful when creating messages.
 
+indent(text, leader='    ', sep='\n', first=None):
+    Indents the text. If first is None, the leader is added to the beginning of 
+    every line, otherwise first is added to the first line and leader is added 
+    to every other.
+
 conjoin(iterable, conj=' and ', sep=', '):
     Like ''.join(), but allows you to specify a conjunction that is placed 
     between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
