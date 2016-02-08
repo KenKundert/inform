@@ -51,7 +51,11 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
         42!
 
     }"""
-    return (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
+    # do the indent
+    indented = (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
+
+    # resplit it and replace the blank lines with empty lines
+    return '\n'.join([line.rstrip() for line in indented.split('\n')])
 
 # cull {{{2
 def cull(collection, **kwargs):
