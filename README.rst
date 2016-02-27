@@ -9,10 +9,11 @@ Install with::
 
     pip install inform
 
-Supported in Python2.7, Python3.3, Python3.4, and Python3.5.
 
 .. image:: https://travis-ci.org/KenKundert/inform.svg?branch=master
     :target: https://travis-ci.org/KenKundert/inform
+
+Supported in Python2.7, Python3.3, Python3.4, and Python3.5.
 
 This package defines a collection of 'print' functions that have different 
 roles.  These functions are referred to as 'informants' and are described below 
