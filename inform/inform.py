@@ -442,6 +442,7 @@ class Inform:
             ignored by Inform, but may be accessed by the informants.
         """
         self.errors = 0
+        self.version = version
         self.termination_callback = termination_callback
         self.flush = flush
         self.stdout = stdout if stdout else sys.stdout
@@ -469,9 +470,7 @@ class Inform:
             else:
                 prog_name = os.path.basename(sys.argv[0])
         self.prog_name = prog_name
-
-        # save the logfile (and open if it is a string)
-        self.set_logfile(logfile)
+        self.argv = argv
 
         # Save the color scheme
         assert colorscheme in [None, 'light', 'dark']
@@ -481,18 +480,8 @@ class Inform:
         global INFORMER
         INFORMER = self
 
-        # write header to log file
-        if prog_name and version:
-            log("%s - version %s" % (prog_name, version))
-        try:
-            import arrow
-            now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p")
-        except:
-            now = ""
-        if argv:
-            log("Invoked as '%s'%s." % (' '.join(argv), now))
-        elif now:
-            log("Invoked%s." % now)
+        # activate the logfile
+        self.set_logfile(logfile)
 
     # __getattr__ {{{2
     def __getattr__(self, name):
@@ -515,7 +504,23 @@ class Inform:
                 logfile = open(logfile, 'w')
             except (IOError, OSError) as err:
                 print(os_error(err), file=sys.stderr)
+                logfile = None
         self.logfile = logfile
+        if not logfile:
+            return
+
+        # write header to log file
+        if self.prog_name and self.version:
+            log("%s - version %s" % (self.prog_name, self.version))
+        try:
+            import arrow
+            now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p")
+        except:
+            now = ""
+        if self.argv:
+            log("Invoked as '%s'%s." % (' '.join(self.argv), now))
+        elif now:
+            log("Invoked%s." % now)
 
     # report {{{2
     def report(self, args, kwargs, action):
