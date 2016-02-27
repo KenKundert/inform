@@ -9,6 +9,8 @@ Install with::
 
     pip install inform
 
+Supported in Python2.7, Python3.3, Python3.4, and Python3.5.
+
 .. image:: https://travis-ci.org/KenKundert/inform.svg?branch=master
     :target: https://travis-ci.org/KenKundert/inform
 
