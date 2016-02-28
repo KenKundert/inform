@@ -450,6 +450,7 @@ class Inform:
         self.hanging_indent = bool(hanging_indent)
         self.__dict__.update(kwargs)
         self.previous_action = None
+        self.logfile = None
 
         # make verbosity flags consistent
         self.mute = mute
