@@ -181,8 +181,10 @@ def fmt(message, *args, **kwargs):
 def os_error(err):
     if err.filename:
         return "%s: %s." % (err.filename, err.strerror.lower())
+    elif err.strerror:
+        return "%s." % err.strerror.lower()
     else:
-        return "%s." % (err.strerror.lower())
+        return "%s." % str(err).lower()
 
 # conjoin {{{2
 # Like join, but supports conjunction
@@ -523,6 +525,10 @@ class Inform:
         elif now:
             log("Invoked%s." % now)
 
+    # flush_logfile {{{2
+    def flush_logfile(self):
+        self.logfile.flush()
+
     # report {{{2
     def report(self, args, kwargs, action):
         is_continuation = action.is_continuation
@@ -540,6 +546,7 @@ class Inform:
             body = message
             hang = 1*bool(kwargs.get('hanging', self.hanging_indent))
             if culprit:
+                culprit = str(culprit)
                 if len(culprit) + len(header) > 40:
                     body = '%s:\n%s' % (
                         culprit,
@@ -614,7 +621,7 @@ class Inform:
     # done {{{2
     def done(self):
         "Normal termination"
-        if self.termination_callback:                                                                                  
+        if self.termination_callback:
             self.termination_callback()
         if self.prog_name:
             log('%s: terminates normally.' % self.prog_name)
