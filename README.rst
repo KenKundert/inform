@@ -718,7 +718,7 @@ isTTY(stream):
    is::
 
       fail = Color('red')
-      fail.enable = Color.isTTY(sys.stdout))
+      fail.enable = Color.isTTY(sys.stdout)
 
 strip_colors(text):
    Takes a string as its input and return that string stripped of any color 
