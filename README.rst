@@ -664,7 +664,9 @@ The Color class creates colorizers, which are used to render text in
 a particular color.  They are like the Python print function in that they take 
 any number of unnamed arguments that are converted to strings and then joined 
 into a single string. The string is then coded for the chosen color and 
-returned. For example::
+returned. For example:
+
+.. code-block:: python
 
    >> from inform import Color, display
 
@@ -681,7 +683,7 @@ returned. For example::
    pass: signalman
 
 When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
-    
+
 The Color class has the concept of a colorscheme. There are three supported 
 schemes: *None*, light, and dark. With *None* the text is not colored. In 
 general it is best to use the light colorscheme on dark backgrounds and the dark 
@@ -707,18 +709,39 @@ colorscheme = *False*:
    *False*, 'light' or 'dark'.  If you specify *False* (the default), the 
    colorscheme specified when creating the colorizer is used.
 
+
 Colorizers have one user settable attribute: *enable*. By default *enable* is 
 True. If you set it to *False* the colorizer no longer renders the text in 
-color.
+color:
+
+.. code-block:: python
+
+   >> warning = Color('yellow')
+   >> warning.enable = Color.isTTY(sys.stdout)
+   >> warning('Cannot find precusor, ignoring.')
+   Cannot find precusor, ignoring.
 
 The Color class has the following class methods:
 
 isTTY(stream):
    Takes a stream as an argument and returns true if it is a TTY. A typical use 
-   is::
+   is:
 
-      fail = Color('red')
-      fail.enable = Color.isTTY(sys.stdout)
+.. code-block:: python
+
+   >> from inform import Color
+   >> import sys, re
+
+   >> if Color.isTTY(sys.stdout):
+   >>     emphasize = Color('magenta')
+   >> else:
+   >>     emphasize = str.upper
+
+   >> def highlight(matchobj):
+   >>     return emphasize(matchobj.group(0))
+
+   >> print(re.sub('your', highlight, 'Imagine your city without cars.', re.I))
+   Imagine YOUR city without cars.
 
 strip_colors(text):
    Takes a string as its input and return that string stripped of any color 
