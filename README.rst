@@ -18,11 +18,11 @@ Supported in Python2.7, Python3.3, Python3.4, and Python3.5.
 This package defines a collection of 'print' functions that have different 
 roles.  These functions are referred to as 'informants' and are described below 
 in the the Informants section. They include include *log*, *comment*, *codicil*.  
-*narrate*, *display*, *output*, *debug*, *warn*, *error*, *fatal* and *panic*.  
-Each of these functions takes arguments like the standard print function: 
-unnamed arguments are converted to strings and joined together to produce the 
-output, the named arguments act to control the process.  The available controls 
-(named arguments) are:
+*narrate*, *display*, *output*, *notify*, *debug*, *warn*, *error*, *fatal* and 
+*panic*.  Each of these functions takes arguments like the standard print 
+function: unnamed arguments are converted to strings and joined together to 
+produce the output, the named arguments act to control the process.  The 
+available controls (named arguments) are:
 
 sep = ' ':
    Specifies the string used to join the unnamed arguments.
@@ -38,7 +38,7 @@ culprit = *None*:
    culprit (the object for which the problem being reported was found). May also 
    be a collection of strings, in which case they are joined with '.'.
 hanging = *True*:
-   Indicates hanging indentation should be used when outputting multiline 
+   Indicates hanging indentation should be used when outputting multi-line 
    message with headers or culprits.
 
 With the simplest use of the program, you simply import the informants you need 
@@ -88,7 +88,7 @@ printed output of your code:
 
     >>> from inform import Inform, display
     >>> import sys
-    >>> if sys.version[0] == '2':                             
+    >>> if sys.version[0] == '2':
     ...     # io assumes unicode, which python2 does not provide by default
     ...     # so use StringIO instead
     ...     from StringIO import StringIO
@@ -315,6 +315,10 @@ log = *True*:
 output = *True*:
    Send to the output stream. May be a boolean or a function that accepts the 
    Inform object as an argument and returns a boolean.
+notify = *False*:
+   Send message to the notifier.  The notifier will display the message that 
+   appears temporarily in a bubble at the top of the screen.  May be a boolean 
+   or a function that accepts the informer as an argument and returns a boolean.
 terminate = *False*:
    Terminate the program, exit status is the value of the terminate unless 
    *terminate* is *True*, in which case 1 is returned if an error occurred and 
@@ -457,6 +461,28 @@ output
 Displays and logs a message. This is used for messages that are not errors that 
 are noteworthy enough that they need to get through even though the user has 
 asked for quiet.
+
+.. code-block:: python
+
+    >>> from inform import output
+    >>> output('We the people ...')
+    We the people ...
+
+
+notify
+""""""
+
+.. code-block:: python
+
+   notify = InformantGenerator(
+       notify=True,
+       log=True,
+   )
+
+Temporarily display the message in a bubble at the top of the screen.  Also 
+prints the message on the standard output and sends it to the log file.  This is 
+used for messages that the user is otherwise unlikely to see because they have 
+no access to the standard output.
 
 .. code-block:: python
 
@@ -699,6 +725,9 @@ colorscheme = 'dark':
    Use the specified colorscheme when rendering the text.
    Choose from *None*, 'light' or 'dark'.
 
+enable = True:
+   If set to False, the colorizer does not render the text in color.
+
 A colorizer takes the following arguments:
 
 text:
@@ -716,8 +745,7 @@ color:
 
 .. code-block:: python
 
-   >> warning = Color('yellow')
-   >> warning.enable = Color.isTTY(sys.stdout)
+   >> warning = Color('yellow', enable=Color.isTTY(sys.stdout))
    >> warning('Cannot find precusor, ignoring.')
    Cannot find precusor, ignoring.
 

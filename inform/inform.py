@@ -26,6 +26,7 @@ import sys
 
 # Globals {{{1
 INFORMER = None
+NOTIFIER = 'notify-send'
 
 
 # Inform Utilities {{{1
@@ -98,10 +99,10 @@ class Color:
         # terminal
     COLOR_CODE_REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
-    def __init__(self, color, scheme=True):
+    def __init__(self, color, scheme=True, enable=True):
         self.color = color
         self.scheme = 'dark' if scheme is True else scheme
-        self.enable = True
+        self.enable = enable
 
     def __call__(self, *args, **kwargs):
         # scheme is acting as an override, and False prevents the override.
@@ -110,7 +111,7 @@ class Color:
         if scheme and self.color and self.enable:
             assert self.color in self.COLORS
             bright = 1 if scheme == 'light' else 0
-            prefix = '\033[%s;3%dm' %(bright, self.COLORS.index(self.color))
+            prefix = '\033[%s;3%dm' % (bright, self.COLORS.index(self.color))
             suffix = '\033[0m'
             return prefix + text + suffix
         else:
@@ -133,7 +134,7 @@ class Color:
 def fmt(message, *args, **kwargs):
     r"""
     Convert a message with embedded attributes to a string. The values for the 
-    attributes can come from the argument list, as with ''.format(), or they may 
+    attributes can come from the argument list, as with ''.format(), or they may
     come from the local scope (found by introspection).
 
     Examples:
@@ -210,7 +211,7 @@ def conjoin(iterable, conj=' and ', sep=', '):
 
     """
     lst = list(iterable)
-    if conj != None and len(lst) > 1:
+    if conj is not None and len(lst) > 1:
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst)
 
@@ -235,6 +236,7 @@ class InformantGenerator:
         is_error=False,
         log=True,
         output=True,
+        notify=False,
         terminate=False,
         is_continuation=False,
         message_color=None,
@@ -255,6 +257,11 @@ class InformantGenerator:
         output (bool)
             Send message to the output stream.  May be a boolean or a function 
             that accepts the informer as an argument and returns a boolean.
+        notify (bool)
+            Send message to the notifier.  The notifier will display the message
+            that appears temporarily in a bubble at the top of the screen.
+            May be a boolean or a function that accepts the informer as an
+            argument and returns a boolean.
         terminate (bool or integer)
             Terminate the program.  Exit status is the value of terminate 
             unless terminate==True, in which case 1 is returned if an error 
@@ -275,6 +282,7 @@ class InformantGenerator:
         self.is_error = is_error
         self.log = log
         self.output = output
+        self.notify = notify
         self.terminate = terminate
         self.is_continuation = is_continuation
         self.message_color = Color(message_color)
@@ -286,7 +294,10 @@ class InformantGenerator:
 
     def produce_output(self, informer):
         "Will informant produce output either directly to the user or to the logfile?"
-        return self.write_output(informer) or self.write_logfile(informer)
+        return (
+            self.write_output(informer) or self.write_logfile(informer) or
+            self.notify_user(informer)
+        )
 
     def write_output(self, informer):
         "Will informant produce output directly to the user?"
@@ -302,6 +313,14 @@ class InformantGenerator:
             return self.log(informer)
         except TypeError:
             return self.log
+
+    def notify_user(self, informer):
+        "Will informant produce output to the logfile?"
+        # returns a boolean
+        try:
+            return self.notify(informer)
+        except TypeError:
+            return self.notify
 
 
 # Informants {{{1
@@ -328,6 +347,11 @@ display = InformantGenerator(
 )
 output = InformantGenerator(
     output=lambda inform: not inform.mute,
+    log=True,
+)
+notify = InformantGenerator(
+    output=lambda inform: not inform.quiet and not inform.mute,
+    notify=True,
     log=True,
 )
 debug = InformantGenerator(
@@ -576,6 +600,9 @@ class Inform:
             if action.write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
                 print('%s%s' % (header, body), **options)
+            if action.notify_user(self):
+                import subprocess
+                subprocess.call(cull([NOTIFIER, self.prog_name, body]))
         if action.terminate is not False:
             self.terminate(status=action.terminate)
         self.previous_action = action
@@ -583,7 +610,7 @@ class Inform:
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
         opts = {
-            #'sep': kwargs.get('sep', ' '), -- handled in _render_message
+            # 'sep': kwargs.get('sep', ' '), -- handled in _render_message
             'end': kwargs.get('end', '\n'),
             'file': kwargs.get(
                 'file',
@@ -646,7 +673,7 @@ class Inform:
         the exit status is 1.
         """
         if status is None or status is True:
-            status = 1 if self.errors_accrued() else 0;
+            status = 1 if self.errors_accrued() else 0
         prog_name = self.prog_name if self.prog_name else sys.argv[0]
         if is_str(status):
             log("%s: terminates with status '%s'." % (prog_name, status))
