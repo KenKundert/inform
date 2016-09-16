@@ -633,6 +633,10 @@ plural(count, singular_form, plural_form = *None*):
     used. If the plural form is not give, the singular form is used with an 's' 
     added to the end.
 
+full_stop(string):
+    Adds a period to the end of the string if needed (if the last character is 
+    no a period, question mark or exclamation mark).
+
 os_error(exception):
     Generates clean messages for operating system errors.
 
