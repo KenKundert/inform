@@ -1,4 +1,4 @@
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 from .inform import (
     indent, cull, is_str, is_iterable, is_collection,
