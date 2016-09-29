@@ -641,7 +641,7 @@ class Inform:
     def _render_culprit(kwargs):
         culprit = kwargs.get('culprit')
         if culprit and is_collection(culprit):
-            culprit = ', '.join(str(c) for c in culprit)
+            culprit = ', '.join(str(c) for c in culprit if c is not None)
         return culprit
 
     # _render_header {{{2
@@ -760,7 +760,10 @@ class Error(Exception):
 
     def get_culprit(self):
         culprit = self.kwargs.get('culprit')
-        return '.'.join(str(c) for c in culprit) if is_collection(culprit) else str(culprit)
+        if is_collection(culprit):
+            return ', '.join(str(c) for c in culprit if c is not None)
+        else:
+            return str(culprit)
 
     def __str__(self):
         message = self.get_message()
