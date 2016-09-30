@@ -230,6 +230,7 @@ def full_stop(sentence):
     A period (full stop) is added if there is no terminating punctuation at the
     end of the string.
     """
+    sentence = str(sentence)
     return sentence if sentence[-1] in '.?!' else sentence + '.'
 
 
