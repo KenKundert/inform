@@ -763,7 +763,7 @@ class Error(Exception):
         culprit = self.kwargs.get('culprit')
         if is_collection(culprit):
             return ', '.join(str(c) for c in culprit if c is not None)
-        else:
+        elif culprit:
             return str(culprit)
 
     def __str__(self):
