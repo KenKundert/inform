@@ -560,7 +560,8 @@ class Inform:
 
     # flush_logfile {{{2
     def flush_logfile(self):
-        self.logfile.flush()
+        if self.logfile:
+            self.logfile.flush()
 
     # report {{{2
     def report(self, args, kwargs, action):
@@ -684,13 +685,13 @@ class Inform:
         if status is None or status is True:
             status = 1 if self.errors_accrued() else 0
         prog_name = self.prog_name if self.prog_name else sys.argv[0]
+        if self.termination_callback:
+            self.termination_callback()
         if is_str(status):
             log("%s: terminates with status '%s'." % (prog_name, status))
         else:
             log('%s: terminates with status %s.' % (prog_name, status))
             assert 0 <= status and status < 128
-        if self.termination_callback:
-            self.termination_callback()
         if self.logfile:
             self.logfile.close()
             self.logfile = None
