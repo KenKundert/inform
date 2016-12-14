@@ -1,5 +1,5 @@
-__version__ = '1.4.6'
-__released__ = '2016-12-13'
+__version__ = '1.5.0'
+__released__ = '2016-12-14'
 
 from .inform import (
     # inform utilities

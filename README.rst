@@ -1,9 +1,6 @@
 Inform - Print & Logging Utilities
 ==================================
 
-| Version: 1.4.6
-| Released: 2016-12-13
-
 .. image:: https://img.shields.io/travis/KenKundert/inform/master.svg
     :target: https://travis-ci.org/KenKundert/inform
 
@@ -19,6 +16,9 @@ Inform - Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/dd/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
+| Version: 1.5.0
+| Released: 2016-12-14
+
 A light-weight package with few dependencies that provides various print-like 
 functions to communicate to the user. It also provides logging and output 
 control.
@@ -27,7 +27,7 @@ Install with::
 
     pip install inform
 
-Supported in Python2.7, Python3.3, Python3.4, and Python3.5.
+Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
 
 This package defines a collection of 'print' functions that have different 
 roles.  These functions are referred to as 'informants' and are described below 
