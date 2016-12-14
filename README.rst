@@ -1,6 +1,24 @@
 Inform - Print & Logging Utilities
 ==================================
 
+| Version: 1.4.6
+| Released: 2016-12-13
+
+.. image:: https://img.shields.io/travis/KenKundert/inform/master.svg
+    :target: https://travis-ci.org/KenKundert/inform
+
+.. image:: https://img.shields.io/coveralls/KenKundert/inform.svg
+    :target: https://coveralls.io/r/KenKundert/inform
+
+.. image:: https://img.shields.io/pypi/v/inform.svg
+    :target: https://pypi.python.org/pypi/inform
+
+.. image:: https://img.shields.io/pypi/pyversions/inform.svg
+    :target: https://pypi.python.org/pypi/inform/
+
+.. image:: https://img.shields.io/pypi/dd/inform.svg
+    :target: https://pypi.python.org/pypi/inform/
+
 A light-weight package with few dependencies that provides various print-like 
 functions to communicate to the user. It also provides logging and output 
 control.
@@ -8,10 +26,6 @@ control.
 Install with::
 
     pip install inform
-
-
-.. image:: https://travis-ci.org/KenKundert/inform.svg?branch=master
-    :target: https://travis-ci.org/KenKundert/inform
 
 Supported in Python2.7, Python3.3, Python3.4, and Python3.5.
 
@@ -627,6 +641,13 @@ cull(collection):
 fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
 
+render(obj):
+    Recursively convert an object to a string with reasonable formatting.  Has 
+    built in support for the base Python types (None, bool, int, float, str, 
+    set, tuple, list, and dict).  If you confine yourself to these types, the 
+    output of render() can be read by the Python interpreter. Other types are 
+    converted to string with repr().
+
 plural(count, singular_form, plural_form = *None*):
     Produces either the singular or plural form of a word based on a count.
     The count may be an integer, or an iterable, in which case its length is 
@@ -686,6 +707,40 @@ explicitly called out in the format string.  *filetype* can be left out of the
 argument list because if *fmt* does not find a named argument in its argument 
 list, it will look for a variable of the same name in the local scope.
 
+Here is an example of render():
+
+.. code-block:: python
+
+    >>> from inform import render, display
+    >>> s1='a string'
+    >>> s2='another string'
+    >>> n=42
+    >>> S={s1, s2}
+    >>> L=[s1, n, S]
+    >>> d = {1:s1, 2:s2}
+    >>> D={'s': s1, 'n': n, 'S': S, 'L': L, 'd':d}
+    >>> display('D', '=', render(D))
+    D = {
+        'L': [
+            'a string',
+            42,
+            {
+                'a string',
+                'another string',
+            },
+        ],
+        'S': {
+            'a string',
+            'another string',
+        },
+        'd': {
+            1: 'a string',
+            2: 'another string',
+        },
+        'n': 42,
+        's': 'a string',
+    }
+
 
 Color Class
 """""""""""
@@ -706,7 +761,7 @@ returned. For example:
    >> failure = red('FAIL:')
 
    >> failures = {'outrigger': True, 'signalman': False}
-   >> for name, fails in failures.iters():
+   >> for name, fails in failures.items():
    ..     result = failure if fails else success
    ..     display(result, name)
    FAIL: outrigger
@@ -761,18 +816,18 @@ isTTY(stream):
 
 .. code-block:: python
 
-   >> from inform import Color
-   >> import sys, re
+   >>> from inform import Color, display
+   >>> import sys, re
 
-   >> if Color.isTTY(sys.stdout):
-   >>     emphasize = Color('magenta')
-   >> else:
-   >>     emphasize = str.upper
+   >>> if Color.isTTY(sys.stdout):
+   ...     emphasize = Color('magenta')
+   ... else:
+   ...     emphasize = str.upper
 
-   >> def highlight(matchobj):
-   >>     return emphasize(matchobj.group(0))
+   >>> def highlight(matchobj):
+   ...     return emphasize(matchobj.group(0))
 
-   >> print(re.sub('your', highlight, 'Imagine your city without cars.', re.I))
+   >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
    Imagine YOUR city without cars.
 
 strip_colors(text):
