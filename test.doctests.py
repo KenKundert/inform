@@ -4,12 +4,15 @@
 
 # Imports {{{1
 from __future__ import print_function
-from runtests import cmdLineOpts, writeSummary, succeed, fail
+from runtests import (
+    cmdLineOpts, writeSummary, succeed, fail,
+    pythonCmd, coverageCmd,
+)
 import doctest
 import sys
 
 # Initialization {{{1
-fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
+fast, printSummary, printTests, printResults, colorize, parent, coverage = cmdLineOpts()
 
 # Unload the inform module so that it is reloaded during the doctests
 # This is important because doctest replaces stdout with its own stream so it 

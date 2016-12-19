@@ -27,7 +27,7 @@ Expected to be called from a very minimal python test file such as:
     import runtests
 
     tests = ['test1', 'test2', ...]
-    runtests.runTests(tests) 
+    runtests.runTests(tests)
 
 The tests will be run and a summary produced. The tests can either be files,
 which are expected to be python files (without the .py suffix) or directories,
@@ -60,7 +60,17 @@ exception = Color('red', 'light')
 
 
 # default python
-defaultPython = "python{0}.{1}".format(*sys.version_info)
+def pythonCmd(version=None):
+    version = version if version else "{0}.{1}".format(*sys.version_info)
+    return "python{}".format(version)
+
+def coverageCmd(version=None, source=None):
+    version = version if version else "{0}.{1}".format(*sys.version_info)
+    version = '-' + version if '.' in version else version
+    cmd = ["coverage{}".format(version), 'run', '--append', '--branch']
+    if source:
+        cmd += ['--include', source]
+    return ' '.join(cmd)
 
 # command line processor {{{2
 class CommandLine():
@@ -84,10 +94,10 @@ class CommandLine():
             '-c', '--nocolor', action='store_false',
             help="do not use color to highlight test results")
         cmdline_parser.add_argument(
-            '--coverage', action='store_true', help="run coverage analysis")
+            '--coverage', nargs='?', default=False, help="run coverage analysis")
         cmdline_parser.add_argument(
             '-h', '--help', action='store_true', help="print usage information and exit")
-        cmdline_parser.add_argument('--parent', nargs='?', default=None, help='do not use')
+        cmdline_parser.add_argument('--parent', nargs='?', default=False, help='do not use')
         self.cmdline_parser = cmdline_parser
         self.cmdline_args = None
 
@@ -140,15 +150,14 @@ def cmdLineOpts():
     """
     clp.process()
 
-    if clp.coverage and not clp.parent:
-        print("coverage analysis not performed on %s." % clp.progName)
     return (
         clp.fast,
         clp.printSummary,
         clp.printTests,
         clp.printResults,
         clp.colorize,
-        clp.parent
+        clp.parent,
+        clp.coverage,
     )
 
 # writeSummary {{{1
@@ -180,7 +189,7 @@ def writeSummary(tests, testFailures, suites = 1, suiteFailures = None):
         )
 
 # runTests {{{1
-def runTests(tests, pythonCmd=None, pythonPath=None, testKey='test'):
+def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test'):
     """
     run tests
 
@@ -201,13 +210,18 @@ def runTests(tests, pythonCmd=None, pythonPath=None, testKey='test'):
         extension even though this would also be a python file).
     """
     clp.process()
+    python = pythonCmd(pythonVers)
 
-    pythonCmd = pythonCmd if pythonCmd else defaultPython
     if clp.printTests:
-        print("Using %s." % pythonCmd)
+        print("Using %s." % python)
 
-    if clp.coverage:
-        pythonCmd = '%s /usr/bin/coverage run -a --branch' % pythonCmd
+    if clp.coverage is not False:
+        if os.path.exists('.coverage') and not clp.parent:
+            os.remove('.coverage')
+        if not source:
+            source = clp.coverge if clp.coverage else ''
+        clp.coverage = source
+        python = coverageCmd(pythonVers, source)
     pythonPath = ('PYTHONPATH=%s; ' % pythonPath) if pythonPath else ''
 
     if len(clp.args) == 0:
@@ -227,7 +241,7 @@ def runTests(tests, pythonCmd=None, pythonPath=None, testKey='test'):
                 sys.stdout.write(status('%s: ' % name))
                 sys.stdout.flush()
             cmd = pythonPath + '%s %s.%s.py %s' % (
-                pythonCmd, testKey, test, _childOpts(test)
+                python, testKey, test, _childOpts(test)
             )
             error = _invoke(cmd)
         elif os.path.isdir(test):
@@ -244,11 +258,10 @@ def runTests(tests, pythonCmd=None, pythonPath=None, testKey='test'):
             numSuites += 1
             numSuiteFailures += 1
             continue
-        if error:
-            if not clp.coverage:
-                # return status of coverage seems broken (sigh)
-                print(fail('Failures detected in %s tests.' % name))
-                failures = True
+        if error and not clp.coverage is not False:
+            # return status of coverage seems broken (sigh)
+            print(fail('Failures detected in %s tests.' % name))
+            failures = True
         try:
             with open(summaryFileName) as f:
                 results = loadSummary(f)
@@ -316,6 +329,10 @@ def _childOpts(test):
     else:
         newParent = test
     opts += ['--parent', newParent]
+    if clp.coverage is not False:
+        opts += ['--coverage']
+        if clp.coverage:
+            opts += [clp.coverage]
     return ' '.join(opts)
 
 # _invoke {{{2

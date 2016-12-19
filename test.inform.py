@@ -5,7 +5,8 @@
 # Imports {{{1
 from __future__ import print_function
 from runtests import (
-    cmdLineOpts, writeSummary, succeed, fail, info, status, warning
+    cmdLineOpts, writeSummary, succeed, fail, info, status, warning,
+    pythonCmd, coverageCmd,
 )
 from inform import indent
 from textwrap import dedent
@@ -27,7 +28,7 @@ assert __debug__
 
 
 # Initialization {{{1
-fast, printSummary, printTests, printResults, colorize, parent = cmdLineOpts()
+fast, printSummary, printTests, printResults, colorize, parent, coverage = cmdLineOpts()
 
 
 # Utilities {{{1
