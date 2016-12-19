@@ -10,7 +10,7 @@ install:
   - pip install .
   - pip install coveralls
 script:
-  - coverage run --include 'inform/*.py' test
+  - ./test --coverage
 deploy:
     provider: pypi
     user: messenger
