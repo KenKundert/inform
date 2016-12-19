@@ -14,5 +14,7 @@ deploy:
     user: messenger
     on:
         tags: true
+after_success:
+  - coveralls
 
 
