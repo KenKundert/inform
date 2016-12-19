@@ -8,8 +8,8 @@ python:
 install:
   - pip install .
   - pip install coveralls
-script: 
-  - ./test
+script:
+  - coverage run --include 'inform/*.py' test
 deploy:
     provider: pypi
     user: messenger

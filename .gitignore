@@ -2,6 +2,7 @@
 .*.swp
 test_key/random_seed
 install.out
+htmlcov
 
 # Packages
 *.egg
