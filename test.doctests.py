@@ -22,6 +22,10 @@ fast, printSummary, printTests, printResults, colorize, parent, coverage = cmdLi
 to_delete = [m for m in sys.modules.keys() if m.startswith('inform')]
 for module in to_delete:
     del sys.modules[module]
+if coverage is False:
+    python = pythonCmd()
+else:
+    python = coverageCmd(source=coverage)
 
 # Tests {{{1
 failures = tests_run = 0

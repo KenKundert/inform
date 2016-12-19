@@ -8,4 +8,4 @@
 
 from runtests import runTests
 
-runTests(['inform', 'doctests'], source='inform/inform.py')
+runTests(['doctests', 'inform'], source='inform/inform.py')

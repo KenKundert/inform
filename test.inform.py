@@ -30,6 +30,10 @@ assert __debug__
 # Initialization {{{1
 fast, printSummary, printTests, printResults, colorize, parent, coverage = cmdLineOpts()
 
+if coverage is False:
+    python = pythonCmd()
+else:
+    python = coverageCmd(source=coverage)
 
 # Utilities {{{1
 def format(text):
