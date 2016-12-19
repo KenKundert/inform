@@ -18,6 +18,7 @@ Inform - Print & Logging Utilities
 
 | Version: 1.5.0
 | Released: 2016-12-14
+|
 
 A light-weight package with few dependencies that provides various print-like 
 functions to communicate to the user. It also provides logging and output 
@@ -674,9 +675,7 @@ For example:
 
 .. code-block:: python
 
-    >>> from inform import (
-    ...     Inform, display, error, conjoin, cull, fmt, plural, os_error
-    ... )
+    >>> from inform import Inform, display, error, conjoin, cull, fmt, plural, os_error
 
     >>> Inform(prog_name=False)
     <...>

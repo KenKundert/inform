@@ -219,7 +219,7 @@ def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test
         if os.path.exists('.coverage') and not clp.parent:
             os.remove('.coverage')
         if not source:
-            source = clp.coverge if clp.coverage else ''
+            source = clp.coverage if clp.coverage else ''
         clp.coverage = source
         python = coverageCmd(pythonVers, source)
     pythonPath = ('PYTHONPATH=%s; ' % pythonPath) if pythonPath else ''
