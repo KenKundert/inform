@@ -16,8 +16,8 @@ Inform - Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/dd/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
-| Version: 1.5.0
-| Released: 2016-12-14
+| Version: 1.6.0
+| Released: 2016-12-21
 |
 
 A light-weight package with few dependencies that provides various print-like 
@@ -657,7 +657,9 @@ plural(count, singular_form, plural_form = *None*):
 
 full_stop(string):
     Adds a period to the end of the string if needed (if the last character is 
-    no a period, question mark or exclamation mark).
+    no a period, question mark or exclamation mark). It applies str() to its 
+    argument, so it is generally a suitable replacement for str in 
+    str(exception) when trying extract an error message from an exception.
 
 os_error(exception):
     Generates clean messages for operating system errors.

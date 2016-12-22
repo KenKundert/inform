@@ -186,6 +186,8 @@ def render(obj, _level=0):
     converted to string with repr().
     """
 
+    from textwrap import dedent
+
     def leader(relative_level=0):
         return (_level+relative_level)*'    '
     code = []
