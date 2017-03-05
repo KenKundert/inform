@@ -16,8 +16,8 @@ Inform - Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/dd/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
-| Version: 1.6.0
-| Released: 2016-12-21
+| Version: 1.6.1
+| Released: 2017-03-04
 |
 
 A light-weight package with few dependencies that provides various print-like 
@@ -268,7 +268,7 @@ Methods
 """""""
 
 The Inform class provides the following user accessible methods. Most of these 
-methods are also available as functions, which act on the current Inform.
+methods are also available as functions, which act on the current informer.
 
 set_logfile():
    Allows you to change the logfile (only available as a method).
@@ -657,7 +657,7 @@ plural(count, singular_form, plural_form = *None*):
 
 full_stop(string):
     Adds a period to the end of the string if needed (if the last character is 
-    no a period, question mark or exclamation mark). It applies str() to its 
+    not a period, question mark or exclamation mark). It applies str() to its 
     argument, so it is generally a suitable replacement for str in 
     str(exception) when trying extract an error message from an exception.
 
@@ -781,7 +781,7 @@ color:
    Render the text in the specified color. Choose from *None*, 'black', 'red', 
    'green', 'yellow', 'blue', 'magenta', 'cyan' or 'white'.
 
-colorscheme = 'dark':
+scheme = 'dark':
    Use the specified colorscheme when rendering the text.
    Choose from *None*, 'light' or 'dark'.
 
@@ -793,7 +793,7 @@ A colorizer takes the following arguments:
 text:
    The text to be colored.
 
-colorscheme = *False*:
+scheme = *False*:
    Use to override the colorscheme when rendering the text.  Choose from *None*, 
    *False*, 'light' or 'dark'.  If you specify *False* (the default), the 
    colorscheme specified when creating the colorizer is used.
@@ -812,8 +812,8 @@ color:
 The Color class has the following class methods:
 
 isTTY(stream):
-   Takes a stream as an argument and returns true if it is a TTY. A typical use 
-   is:
+   Takes a stream as an argument (default is stdout) and returns true if it is 
+   a TTY.  A typical use is:
 
 .. code-block:: python
 
