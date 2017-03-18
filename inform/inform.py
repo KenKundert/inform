@@ -190,44 +190,48 @@ def render(obj, _level=0):
 
     def leader(relative_level=0):
         return (_level+relative_level)*'    '
+
+    def render_iterator(code, prefix, members, suffix, rendered):
+        rendered = str(rendered)
+        if len(rendered) < 40 and '\n' not in rendered:
+            code.append(rendered)
+        else:
+            code += [prefix]
+            for each in members:
+                code += ['%s%s,' % (
+                    leader(1), render(each, _level+1)
+                )]
+            code += [leader(0) + suffix]
+
     code = []
     if type(obj) == dict:
-        code += ['{']
-        try:
-            keys = sorted(obj.keys())
-        except TypeError: # keys have heterogeneous types, cannot be sorted
-            keys = obj.keys()
-        for key in keys:
-            value = obj[key]
-            code += ['%s%r: %s,' % (
-                leader(1), key, render(value, _level+1)
-            )]
-        code += ['%s}' % (leader(0))]
-    elif type(obj) == list:
-        code += ['[']
-        for each in obj:
-            code += ['%s%s,' % (
-                leader(1), render(each, _level+1)
-            )]
-        code += ['%s]' % (leader(0))]
-    elif type(obj) == tuple:
-        code += ['(']
-        for each in obj:
-            code += ['%s%s,' % (
-                leader(1), render(each, _level+1)
-            )]
-        code += ['%s)' % (leader(0))]
-    elif type(obj) == set:
-        code += ['{']
+        text = str(obj)
+        if len(text) < 40 and '\n' not in text:
+            code.append(text)
+        else:
+            code += ['{']
+            try:
+                keys = sorted(obj.keys())
+            except TypeError: # keys have heterogeneous types, cannot be sorted
+                keys = obj.keys()
+            for key in keys:
+                value = obj[key]
+                code += ['%s%r: %s,' % (
+                    leader(1), key, render(value, _level+1)
+                )]
+            code += ['%s}' % (leader(0))]
+    elif type(obj) is list:
+        render_iterator(code, '[', obj, ']', str(obj))
+    elif type(obj) is tuple:
+        render_iterator(code, '(', obj, ')', str(obj))
+    elif type(obj) is set:
         try:
             members = sorted(obj)
+            rendered = '{' + str(members)[1:-1] + '}'
         except TypeError: # members have heterogeneous types, cannot be sorted
             members = obj
-        for each in members:
-            code += ['%s%s,' % (
-                leader(1), render(each, _level+1)
-            )]
-        code += ['%s}' % (leader(0))]
+            rendered = str(members)
+        render_iterator(code, '{', members, '}', rendered)
     elif is_str(obj) and '\n' in obj:
         code += ['"""' + indent(dedent(obj), leader(1)) + leader(0) + '"""']
     else:

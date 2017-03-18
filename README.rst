@@ -713,8 +713,8 @@ Here is an example of render():
 .. code-block:: python
 
     >>> from inform import render, display
-    >>> s1='a string'
-    >>> s2='another string'
+    >>> s1='alpha string'
+    >>> s2='beta string'
     >>> n=42
     >>> S={s1, s2}
     >>> L=[s1, n, S]
@@ -723,23 +723,14 @@ Here is an example of render():
     >>> display('D', '=', render(D))
     D = {
         'L': [
-            'a string',
+            'alpha string',
             42,
-            {
-                'a string',
-                'another string',
-            },
+            {'alpha string', 'beta string'},
         ],
-        'S': {
-            'a string',
-            'another string',
-        },
-        'd': {
-            1: 'a string',
-            2: 'another string',
-        },
+        'S': {'alpha string', 'beta string'},
+        'd': {1: 'alpha string', 2: 'beta string'},
         'n': 42,
-        's': 'a string',
+        's': 'alpha string',
     }
 
 
