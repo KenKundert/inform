@@ -191,52 +191,52 @@ def render(obj, _level=0):
     def leader(relative_level=0):
         return (_level+relative_level)*'    '
 
-    def render_iterator(code, prefix, members, suffix, rendered):
-        rendered = str(rendered)
-        if len(rendered) < 40 and '\n' not in rendered:
-            code.append(rendered)
-        else:
-            code += [prefix]
-            for each in members:
-                code += ['%s%s,' % (
-                    leader(1), render(each, _level+1)
-                )]
-            code += [leader(0) + suffix]
-
     code = []
     if type(obj) == dict:
-        text = str(obj)
-        if len(text) < 40 and '\n' not in text:
-            code.append(text)
-        else:
-            code += ['{']
-            try:
-                keys = sorted(obj.keys())
-            except TypeError: # keys have heterogeneous types, cannot be sorted
-                keys = obj.keys()
-            for key in keys:
-                value = obj[key]
-                code += ['%s%r: %s,' % (
-                    leader(1), key, render(value, _level+1)
-                )]
-            code += ['%s}' % (leader(0))]
+        endcaps = '{ }'
+        content = ['%r: %s' % (k, render(v, _level+1)) for k, v in obj.items()]
     elif type(obj) is list:
-        render_iterator(code, '[', obj, ']', str(obj))
+        endcaps = '[ ]'
+        content = [render(v) for v in obj]
     elif type(obj) is tuple:
-        render_iterator(code, '(', obj, ')', str(obj))
+        endcaps = '( )'
+        content = [render(v) for v in obj]
     elif type(obj) is set:
+        endcaps = '{ }'
         try:
-            members = sorted(obj)
-            rendered = '{' + str(members)[1:-1] + '}'
-        except TypeError: # members have heterogeneous types, cannot be sorted
-            members = obj
-            rendered = str(members)
-        render_iterator(code, '{', members, '}', rendered)
+            content = [render(v) for v in sorted(obj)]
+        except TypeError:
+            # obj is not homogeneous, cannot sort
+            # and unlike dicts, sets still do not retain their order
+            content = [render(v) for v in obj]
     elif is_str(obj) and '\n' in obj:
-        code += ['"""' + indent(dedent(obj), leader(1)) + leader(0) + '"""']
+        endcaps = None
+        content = [
+            '"""',
+            indent(dedent(obj.strip()), leader(1)),
+            leader(0) + '"""'
+        ]
     else:
-        code += [repr(obj)]
-    return '\n'.join(code)
+        endcaps = None
+        content = [repr(obj)]
+
+    if endcaps:
+        endcaps = endcaps.split()
+        lcap, rcap = endcaps[0], endcaps[-1]
+    else:
+        lcap = rcap = ''
+
+    # try joining the content without newlines
+    text = lcap + ', '.join(content) + rcap
+    if len(text) < 40 and '\n' not in text:
+        return text
+
+    # text is too long, spread it over several lines to make it more readable
+    if endcaps:
+        content = (
+            [lcap] + [leader(1) + v + ',' for v in content] + [leader(0) + rcap]
+        )
+    return '\n'.join(content)
 
 # os_error {{{2
 # Generates a reasonable error message for an operating system errors, those 

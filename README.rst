@@ -722,15 +722,15 @@ Here is an example of render():
     >>> D={'s': s1, 'n': n, 'S': S, 'L': L, 'd':d}
     >>> display('D', '=', render(D))
     D = {
+        's': 'alpha string',
+        'n': 42,
+        'S': {'alpha string', 'beta string'},
         'L': [
             'alpha string',
             42,
             {'alpha string', 'beta string'},
         ],
-        'S': {'alpha string', 'beta string'},
         'd': {1: 'alpha string', 2: 'beta string'},
-        'n': 42,
-        's': 'alpha string',
     }
 
 
