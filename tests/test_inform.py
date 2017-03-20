@@ -139,3 +139,8 @@ def test_Error():
         assert err.get_culprit() == 'nutz, crunch'
         assert err.extra == 'foo'
         assert str(err) == 'nutz, crunch: hey now!'
+        try:
+            err.terminate()
+            assert False
+        except SystemExit:
+            assert True
