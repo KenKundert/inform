@@ -619,7 +619,7 @@ Utilities
 Several utility functions are provided for your convenience. They are often 
 helpful when creating messages.
 
-indent(text, leader='    ',  first=0, stops=1, sep='\n'):
+indent(text, leader='    ',  first=0, stops=1, sep='\\n'):
     Indents the text. Multiples of *leader* are added to the beginning of the 
     lines to indent.  *first* is the number of indentations used for the first 
     line relative to the others (may be negative but (first + stops) should not 
@@ -631,10 +631,10 @@ conjoin(iterable, conj=' and ', sep=', '):
     between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
     generates 'a, b or c'.
 
-cull(collection):
+cull(collection, [remove]):
     Strips items from a list that have a particular value. By default, it strips 
-    a list of values that if casted to a boolean would have a value of False 
-    (False, None, '', (), [], etc.).  A particular value may be specified using 
+    a list of values that if casted to a boolean would have a value of False (0, 
+    False, None, '', (), [], etc.).  A particular value may be specified using 
     the 'remove' as a keyword argument.  The value of remove may be a function, 
     in which case it takes a single item as an argument and returns *True* if 
     that item should be removed from the list.

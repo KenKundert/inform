@@ -1,0 +1,20 @@
+#!/bin/sh
+
+rm -rf ~/.local/lib/python*/site-packages/inform*
+
+echo "#################"
+echo "Python2 tests ..."
+echo "#################"
+pip2 install --user -e ..
+# python2.7 -m pytest -xvv
+python2.7 -m pytest -v
+
+rm -rf ~/.local/lib/python*/site-packages/inform*
+
+echo
+echo "#################"
+echo "Python3 tests ..."
+echo "#################"
+pip3.6 install --user -e ..
+# python3.6 -m pytest -xvv
+python3.6 -m pytest -v

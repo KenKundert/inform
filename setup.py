@@ -18,15 +18,10 @@ setup(
     license='GPLv3+',
     zip_safe=True,
     packages=['inform'],
-    install_requires=[
-        'arrow',
-        'six',
-    ],
-    keywords=[
-        'inform',
-        'logging',
-        'printing',
-    ],
+    install_requires='arrow six'.split(),
+    setup_requires='pytest-runner>=2.0'.split(),
+    tests_requires='pytest'.split(),
+    keywords='inform logging printing'.split(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
