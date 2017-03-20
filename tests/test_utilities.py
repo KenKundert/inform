@@ -10,7 +10,7 @@ import sys
 # Before Python3.5 the dictionaries were ordered randomly, which confuses the
 # test. This is a crude fix, just sort the output, that way we will likely catch
 # most unexpected changes.  This is not needed for 3.6 and beyond.
-if sys.version_info <= (3, 5):
+if sys.version_info < (3, 6):
     def X(arg):
         return sorted(arg)
 else:
