@@ -587,6 +587,10 @@ class Inform:
             raise AttributeError(name)
         return self.__dict__.get(name)
 
+    # suppress_output {{{2
+    def suppress_output(self, mute):
+        self.mute = bool(mute)
+
     # set_logfile {{{2
     def set_logfile(self, logfile):
         try:

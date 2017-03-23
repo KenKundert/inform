@@ -270,6 +270,9 @@ Methods
 The Inform class provides the following user accessible methods. Most of these 
 methods are also available as functions, which act on the current informer.
 
+suppress_output():
+   Allows you to change the mute flag (only available as a method).
+
 set_logfile():
    Allows you to change the logfile (only available as a method).
 

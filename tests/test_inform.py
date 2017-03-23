@@ -1,9 +1,16 @@
+#!/usr/bin/env python
+
+# Test Inform
+
+# Imports {{{1
 from inform import (
     Inform, Error, codicil, display, done, error, errors_accrued, log, output,
     terminate, terminate_if_errors, warn
 )
+from contextlib import contextmanager
 from textwrap import dedent
 import sys
+import re
 
 if sys.version[0] == '2':
     # io assumes unicode, which python2 does not provide by default
@@ -15,185 +22,142 @@ if sys.version[0] == '2':
 else:
     from io import StringIO
 
-def test_log():
-    with StringIO() as stdout, \
-         StringIO() as stderr, \
-         StringIO() as logfile, \
-         Inform(stdout=stdout, stderr=stderr, logfile=logfile) as msg \
-    :
-        log('hey now!')
+# Utilities {{{1
+invokeTimeRegex = r"(?<=Invoked as )'.*' on .*(?=\.)"
+def strip(stringio):
+    return stringio.getvalue().strip()
 
-        num_errors = msg.errors_accrued()
-        num_errors2 = errors_accrued()
-        output_text = stdout.getvalue()
-        error_text = stderr.getvalue()
-        logfile_text = logfile.getvalue()
+def log_strip(stringio):
+    achieved = stringio.getvalue().strip()
+    achieved = re.sub(invokeTimeRegex, '<exe> on <date>', achieved)
+    return achieved
 
-    assert num_errors == 0
-    assert num_errors2 == 0
-    assert str(output_text) == ''
-    assert str(error_text) == ''
-    log_lines = logfile_text.split('\n')
-    assert len(log_lines) == 3
-    assert log_lines[0].startswith('Invoked as')
-    assert log_lines[1] == 'hey now!'
-    assert log_lines[2] == ''
+# Helper classes and functions {{{1
+@contextmanager
+def messenger(*args, **kwargs):
+    stdout = StringIO()
+    stderr = StringIO()
+    logfile = StringIO()
+    with Inform(
+        *args, **kwargs, stdout=stdout, stderr=stderr, prog_name=False,
+        logfile=logfile
+    ) as msg:
+        yield msg, stdout, stderr, logfile
+    stdout.close()
+    stderr.close()
+    logfile.close()
 
-def test_display():
-    with StringIO() as stdout, \
-         StringIO() as stderr, \
-         StringIO() as logfile, \
-         Inform(stdout=stdout, stderr=stderr, logfile=logfile) as msg \
-    :
+
+# Test cases {{{1
+def test_grove():
+    with messenger() as (msg, stdout, stderr, logfile):
+        stimulus = 'hey now!'
+        log(stimulus)
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == ''
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            Invoked as <exe> on <date>.
+            {expected}
+        ''').strip().format(expected=stimulus)
+
+def test_billfold():
+    with messenger() as (msg, stdout, stderr, logfile):
         display('hey now!', culprit=('yo', 'ho'))
         display('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
-
-        num_errors = msg.errors_accrued()
-        num_errors2 = errors_accrued()
-        output_text = stdout.getvalue()
-        error_text = stderr.getvalue()
-        logfile_text = logfile.getvalue()
-
-    assert num_errors == 0
-    assert num_errors2 == 0
-    assert str(output_text) == dedent('''
-        yo, ho: hey now!
-        yep yep yep yep yep yep yep yep yep yep yep:
-            yep,
-                YEP!
-    ''').lstrip()
-    assert str(error_text) == ''
-    log_lines = logfile_text.split('\n')
-    assert len(log_lines) == 6
-    assert log_lines[0].startswith('Invoked as')
-    assert log_lines[1] == 'yo, ho: hey now!'
-    assert log_lines[2] == 'yep yep yep yep yep yep yep yep yep yep yep:'
-    assert log_lines[3] == '    yep,'
-    assert log_lines[4] == '        YEP!'
-    assert log_lines[5] == ''
-
-def test_output():
-    with StringIO() as stdout, \
-         StringIO() as stderr, \
-         StringIO() as logfile, \
-         Inform(stdout=stdout, stderr=stderr, logfile=logfile) as msg \
-    :
-        output('hey now!')
-        codicil('baby', 'bird', sep='\n')
-        msg.flush_logfile()
-
-        num_errors = msg.errors_accrued()
-        num_errors2 = errors_accrued()
-        output_text = stdout.getvalue()
-        error_text = stderr.getvalue()
-        logfile_text = logfile.getvalue()
-
-    assert num_errors == 0
-    assert num_errors2 == 0
-    assert str(output_text) == 'hey now!\nbaby\nbird\n'
-    assert str(error_text) == ''
-    log_lines = logfile_text.split('\n')
-    assert len(log_lines) == 5
-    assert log_lines[0].startswith('Invoked as')
-    assert log_lines[1] == 'hey now!'
-    assert log_lines[2] == 'baby'
-    assert log_lines[3] == 'bird'
-    assert log_lines[4] == ''
-
-    try:
-        terminate_if_errors()
-        assert True
-    except SystemExit:
-        assert False
-
-def test_error():
-    with StringIO() as stdout, \
-         StringIO() as stderr, \
-         StringIO() as logfile, \
-         Inform(
-            stdout=stdout, stderr=stderr, logfile=logfile, prog_name=False,
-            hanging_indent=False
-         ) as msg \
-    :
-        error('hey now!')
-        codicil('baby', 'bird', sep='\n')
-        error('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
-
-        num_errors = msg.errors_accrued()
-        num_errors2 = errors_accrued(True)
-        num_errors3 = errors_accrued()
-        output_text = stdout.getvalue()
-        error_text = stderr.getvalue()
-        logfile_text = logfile.getvalue()
-
-    assert num_errors == 2
-    assert num_errors2 == 2
-    assert num_errors3 == 0
-    assert str(output_text) == dedent('''
-        error: hey now!
-            baby
-            bird
-        error:
-            yep yep yep yep yep yep yep yep yep yep yep:
-                yep,
-                YEP!
-    ''').lstrip()
-    assert str(error_text) == ''
-    log_lines = logfile_text.split('\n')
-    assert len(log_lines) == 9
-    assert log_lines[0].startswith('Invoked as')
-    assert log_lines[1] == 'error: hey now!'
-    assert log_lines[2] == '    baby'
-    assert log_lines[3] == '    bird'
-    assert log_lines[4] == 'error:'
-    assert log_lines[5] == '    yep yep yep yep yep yep yep yep yep yep yep:'
-    assert log_lines[6] == '        yep,'
-    assert log_lines[7] == '        YEP!'
-    assert log_lines[8] == ''
-
-def test_warn():
-    with StringIO() as stdout, \
-         StringIO() as stderr, \
-         StringIO() as logfile, \
-         Inform(
-            stdout=stdout, stderr=stderr, logfile=logfile, prog_name=False
-        ) as msg \
-    :
-        warn('hey now!', culprit='yo')
-        codicil('baby', 'bird', sep='\n')
-        warn('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
-
-        num_errors = msg.errors_accrued()
-        num_errors2 = errors_accrued()
-        output_text = stdout.getvalue()
-        error_text = stderr.getvalue()
-        logfile_text = logfile.getvalue()
-
-    assert num_errors == 0
-    assert num_errors2 == 0
-    assert str(output_text) == dedent('''
-        warning: yo: hey now!
-            baby
-                bird
-        warning:
+        expected = dedent('''
+            yo, ho: hey now!
             yep yep yep yep yep yep yep yep yep yep yep:
                 yep,
                     YEP!
-    ''').lstrip()
-    assert str(error_text) == ''
-    log_lines = logfile_text.split('\n')
-    assert len(log_lines) == 9
-    assert log_lines[0].startswith('Invoked as')
-    assert log_lines[1] == 'warning: yo: hey now!'
-    assert log_lines[2] == '    baby'
-    assert log_lines[3] == '        bird'
-    assert log_lines[4] == 'warning:'
-    assert log_lines[5] == '    yep yep yep yep yep yep yep yep yep yep yep:'
-    assert log_lines[6] == '        yep,'
-    assert log_lines[7] == '            YEP!'
-    assert log_lines[8] == ''
+        ''').strip()
 
-def test_Error():
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            Invoked as <exe> on <date>.
+            {expected}
+        ''').strip().format(expected=expected)
+
+def test_wring():
+    with messenger() as (msg, stdout, stderr, logfile):
+        output('hey now!')
+        codicil('baby', 'bird', sep='\n')
+        msg.flush_logfile()
+        expected = dedent('''
+            hey now!
+            baby
+            bird
+        ''').strip()
+
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            Invoked as <exe> on <date>.
+            {expected}
+        ''').strip().format(expected=expected)
+
+        try:
+            terminate_if_errors()
+            assert True
+        except SystemExit:
+            assert False
+
+def test_fabricate():
+    with messenger(hanging_indent=False) as (msg, stdout, stderr, logfile):
+        error('hey now!')
+        codicil('baby', 'bird', sep='\n')
+        error('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
+        expected = dedent('''
+            error: hey now!
+                baby
+                bird
+            error:
+                yep yep yep yep yep yep yep yep yep yep yep:
+                    yep,
+                    YEP!
+        ''').strip()
+
+        assert msg.errors_accrued() == 2
+        assert errors_accrued(True) == 2
+        assert msg.errors_accrued() == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            Invoked as <exe> on <date>.
+            {expected}
+        ''').strip().format(expected=expected)
+
+def test_cartwheel():
+    with messenger() as (msg, stdout, stderr, logfile):
+        warn('hey now!', culprit='yo')
+        codicil('baby', 'bird', sep='\n')
+        warn('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
+        expected = dedent('''
+            warning: yo: hey now!
+                baby
+                    bird
+            warning:
+                yep yep yep yep yep yep yep yep yep yep yep:
+                    yep,
+                        YEP!
+        ''').strip()
+
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            Invoked as <exe> on <date>.
+            {expected}
+        ''').strip().format(expected=expected)
+
+def test_pardon():
     try:
         raise Error('hey now!', culprit='nutz', extra='foo')
         assert False
