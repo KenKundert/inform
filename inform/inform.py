@@ -177,7 +177,7 @@ def fmt(message, *args, **kwargs):
     return message.format(*args, **attrs)
 
 # render {{{2
-def render(obj, _level=0):
+def render(obj, sort=None, _level=0):
     """
     Recursively convert object to string with reasonable formatting.
     Has built in support for the base Python types (None, bool, int, float, str,
@@ -185,30 +185,39 @@ def render(obj, _level=0):
     output of render can be read by the Python interpreter. Other types are
     converted to string with repr().
     """
-
     from textwrap import dedent
 
+    # define sort function, make it either sort or not based on sort
+    if sort is None:
+        sort = True if sys.version_info < (3, 6) else False
+    if sort:
+        def order(keys):
+            try:
+                return sorted(keys)
+            except TypeError:
+                # keys is not homogeneous, cannot sort
+                return keys
+    else:
+        def order(keys):
+            return keys
+
+    # define function for computing the amount of indentation needed
     def leader(relative_level=0):
         return (_level+relative_level)*'    '
 
     code = []
     if type(obj) == dict:
         endcaps = '{ }'
-        content = ['%r: %s' % (k, render(v, _level+1)) for k, v in obj.items()]
+        content = ['%r: %s' % (k, render(obj[k], sort, _level+1)) for k in order(obj)]
     elif type(obj) is list:
         endcaps = '[ ]'
-        content = [render(v) for v in obj]
+        content = [render(v, sort, _level+1) for v in obj]
     elif type(obj) is tuple:
         endcaps = '( )'
-        content = [render(v) for v in obj]
+        content = [render(v, sort, _level+1) for v in obj]
     elif type(obj) is set:
         endcaps = '{ }'
-        try:
-            content = [render(v) for v in sorted(obj)]
-        except TypeError:
-            # obj is not homogeneous, cannot sort
-            # and unlike dicts, sets still do not retain their order
-            content = [render(v) for v in obj]
+        content = [render(v, sort, _level+1) for v in order(obj)]
     elif is_str(obj) and '\n' in obj:
         endcaps = None
         content = [

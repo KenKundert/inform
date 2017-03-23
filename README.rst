@@ -645,12 +645,14 @@ cull(collection, [remove]):
 fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
 
-render(obj):
+render(obj, sort=None):
     Recursively convert an object to a string with reasonable formatting.  Has 
     built in support for the base Python types (None, bool, int, float, str, 
     set, tuple, list, and dict).  If you confine yourself to these types, the 
     output of render() can be read by the Python interpreter. Other types are 
-    converted to string with repr().
+    converted to string with repr(). The dictionary keys and set values are 
+    sorted if sort is True. Sometimes this is not possible because the values 
+    are not comparable, in which case render reverts to the natural order.
 
 plural(count, singular_form, plural_form = *None*):
     Produces either the singular or plural form of a word based on a count.
@@ -723,17 +725,42 @@ Here is an example of render():
     >>> L=[s1, n, S]
     >>> d = {1:s1, 2:s2}
     >>> D={'s': s1, 'n': n, 'S': S, 'L': L, 'd':d}
-    >>> display('D', '=', render(D))
+    >>> display('D', '=', render(D, True))
     D = {
-        's': 'alpha string',
-        'n': 42,
-        'S': {'alpha string', 'beta string'},
         'L': [
             'alpha string',
             42,
             {'alpha string', 'beta string'},
         ],
+        'S': {'alpha string', 'beta string'},
         'd': {1: 'alpha string', 2: 'beta string'},
+        'n': 42,
+        's': 'alpha string',
+    }
+
+    >>> E={'s': s1, 'n': n, 'S': S, 'L': L, 'd':d, 'D':D}
+    >>> display('E', '=', render(E, True))
+    E = {
+        'D': {
+            'L': [
+                'alpha string',
+                42,
+                {'alpha string', 'beta string'},
+            ],
+            'S': {'alpha string', 'beta string'},
+            'd': {1: 'alpha string', 2: 'beta string'},
+            'n': 42,
+            's': 'alpha string',
+        },
+        'L': [
+            'alpha string',
+            42,
+            {'alpha string', 'beta string'},
+        ],
+        'S': {'alpha string', 'beta string'},
+        'd': {1: 'alpha string', 2: 'beta string'},
+        'n': 42,
+        's': 'alpha string',
     }
 
 
