@@ -39,8 +39,8 @@ def messenger(*args, **kwargs):
     stderr = StringIO()
     logfile = StringIO()
     with Inform(
-        *args, **kwargs, stdout=stdout, stderr=stderr, prog_name=False,
-        logfile=logfile
+        *args, stdout=stdout, stderr=stderr, prog_name=False, logfile=logfile,
+        **kwargs
     ) as msg:
         yield msg, stdout, stderr, logfile
     stdout.close()

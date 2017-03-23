@@ -3,8 +3,10 @@ echo "#########"
 echo Python 2:
 echo "#########"
 python2 test
+py.test-2
 echo
 echo "#########"
 echo Python 3:
 echo "#########"
 python3 test
+py.test-3
