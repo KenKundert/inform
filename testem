@@ -1,4 +1,5 @@
 #!/bin/sh
+./clean
 echo "#########"
 echo Python 2:
 echo "#########"
