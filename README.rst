@@ -21,8 +21,21 @@ Inform - Print & Logging Utilities
 |
 
 A light-weight package with few dependencies that provides various print-like 
-functions to communicate to the user. It also provides logging and output 
-control.
+functions to communicate to the user. It allows you to easily print attractive, 
+informative, and consistent error messages.  For example:
+
+    >> from inform import display, warn, error
+    >> display('Display is like print, except that it support logging and can be disabled.')
+    Display is like print, except that it support logging and can be disabled.
+
+    >> warn('warnings get a header that is printed in yellow.')
+    warning: warnings get a header that is printed in yellow.
+
+    >> error('erros get a header that is printed in red.')
+    error: warnings get a header that is printed in red.
+
+Inform also supports normal best practices such as providing logging and output 
+control and adding the program name to error messages.
 
 Install with::
 
