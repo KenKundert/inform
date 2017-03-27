@@ -32,7 +32,7 @@ Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
 
 This package defines a collection of 'print' functions that have different 
 roles.  These functions are referred to as 'informants' and are described below 
-in the the Informants section. They include include *log*, *comment*, *codicil*.  
+in the the Informants section. They include include *log*, *comment*, *codicil*, 
 *narrate*, *display*, *output*, *notify*, *debug*, *warn*, *error*, *fatal* and 
 *panic*.  Each of these functions takes arguments like the standard print 
 function: unnamed arguments are converted to strings and joined together to 
@@ -531,6 +531,9 @@ to the message and the header is colored magenta.
     >>> debug('HERE!')
     myprog DEBUG: HERE!
 
+The *debug* informant is being deprecated in favor of the debugging functions 
+``ddd()``, ``ppp()`` and ``vvv()``.
+
 
 warn
 """"
@@ -762,6 +765,113 @@ Here is an example of render():
         'n': 42,
         's': 'alpha string',
     }
+
+
+Debugging Functions
+"""""""""""""""""""
+The debugging functions are intended to be used when you want to print something 
+out when debugging your program.  They are colorful to make it easier to find 
+them amoung the program's normal output, and a header is added that describes 
+the location they were called from. This makes it easier to distinguish several 
+debug message and also makes it easy to find and remove the functions once you 
+are done debugging.
+
+ppp(\*args, \*\*kwargs):
+    This function is very similar to the normal Python print function in that it 
+    prints out the values of the unnamed arguments under the control of the 
+    named arguments. It also takes the same named arguments as ``print()``, such 
+    as ``sep`` and ``end``.
+
+    If given without unnamed arguments, it will just print the header, which 
+    good way of confirming that a line of code has been reached.
+
+    .. code:: python
+
+        >>> from inform import ppp, ddd, vvv
+        >>> a = 1
+        >>> b = 'this is a test'
+        >>> c = (2, 3)
+        >>> d = {'a': a, 'b': b, 'c': c}
+        >>> ppp(a, b, c)
+        DEBUG: <doctest README.rst[75]>:1, __main__:
+            1 this is a test (2, 3)
+
+ddd(\*args, \*\*kwyargs):
+    This function is pretty prints all of both the unnamed and named arguments.
+
+    .. code:: python
+
+        >>> ddd(a, b, c, d)
+        DEBUG: <doctest README.rst[76]>:1, __main__:
+            1
+            'this is a test'
+            (2, 3)
+            {
+                'a': 1,
+                'b': 'this is a test',
+                'c': (2, 3),
+            }
+
+    If you give named arguments, the name is prepended to its value:
+
+    .. code:: python
+
+        >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
+        DEBUG: <doctest README.rst[77]>:1, __main__:
+            a = 1
+            b = 'this is a test'
+            c = (2, 3)
+            d = {
+                'a': 1,
+                'b': 'this is a test',
+                'c': (2, 3),
+            }
+            s = 'hey now!'
+
+    If an arguments has a __dict__ attribute, it is printed rather than the 
+    argument itself.
+
+    .. code:: python
+
+        >>> class Info:
+        ...     def __init__(self, **kwargs):
+        ...         self.__dict__.update(kwargs)
+        ...         ddd(self=self)
+
+        >>> contact = Info(name='Ted Ledbelly', email='ted@ledbelly.com')
+        DEBUG: <doctest README.rst[78]>:4, __main__.Info.__init__():
+            self = {
+                'email': 'ted@ledbelly.com',
+                'name': 'Ted Ledbelly',
+            }
+
+vvv(\*args):
+    This function prints variables from the calling scope. If no arguments are 
+    given, then all the variables are printed. You can optionally give specific 
+    variables on the argument list and only those variables are printed.
+
+    .. code:: python
+
+        >>> vvv(b, d)
+        DEBUG: <doctest README.rst[80]>:1, __main__:
+            b = 'this is a test'
+            d = {
+                'a': 1,
+                'b': 'this is a test',
+                'c': (2, 3),
+            }
+
+    This last feature is not completely robust. The checking is done by value, 
+    so if several variables share the value of one requested, they are all 
+    shown.
+
+    .. code:: python
+
+        >>> aa = 1
+        >>> vvv(a)
+        DEBUG: <doctest README.rst[82]>:1, __main__:
+            a = 1
+            aa = 1
 
 
 Color Class

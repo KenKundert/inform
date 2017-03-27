@@ -71,8 +71,8 @@ def cull(collection, **kwargs):
         return [each for each in collection if each]
 
 # is_str {{{2
-from six import string_types
 def is_str(obj):
+    from six import string_types
     """Identifies strings in all their various guises."""
     return isinstance(obj, string_types)
 
@@ -258,8 +258,8 @@ def os_error(err):
 # conjoin {{{2
 # Like join, but supports conjunction
 def conjoin(iterable, conj=' and ', sep=', '):
-    """
-    Conjunction Join
+    """Conjunction join
+
     Return the list joined into a string, where conj is used to join the last
     two items in the list, and sep is used to join the others.
 
@@ -285,6 +285,12 @@ def conjoin(iterable, conj=' and ', sep=', '):
 
 # plural {{{2
 def plural(count, singular, plural=None):
+    '''Pluralize a word
+
+    If count is 1 or has length 1, the singular argument is returned, otherwise
+    the plural argument is returned. If plural is None, then it is created by
+    adding an 's' to the end of singular argument.
+    '''
     if plural is None:
         plural = singular + 's'
     if is_iterable(count):
@@ -303,6 +309,108 @@ def full_stop(sentence):
     """
     sentence = str(sentence)
     return sentence if sentence[-1] in '.?!' else sentence + '.'
+
+# debug functions {{{2
+def _debug(frame_depth, args, kwargs):
+    import inspect
+    frame = inspect.stack()[frame_depth + 1][0]
+
+    try:
+        # If the calling frame is inside a class (deduced based on the presence 
+        # of a 'self' variable), name the logger after that class.  Otherwise 
+        # if the calling frame is inside a function, name the logger after that 
+        # function.  Otherwise name it after the module of the calling scope.
+        from pathlib import Path
+
+        self = frame.f_locals.get('self')
+        frame_info = inspect.getframeinfo(frame)
+        function = frame_info.function
+        filename = frame_info.filename
+        lineno = frame_info.lineno
+        module = frame.f_globals['__name__']
+
+        fname = Path(filename).name
+
+        if self is not None:
+            name = '.'.join([
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                    function,
+            ]) + '()'
+
+        elif function != '<module>':
+            name = '.'.join([module, function]) + '()'
+
+        else:
+            name = module
+
+        highlight_header = Color('magenta', enable=Color.isTTY(sys.stdout))
+        highlight_body = Color('blue', enable=Color.isTTY(sys.stdout))
+
+        header = 'DEBUG: {fname}:{lineno}, {name}'.format(
+            filename=filename, fname=fname, lineno=lineno, name=name
+        )
+        body = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        header += ':\n' if body else '.'
+        message = highlight_header(header) + highlight_body(indent(body))
+        print(message, **kwargs)
+
+    finally:
+        # Failing to explicitly delete the frame can lead to long-lived 
+        # reference cycles.
+        del frame
+
+def ppp(*args, **kwargs):
+    '''Print function tailored for debugging.
+
+    Mimics the normal print function, but colors printed output to make it
+    easier to see and labels it with the location of the call.
+    '''
+    frame_depth = 1
+    _debug(frame_depth, args, kwargs)
+
+def ddd(*args, **kwargs):
+    '''Print arguments function tailored for debugging.
+
+    Pretty-prints its arguments. Arguments may be name or unnamed.
+    '''
+    # if an argument has __dict__ attribute, render that rather than arg itself
+    def expand(arg):
+        try:
+            return render(arg.__dict__)
+        except AttributeError:
+            return render(arg)
+
+    args = [
+        expand(arg) for arg in args
+    ] + [
+        '{k} = {v}'.format(k=k, v=expand(v))
+        for k, v in sorted(kwargs.items())
+    ]
+    frame_depth = 1
+    _debug(frame_depth, args, kwargs={'sep':'\n'})
+
+def vvv(*args):
+    '''Print variables function tailored for debugging.
+
+    Pretty-prints variables from the calling scope. If no arguments are given,
+    all variables are printed. If arguments are given, only the variables whose
+    value match an argument are printed.
+    '''
+    from types import ModuleType, FunctionType
+    import inspect
+
+    frame_depth = 1
+    frame = inspect.stack()[frame_depth][0]
+    variables = [(k, frame.f_locals[k]) for k in sorted(frame.f_locals)]
+    args = [
+        '{k} = {v}'.format(k=k, v=render(v))
+        for k, v in variables
+        if not k.startswith('_')
+        if not isinstance(v, (FunctionType, type, ModuleType))
+        if not args or v in args
+    ]
+    _debug(frame_depth, args, kwargs={'sep':'\n'})
 
 
 # InformantGenerator class {{{1
@@ -828,6 +936,7 @@ INFORMER = DEFAULT_INFORMER
 # Exceptions {{{1
 # Error {{{2
 class Error(Exception):
+    '''A generic exception'''
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -842,18 +951,17 @@ class Error(Exception):
         elif culprit:
             return str(culprit)
 
-    def __str__(self):
-        message = self.get_message()
-        culprit = self.get_culprit()
-        return "%s: %s" % (culprit, message) if culprit else message
-
     def report(self):
         error(*self.args, **self.kwargs)
 
     def terminate(self):
         fatal(*self.args, **self.kwargs)
 
-    # __getattr__ {{{2
+    def __str__(self):
+        message = self.get_message()
+        culprit = self.get_culprit()
+        return "%s: %s" % (culprit, message) if culprit else message
+
     def __getattr__(self, name):
         # returns the value associated with name in kwargs if it exists, 
         # otherwise None

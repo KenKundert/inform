@@ -1,3 +1,4 @@
+import sys
 try:
     from setuptools import setup
 except ImportError:
@@ -5,6 +6,11 @@ except ImportError:
 
 with open('README.rst') as f:
     readme = f.read()
+
+if sys.version_info < (3,4):
+    dependencies='arrow six pathlib'
+else:
+    dependencies='arrow six'
 
 setup(
     name='inform',
@@ -18,7 +24,7 @@ setup(
     license='GPLv3+',
     zip_safe=True,
     packages=['inform'],
-    install_requires='arrow six'.split(),
+    install_requires=dependencies.split(),
     setup_requires='pytest-runner>=2.0'.split(),
     tests_requires='pytest'.split(),
     keywords='inform logging printing'.split(),
