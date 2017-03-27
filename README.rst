@@ -24,6 +24,8 @@ A light-weight package with few dependencies that provides various print-like
 functions to communicate to the user. It allows you to easily print attractive, 
 informative, and consistent error messages.  For example:
 
+.. code-block:: python
+
     >> from inform import display, warn, error
     >> display('Display is like print, except that it support logging and can be disabled.')
     Display is like print, except that it support logging and can be disabled.
