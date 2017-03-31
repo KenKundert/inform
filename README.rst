@@ -853,7 +853,7 @@ ddd(\*args, \*\*kwyargs):
         ...         self.__dict__.update(kwargs)
         ...         ddd(self=self)
 
-        >>> contact = Info(name='Ted Ledbelly', email='ted@ledbelly.com')
+        >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
         DEBUG: <doctest README.rst[78]>:4, __main__.Info.__init__():
             self = {
                 'email': 'ted@ledbelly.com',
