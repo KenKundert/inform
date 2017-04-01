@@ -28,7 +28,7 @@ informative, and consistent error messages.  For example:
 
     >> from inform import display, warn, error
     >> display('Display is like print, except that it support logging and can be disabled.')
-    Display is like print, except that it support logging and can be disabled.
+    Display is like print, except that it supports logging and can be disabled.
 
     >> warn('warnings get a header that is printed in yellow.')
     warning: warnings get a header that is printed in yellow.
