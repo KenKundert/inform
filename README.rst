@@ -45,35 +45,18 @@ Install with::
 
 Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
 
+Introduction
+------------
+
 This package defines a collection of 'print' functions that have different 
 roles.  These functions are referred to as 'informants' and are described below 
-in the the Informants section. They include include *log*, *comment*, *codicil*, 
+in the Informants section. They include include *log*, *comment*, *codicil*, 
 *narrate*, *display*, *output*, *notify*, *debug*, *warn*, *error*, *fatal* and 
-*panic*.  Each of these functions takes arguments like the standard print 
-function: unnamed arguments are converted to strings and joined together to 
-produce the output, the named arguments act to control the process.  The 
-available controls (named arguments) are:
-
-sep = ' ':
-   Specifies the string used to join the unnamed arguments.
-end = '\\n':
-   Specifies a string to append to the message.
-file = stdout:
-   The destination stream (a file pointer).
-flush = *False*:
-   Whether the message should flush the destination stream (not available in 
-   python2).
-culprit = *None*:
-   A string that is added to the beginning of the message that identifies the 
-   culprit (the object for which the problem being reported was found). May also 
-   be a collection of strings, in which case they are joined with '.'.
-hanging = *True*:
-   Indicates hanging indentation should be used when outputting multi-line 
-   message with headers or culprits.
+*panic*.
 
 With the simplest use of the program, you simply import the informants you need 
 and call them (they take the same arguments as does the *print* function built 
-into Python:
+into Python):
 
 .. code-block:: python
 
@@ -81,8 +64,8 @@ into Python:
     >>> display('ice', 9)
     ice 9
 
-More typical is to import and instantiate the Inform class yourself along with 
-the desired informants.  This gives you the ability to specify options:
+You can import and instantiate the Inform class yourself along with the desired 
+informants.  This gives you the ability to specify options:
 
 .. code-block:: python
 
@@ -634,6 +617,32 @@ added to the message and the header is colored red. The program is terminated
 with an exit status of 3.
 
 
+Informant Control
+-----------------
+
+The exeception (Error) and all informants take arguments very much like the 
+standard print function: unnamed arguments are converted to strings and joined 
+together to produce the output, the named arguments act to control the process.  
+The available controls (named arguments) are:
+
+sep = ' ':
+   Specifies the string used to join the unnamed arguments.
+end = '\\n':
+   Specifies a string to append to the message.
+file = stdout:
+   The destination stream (a file pointer).
+flush = *False*:
+   Whether the message should flush the destination stream (not available in 
+   python2).
+culprit = *None*:
+   A string that is added to the beginning of the message that identifies the 
+   culprit (the object for which the problem being reported was found). May also 
+   be a collection of strings, in which case they are joined with '.'.
+hanging = *True*:
+   Indicates hanging indentation should be used when outputting multi-line 
+   message with headers or culprits.
+
+
 Utilities
 ---------
 
@@ -649,8 +658,16 @@ indent(text, leader='    ',  first=0, stops=1, sep='\\n'):
 
 conjoin(iterable, conj=' and ', sep=', '):
     Like ''.join(), but allows you to specify a conjunction that is placed 
-    between the last two elements, ex: conjoin(['a', 'b', 'c'], conj=' or ') 
-    generates 'a, b or c'.
+    between the last two elements, ex:
+
+    .. code-block:: python
+
+        >>> from inform import conjoin
+        >>> conjoin(['a', 'b', 'c'])
+        'a, b and c'
+
+        >>> conjoin(['a', 'b', 'c'], conj=' or ')
+        'a, b or c'
 
 cull(collection, [remove]):
     Strips items from a list that have a particular value. By default, it strips 
@@ -808,7 +825,7 @@ ppp(\*args, \*\*kwargs):
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[75]>:1, __main__:
+        DEBUG: <doctest README.rst[78]>:1, __main__:
             1 this is a test (2, 3)
 
 ddd(\*args, \*\*kwyargs):
@@ -817,7 +834,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a, b, c, d)
-        DEBUG: <doctest README.rst[76]>:1, __main__:
+        DEBUG: <doctest README.rst[79]>:1, __main__:
             1
             'this is a test'
             (2, 3)
@@ -832,7 +849,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest README.rst[77]>:1, __main__:
+        DEBUG: <doctest README.rst[80]>:1, __main__:
             a = 1
             b = 'this is a test'
             c = (2, 3)
@@ -854,7 +871,7 @@ ddd(\*args, \*\*kwyargs):
         ...         ddd(self=self)
 
         >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest README.rst[78]>:4, __main__.Info.__init__():
+        DEBUG: <doctest README.rst[81]>:4, __main__.Info.__init__():
             self = {
                 'email': 'ted@ledbelly.com',
                 'name': 'Ted Ledbelly',
@@ -868,7 +885,7 @@ vvv(\*args):
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest README.rst[80]>:1, __main__:
+        DEBUG: <doctest README.rst[83]>:1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,
@@ -884,7 +901,7 @@ vvv(\*args):
 
         >>> aa = 1
         >>> vvv(a)
-        DEBUG: <doctest README.rst[82]>:1, __main__:
+        DEBUG: <doctest README.rst[85]>:1, __main__:
             a = 1
             aa = 1
 

@@ -26,7 +26,7 @@ setup(
     packages=['inform'],
     install_requires=dependencies.split(),
     setup_requires='pytest-runner>=2.0'.split(),
-    tests_requires='pytest'.split(),
+    tests_require='pytest'.split(),
     keywords='inform logging printing'.split(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
