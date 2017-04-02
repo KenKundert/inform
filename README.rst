@@ -30,7 +30,7 @@ example:
     >> from inform import display, warn, error
     >> display(
     ..     'Display is like print'
-    ..     'except that it support logging and can be disabled.'
+    ..     'except that it supports logging and can be disabled.'
     ..     sep=', ')
     Display is like print, except that it supports logging and can be disabled.
 
