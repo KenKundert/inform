@@ -9,7 +9,7 @@ from .inform import (
     Color, fmt, render, os_error, conjoin, plural, full_stop, ppp, ddd, vvv,
 
     # inform classes
-    InformantGenerator, Inform, Error,
+    InformantFactory, Inform, Error,
 
     # inform functions
     done, terminate, terminate_if_errors, errors_accrued,

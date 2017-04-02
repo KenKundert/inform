@@ -413,11 +413,11 @@ def vvv(*args):
     _debug(frame_depth, args, kwargs={'sep':'\n'})
 
 
-# InformantGenerator class {{{1
+# InformantFactory class {{{1
 # A bit of terminology. The active Inform object is called the informer, 
-# whereas the print functions returned from InformantGenerator are referred to 
+# whereas the print functions returned from InformantFactory are referred to 
 # as informants.
-class InformantGenerator:
+class InformantFactory:
     def __init__(
         self,
         severity=None,
@@ -512,56 +512,56 @@ class InformantGenerator:
 
 
 # Informants {{{1
-log = InformantGenerator(
+log = InformantFactory(
     output=False,
     log=True,
 )
-comment = InformantGenerator(
+comment = InformantFactory(
     output=lambda inform: inform.verbose and not inform.mute,
     log=True,
     message_color='cyan',
 )
-codicil = InformantGenerator(
+codicil = InformantFactory(
     is_continuation=True,
 )
-narrate = InformantGenerator(
+narrate = InformantFactory(
     output=lambda inform: inform.narrate and not inform.mute,
     log=True,
     message_color='blue',
 )
-display = InformantGenerator(
+display = InformantFactory(
     output=lambda inform: not inform.quiet and not inform.mute,
     log=True,
 )
-output = InformantGenerator(
+output = InformantFactory(
     output=lambda inform: not inform.mute,
     log=True,
 )
-notify = InformantGenerator(
+notify = InformantFactory(
     output=lambda inform: not inform.quiet and not inform.mute,
     notify=True,
     log=True,
 )
-debug = InformantGenerator(
+debug = InformantFactory(
     severity='DEBUG',
     output=True,
     log=True,
     header_color='magenta',
 )
-warn = InformantGenerator(
+warn = InformantFactory(
     severity='warning',
     header_color='yellow',
     output=lambda inform: not inform.quiet and not inform.mute,
     log=True,
 )
-error = InformantGenerator(
+error = InformantFactory(
     severity='error',
     is_error=True,
     header_color='red',
     output=lambda inform: not inform.mute,
     log=True,
 )
-fatal = InformantGenerator(
+fatal = InformantFactory(
     severity='error',
     is_error=True,
     terminate=1,
@@ -569,7 +569,7 @@ fatal = InformantGenerator(
     output=lambda inform: not inform.mute,
     log=True,
 )
-panic = InformantGenerator(
+panic = InformantFactory(
     severity='internal error (please report)',
     is_error=True,
     terminate=3,

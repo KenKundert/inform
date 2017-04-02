@@ -21,29 +21,33 @@ Inform - Print & Logging Utilities
 |
 
 A light-weight package with few dependencies that provides various print-like 
-functions to communicate to the user. It allows you to easily print attractive, 
-informative, and consistent error messages.  For example:
+functions that are uses when communicating with the user. It allows you to 
+easily print attractive, informative, and consistent error messages.  For 
+example:
 
 .. code-block:: python
 
     >> from inform import display, warn, error
-    >> display('Display is like print, except that it support logging and can be disabled.')
+    >> display(
+    ..     'Display is like print'
+    ..     'except that it support logging and can be disabled.'
+    ..     sep=', ')
     Display is like print, except that it supports logging and can be disabled.
 
     >> warn('warnings get a header that is printed in yellow.')
     warning: warnings get a header that is printed in yellow.
 
-    >> error('erros get a header that is printed in red.')
-    error: warnings get a header that is printed in red.
+    >> error('errors get a header that is printed in red.')
+    error: errors get a header that is printed in red.
 
-Inform also supports normal best practices such as providing logging and output 
-control and adding the program name to error messages.
+Inform also provides logging and output control.
 
 Install with::
 
     pip install inform
 
 Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
+
 
 Introduction
 ------------
@@ -55,8 +59,8 @@ in the Informants section. They include include *log*, *comment*, *codicil*,
 *panic*.
 
 With the simplest use of the program, you simply import the informants you need 
-and call them (they take the same arguments as does the *print* function built 
-into Python):
+and call them (they take the same arguments as Python's built-in *print* 
+function):
 
 .. code-block:: python
 
@@ -64,8 +68,9 @@ into Python):
     >>> display('ice', 9)
     ice 9
 
-You can import and instantiate the Inform class yourself along with the desired 
-informants.  This gives you the ability to specify options:
+For more control of the informants, you can import and instantiate the Inform 
+class yourself along with the desired informants.  This gives you the ability to 
+specify options:
 
 .. code-block:: python
 
@@ -141,10 +146,10 @@ You can create your own informants:
 
 .. code-block:: python
 
-    >>> from inform import Inform, InformantGenerator
+    >>> from inform import Inform, InformantFactory
 
-    >>> verbose1 = InformantGenerator(output=lambda m: m.verbosity >= 1)
-    >>> verbose2 = InformantGenerator(output=lambda m: m.verbosity >= 2)
+    >>> verbose1 = InformantFactory(output=lambda m: m.verbosity >= 1)
+    >>> verbose2 = InformantFactory(output=lambda m: m.verbosity >= 2)
     >>> with Inform(verbosity=0):
     ...     verbose1('First level of verbosity.')
     ...     verbose2('Second level of verbosity.')
@@ -163,7 +168,7 @@ You can create your own informants:
 The argument *verbosity* is not an explicitly supported argument to Inform.  In 
 this case Inform simply saves the value and makes it available as an attribute, 
 and it is this attribute that is queried by the lambda function passed to the 
-InformantGenerator when creating the informants.
+InformantFactory when creating the informants.
 
 
 Exception
@@ -314,9 +319,9 @@ functionality even if you do not have local access to the informer. They are:
 | terminate_if_errors()
 | errors_accrued()
 
-InformantGenerator Class
-------------------------
-The InformantGenerator class takes the following arguments:
+InformantFactory Class
+----------------------
+The InformantFactory class takes the following arguments:
 
 severity = *None*:
    Messages with severities get headers. The header consists of the severity, 
@@ -350,15 +355,15 @@ message_color = *None*:
 header_color = *None*:
    Color used to display the header, if one is produced.
 
-An object of InformantGenerator is referred to as an informant. It is generally 
+An object of InformantFactory is referred to as an informant. It is generally 
 treated as a function that is called to produce the desired output.
 
 .. code-block:: python
 
-    >>> from inform import InformantGenerator
+    >>> from inform import InformantFactory
 
-    >>> succeed = InformantGenerator(message_color='green')
-    >>> fail = InformantGenerator(message_color='red')
+    >>> succeed = InformantFactory(message_color='green')
+    >>> fail = InformantFactory(message_color='red')
 
     >>> succeed('This message would be green.')
     This message would be green.
@@ -378,7 +383,7 @@ log
 
 .. code-block:: python
 
-   log = InformantGenerator(
+   log = InformantFactory(
        output=False,
        log=True,
    )
@@ -391,7 +396,7 @@ comment
 
 .. code-block:: python
 
-   comment = InformantGenerator(
+   comment = InformantFactory(
        output=lambda informer: informer.verbose and not informer.mute,
        log=True,
        message_color='cyan',
@@ -408,7 +413,7 @@ codicil
 
 .. code-block:: python
 
-   codicil = InformantGenerator(is_continuation=True)
+   codicil = InformantFactory(is_continuation=True)
 
 Continues a previous message. Continued messages inherit the properties (output, 
 log, message color, etc) of the previous message.  If the previous message had 
@@ -430,7 +435,7 @@ narrate
 
 .. code-block:: python
 
-   narrate = InformantGenerator(
+   narrate = InformantFactory(
        output=lambda informer: informer.narrate and not informer.mute,
        log=True,
        message_color='blue',
@@ -450,7 +455,7 @@ display
 
 .. code-block:: python
 
-   display = InformantGenerator(
+   display = InformantFactory(
        output=lambda informer: not informer.quiet and not informer.mute,
        log=True,
    )
@@ -469,7 +474,7 @@ output
 
 .. code-block:: python
 
-   output = InformantGenerator(
+   output = InformantFactory(
        output=lambda informer: not informer.mute,
        log=True,
    )
@@ -490,7 +495,7 @@ notify
 
 .. code-block:: python
 
-   notify = InformantGenerator(
+   notify = InformantFactory(
        notify=True,
        log=True,
    )
@@ -512,7 +517,7 @@ debug
 
 .. code-block:: python
 
-   debug = InformantGenerator(
+   debug = InformantFactory(
        severity='DEBUG',
        output=True,
        log=True,
@@ -538,7 +543,7 @@ warn
 
 .. code-block:: python
 
-   warn = InformantGenerator(
+   warn = InformantFactory(
        severity='warning',
        header_color='yellow',
        output=lambda informer: not informer.quiet and not informer.mute,
@@ -561,7 +566,7 @@ error
 
 .. code-block:: python
 
-   error = InformantGenerator(
+   error = InformantFactory(
        severity='error',
        is_error=True,
        header_color='red',
@@ -584,7 +589,7 @@ fatal
 
 .. code-block:: python
 
-   fatal = InformantGenerator(
+   fatal = InformantFactory(
        severity='error',
        is_error=True,
        terminate=1,
@@ -603,7 +608,7 @@ panic
 
 .. code-block:: python
 
-   panic = InformantGenerator(
+   panic = InformantFactory(
        severity='internal error (please report)',
        is_error=True,
        terminate=3,
