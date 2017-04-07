@@ -13,8 +13,9 @@ Inform - Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/pyversions/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
-.. image:: https://img.shields.io/pypi/dd/inform.svg
-    :target: https://pypi.python.org/pypi/inform/
+.. IGNORE: pypi statics are broken and unlikely to be fixed
+    .. image:: https://img.shields.io/pypi/dm/inform.svg
+        :target: https://pypi.python.org/pypi/inform/
 
 | Version: 1.9.0
 | Released: 2017-04-02
