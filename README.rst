@@ -13,9 +13,8 @@ Inform - Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/pyversions/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
-.. IGNORE: pypi statics are broken and unlikely to be fixed
-    .. image:: https://img.shields.io/pypi/dm/inform.svg
-        :target: https://pypi.python.org/pypi/inform/
+.. image:: https://img.shields.io/pypi/dd/inform.svg
+    :target: https://pypi.python.org/pypi/inform/
 
 | Version: 1.9.0
 | Released: 2017-04-02
@@ -261,9 +260,10 @@ stdout=None (stream):
 stderr=None (stream):
    Termination messages are sent here by default. Generally used for 
    testing.  If not given, sys.stderr is used.
-hanging_indent=True (bool):
-   Indicates hanging indentation should be used by default when outputting 
-   multiline message with headers or culprits.
+length_thresh=80
+   If length of line would be greater than this, split header from body.
+culprit_sep=', '
+   Join string used for culprit collections.
 \**kwargs:
    Any additional keyword arguments are made attributes that are ignored by 
    Inform, but may be accessed by the informants.
@@ -626,7 +626,7 @@ with an exit status of 3.
 Informant Control
 -----------------
 
-The exeception (Error) and all informants take arguments very much like the 
+The exception (Error) and all informants take arguments very much like the 
 standard print function: unnamed arguments are converted to strings and joined 
 together to produce the output, the named arguments act to control the process.  
 The available controls (named arguments) are:
@@ -635,18 +635,36 @@ sep = ' ':
    Specifies the string used to join the unnamed arguments.
 end = '\\n':
    Specifies a string to append to the message.
+wrap = False:
+   Specifies whether message should be wrapped. *wrap* may be True, in which 
+   case the default width of 70 is used.  Alternately, you may specify the 
+   desired width. The wrapping occurs on the final message after the arguments 
+   have been joined.
+culprit = *None*:
+   A string that is added to the beginning of the message that identifies the 
+   culprit (the object for which the problem being reported was found). May also 
+   be a collection of strings, in which case they are joined with *culprit_sep* 
+   (default is ', ').
 file = stdout:
    The destination stream (a file pointer).
 flush = *False*:
    Whether the message should flush the destination stream (not available in 
    python2).
-culprit = *None*:
-   A string that is added to the beginning of the message that identifies the 
-   culprit (the object for which the problem being reported was found). May also 
-   be a collection of strings, in which case they are joined with '.'.
-hanging = *True*:
-   Indicates hanging indentation should be used when outputting multi-line 
-   message with headers or culprits.
+
+Here is an example that demonstrates the wrap and composite culprit features.
+
+..  code-block:: python
+
+   >>> value = -1
+   >>> error(
+   ...     'Encountered illegal value',
+   ...     value,
+   ...     'when filtering. Consider regenerating data again.',
+   ...     culprit=('input.data', 32), wrap=True,
+   ... )
+   myprog error: input.data, 32:
+       Encountered illegal value -1 when filtering. Consider regenerating
+       data again.
 
 
 Utilities
@@ -831,7 +849,7 @@ ppp(\*args, \*\*kwargs):
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[78]>:1, __main__:
+        DEBUG: <doctest README.rst[80]>:1, __main__:
             1 this is a test (2, 3)
 
 ddd(\*args, \*\*kwyargs):
@@ -840,7 +858,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a, b, c, d)
-        DEBUG: <doctest README.rst[79]>:1, __main__:
+        DEBUG: <doctest README.rst[81]>:1, __main__:
             1
             'this is a test'
             (2, 3)
@@ -855,7 +873,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest README.rst[80]>:1, __main__:
+        DEBUG: <doctest README.rst[82]>:1, __main__:
             a = 1
             b = 'this is a test'
             c = (2, 3)
@@ -877,7 +895,7 @@ ddd(\*args, \*\*kwyargs):
         ...         ddd(self=self)
 
         >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest README.rst[81]>:4, __main__.Info.__init__():
+        DEBUG: <doctest README.rst[83]>:4, __main__.Info.__init__():
             self = {
                 'email': 'ted@ledbelly.com',
                 'name': 'Ted Ledbelly',
@@ -891,7 +909,7 @@ vvv(\*args):
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest README.rst[83]>:1, __main__:
+        DEBUG: <doctest README.rst[85]>:1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,
@@ -907,7 +925,7 @@ vvv(\*args):
 
         >>> aa = 1
         >>> vvv(a)
-        DEBUG: <doctest README.rst[85]>:1, __main__:
+        DEBUG: <doctest README.rst[87]>:1, __main__:
             a = 1
             aa = 1
 

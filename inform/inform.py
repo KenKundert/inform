@@ -2,7 +2,7 @@
 # Utilities for communicating directly with the user.
 
 # License {{{1
-# Copyright (C) 2014-16 Kenneth S. Kundert
+# Copyright (C) 2014-2017 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -604,7 +604,8 @@ class Inform:
         flush=False,
         stdout=None,
         stderr=None,
-        hanging_indent=True,
+        length_thresh=80,
+        culprit_sep = ', ',
         **kwargs
     ):
         """
@@ -651,6 +652,11 @@ class Inform:
         stderr (stream)
             Termination messages are sent here by default. Generally used for 
             testing.  If not given, sys.stderr is used.
+        length_thresh (integer)
+            Split header from body if line length would be greater than
+            threshold.
+        culprit_sep (string)
+            Join string used for culprit collections.
         **kwargs
             Any additional keyword arguments are made attributes that are 
             ignored by Inform, but may be accessed by the informants.
@@ -661,10 +667,11 @@ class Inform:
         self.flush = flush
         self.stdout = stdout if stdout else sys.stdout
         self.stderr = stderr if stderr else sys.stderr
-        self.hanging_indent = bool(hanging_indent)
         self.__dict__.update(kwargs)
         self.previous_action = None
         self.logfile = None
+        self.length_thresh = length_thresh
+        self.culprit_sep = culprit_sep
 
         # make verbosity flags consistent
         self.mute = mute
@@ -748,6 +755,8 @@ class Inform:
 
     # report {{{2
     def report(self, args, kwargs, action):
+
+        # handle continuations
         is_continuation = action.is_continuation
         if is_continuation:
             action = self.previous_action
@@ -755,46 +764,38 @@ class Inform:
         else:
             if action.is_error:
                 self.errors += 1
+
+        # assemble the message
         if action.produce_output(self):
             options = self._get_print_options(kwargs, action)
             message = self._render_message(args, kwargs)
             culprit = self._render_culprit(kwargs)
             header = self._render_header(action)
-            body = message
-            hang = 1*bool(kwargs.get('hanging', self.hanging_indent))
-            if culprit:
-                culprit = str(culprit)
-                if len(culprit) + len(header) > 40:
-                    body = '%s:\n%s' % (
-                        culprit,
-                        indent(body, first=-hang, stops=1 + (not header)*hang)
-                    )
-                else:
-                    body = '%s: %s' % (culprit, body)
-            if header:
-                if is_continuation:
-                    header = ''
-                    body = indent(body, first=-hang, stops=1+hang)
-                elif '\n' in body:
-                    body = '\n' + indent(body, first=-hang, stops=1+hang)
-                    header = header.rstrip()
+            multiline = (header or culprit) and (
+                '\n' in message or
+                len(header + culprit + message) > self.length_thresh
+            )
+            if is_continuation:
+                multiline = bool(header)
+                header = ''
+
             messege_color = action.message_color
             header_color = action.header_color
             if action.write_output(self):
                 cs = self.colorscheme if Color.isTTY(options['file']) else None
-                if header:
-                    print(
-                        header_color(header, scheme=cs)
-                      + messege_color(body, scheme=cs),
-                        **options
-                    )
-                else:
-                    print(messege_color(body, scheme=cs), **options)
+                self._show_msg(
+                    header_color(header, scheme=cs) if header else header,
+                    header_color(culprit, scheme=cs) if culprit else culprit,
+                    messege_color(message, scheme=cs) if message else message,
+                    multiline,
+                    options
+                )
             if action.write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
-                print('%s%s' % (header, body), **options)
+                self._show_msg(header, culprit, message, multiline, options)
             if action.notify_user(self):
                 import subprocess
+                body = ': '.join(cull([header, culprit, message]))
                 subprocess.call(cull([NOTIFIER, self.prog_name, body]))
         if action.terminate is not False:
             self.terminate(status=action.terminate)
@@ -819,24 +820,46 @@ class Inform:
     # _render_message {{{2
     @staticmethod
     def _render_message(args, kwargs):
-        return kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        wrap = kwargs.get('wrap')
+        if wrap:
+            from textwrap import fill
+            if type(wrap) == int:
+                message = fill(message, width=wrap)
+            else:
+                message = fill(message)
+        return message
 
     # _render_culprit {{{2
-    @staticmethod
-    def _render_culprit(kwargs):
+    def _render_culprit(self, kwargs):
         culprit = kwargs.get('culprit')
-        if culprit and is_collection(culprit):
-            culprit = ', '.join(str(c) for c in culprit if c is not None)
-        return culprit
+        if culprit:
+            if is_collection(culprit):
+                return self.culprit_sep.join(str(c) for c in culprit if c)
+            else:
+                return str(culprit)
+        else:
+            return ''
 
     # _render_header {{{2
     def _render_header(self, action):
         if action.severity:
             if self.output_prog_name and self.prog_name:
-                return '%s %s: ' % (self.prog_name, action.severity)
+                return '%s %s' % (self.prog_name, action.severity)
             else:
-                return '%s: ' % action.severity
+                return '%s' % action.severity
         return ''
+
+    # show_msg {{{2
+    def _show_msg(self, header, culprit, message, multiline, options):
+        if multiline:
+            head = ': '.join(cull([header, culprit]))
+            if head:
+                print('%s:\n%s' % (head, indent(message)), **options)
+            else:
+                print(indent(message), **options)
+        else:
+            print(': '.join(cull([header, culprit, message])), **options)
 
     # done {{{2
     def done(self):

@@ -358,13 +358,13 @@ testCases = [
         stdout=dedent('''
             inform warning:
                 This is a ...
-                    test.
+                test.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             inform warning:
                 This is a ...
-                    test.
+                test.
         '''),
     ),
     Case(
@@ -436,14 +436,14 @@ testCases = [
             codicil('This is the third appendage.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage.
                 This is the third appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage.
                 This is the third appendage.
@@ -458,17 +458,17 @@ testCases = [
             codicil('This is the second appendage,\nand the third.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage,
-                    and the third.
+                and the third.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage,
-                    and the third.
+                and the third.
         '''),
     ),
     Case(
@@ -503,13 +503,13 @@ testCases = [
         stdout=dedent('''
             inform error:
                 Error message.
-                    Additional info.
+                Additional info.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             inform error:
                 Error message.
-                    Additional info.
+                Additional info.
         '''),
     ),
     Case(
@@ -543,15 +543,15 @@ testCases = [
             error('this is the ...{nl}error message.', culprit='src')
         ''').format(stdargs=captureAll, nl=r'\n'),
         stdout=dedent('''
-            inform error:
-                src: this is the ...
-                    error message.
+            inform error: src:
+                this is the ...
+                error message.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error:
-                src: this is the ...
-                    error message.
+            inform error: src:
+                this is the ...
+                error message.
         '''),
     ),
     Case(
@@ -599,16 +599,14 @@ testCases = [
             codicil('This is an appendage.')
         '''.format(stdargs=captureAll)),
         stdout=dedent('''
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the error message.
                 This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the error message.
                 This is an appendage.
         '''),
     ),
@@ -623,18 +621,16 @@ testCases = [
             codicil('This is an appendage.')
         ''').format(stdargs=captureAll, nl=r'\n'),
         stdout=dedent('''
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the ...
-                        error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                error message.
                 This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the ...
-                        error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                error message.
                 This is an appendage.
         '''),
     ),
@@ -651,14 +647,14 @@ testCases = [
         stdout=dedent('''
             This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the ...
-                    error message.
+                error message.
             This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the ...
-                    error message.
+                error message.
             This is an appendage.
         '''),
     ),
@@ -854,13 +850,13 @@ testCases = [
         stdout=dedent('''
             inform warning:
                 This is a ...
-                    test.
+                test.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
             inform warning:
                 This is a ...
-                    test.
+                test.
         '''),
     ),
     Case(
@@ -914,14 +910,14 @@ testCases = [
             codicil('This is the third appendage.')
         '''.format(stdargs=noHang)),
         stdout=dedent('''
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage.
                 This is the third appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage.
                 This is the third appendage.
@@ -936,14 +932,14 @@ testCases = [
             codicil('This is the second appendage,\nand the third.')
         '''.format(stdargs=noHang)),
         stdout=dedent('''
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage,
                 and the third.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error: 
+            inform error
                 This is the first appendage.
                 This is the second appendage,
                 and the third.
@@ -1021,14 +1017,14 @@ testCases = [
             error('this is the ...{nl}error message.', culprit='src')
         ''').format(stdargs=noHang, nl=r'\n'),
         stdout=dedent('''
-            inform error:
-                src: this is the ...
+            inform error: src:
+                this is the ...
                 error message.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error:
-                src: this is the ...
+            inform error: src:
+                this is the ...
                 error message.
         '''),
     ),
@@ -1077,16 +1073,14 @@ testCases = [
             codicil('This is an appendage.')
         '''.format(stdargs=noHang)),
         stdout=dedent('''
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the error message.
                 This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the error message.
                 This is an appendage.
         '''),
     ),
@@ -1101,18 +1095,16 @@ testCases = [
             codicil('This is an appendage.')
         ''').format(stdargs=noHang, nl=r'\n'),
         stdout=dedent('''
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the ...
-                    error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                error message.
                 This is an appendage.
         '''),
         logfile=dedent('''
             Invoked as <exe> on <date>.
-            inform error:
-                This is a very long culprit, indeed it is very very very very very very very long:
-                    This is the body of the ...
-                    error message.
+            inform error: This is a very long culprit, indeed it is very very very very very very very long:
+                This is the body of the ...
+                error message.
                 This is an appendage.
         '''),
     ),

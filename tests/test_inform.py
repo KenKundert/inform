@@ -70,7 +70,7 @@ def test_billfold():
             yo, ho: hey now!
             yep yep yep yep yep yep yep yep yep yep yep:
                 yep,
-                    YEP!
+                YEP!
         ''').strip()
 
         assert msg.errors_accrued() == 0
@@ -112,15 +112,14 @@ def test_fabricate():
     with messenger(hanging_indent=False) as (msg, stdout, stderr, logfile):
         error('hey now!')
         codicil('baby', 'bird', sep='\n')
-        error('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
+        error('uh-huh\nuh-huh', culprit='yep yep yep yep yep yep yep yep yep yep yep')
         expected = dedent('''
             error: hey now!
                 baby
                 bird
-            error:
-                yep yep yep yep yep yep yep yep yep yep yep:
-                    yep,
-                    YEP!
+            error: yep yep yep yep yep yep yep yep yep yep yep:
+                uh-huh
+                uh-huh
         ''').strip()
 
         assert msg.errors_accrued() == 2
@@ -137,15 +136,14 @@ def test_cartwheel():
     with messenger() as (msg, stdout, stderr, logfile):
         warn('hey now!', culprit='yo')
         codicil('baby', 'bird', sep='\n')
-        warn('yep,\nYEP!', culprit='yep yep yep yep yep yep yep yep yep yep yep')
+        warn('uh-huh\nuh-huh', culprit='yep yep yep yep yep yep yep yep yep yep yep')
         expected = dedent('''
             warning: yo: hey now!
                 baby
-                    bird
-            warning:
-                yep yep yep yep yep yep yep yep yep yep yep:
-                    yep,
-                        YEP!
+                bird
+            warning: yep yep yep yep yep yep yep yep yep yep yep:
+                uh-huh
+                uh-huh
         ''').strip()
 
         assert msg.errors_accrued() == 0
