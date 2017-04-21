@@ -306,7 +306,7 @@ errors_accrued(reset = *False*):
    Return the number of errors that have accrued.
 
 disconnect():
-   Deactivate the current Inform, restoring the default.
+   Deactivate the current informer, restoring the default.
 
 Functions
 """""""""
