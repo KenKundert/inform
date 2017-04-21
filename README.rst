@@ -977,8 +977,12 @@ enable = True:
 
 A colorizer takes the following arguments:
 
-text:
-   The text to be colored.
+unnamed arguments:
+   The unnamed arguments are converted to strings and joined to form the text to 
+   be colored.
+
+sep = ' ':
+   The join string.
 
 scheme = *False*:
    Use to override the colorscheme when rendering the text.  Choose from *None*, 
