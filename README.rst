@@ -982,7 +982,7 @@ unnamed arguments:
    be colored.
 
 sep = ' ':
-   The join string.
+   The join string, used when joining the unnamed arguments.
 
 scheme = *False*:
    Use to override the colorscheme when rendering the text.  Choose from *None*, 
