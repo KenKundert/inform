@@ -32,7 +32,7 @@ NOTIFIER = 'notify-send'
 # Inform Utilities {{{1
 # indent {{{2
 def indent(text, leader='    ', first=0, stops=1, sep='\n'):
-    r"""{
+    r"""
     Add indentation.
 
     leader (string):
@@ -51,7 +51,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     And the answer is ...
         42!
 
-    }"""
+    """
     # do the indent
     indented = (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
 
@@ -126,7 +126,10 @@ class Color:
 
     @classmethod
     def strip_colors(cls, text):
-        return cls.COLOR_CODE_REGEX.sub('', text)
+        if '\033' in text:
+            return cls.COLOR_CODE_REGEX.sub('', text)
+        else:
+            return text
 
 
 # User Utilities {{{1
@@ -413,6 +416,22 @@ def vvv(*args):
     ]
     _debug(frame_depth, args, kwargs={'sep':'\n'})
 
+def sss(*args):
+    import traceback
+    tb = traceback.extract_stack()
+    highlight_body = Color('blue', enable=Color.isTTY(sys.stdout))
+    stacktrace = []
+    for filename, lineno, funcname, text in tb[:-1]:
+        filename = 'File {!r}'.format(filename) if filename else None
+        lineno = 'line {}'.format(lineno) if lineno else None
+        funcname = 'in {}'.format(funcname) if funcname else None
+        text = '\n    {}'.format(text) if text else None
+        stacktrace.append(', '.join(cull([filename, lineno, funcname, text])))
+
+    import inspect
+    frame_depth = 1
+    frame = inspect.stack()[frame_depth][0]
+    _debug(frame_depth, stacktrace, kwargs={'sep':'\n'})
 
 # InformantFactory class {{{1
 # A bit of terminology. The active Inform object is called the informer, 
@@ -793,7 +812,13 @@ class Inform:
                 )
             if action.write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
-                self._show_msg(header, culprit, message, multiline, options)
+                self._show_msg(
+                    header,
+                    culprit,
+                    Color.strip_colors(message),
+                    multiline,
+                    options
+                )
             if action.notify_user(self):
                 import subprocess
                 body = ': '.join(cull([header, culprit, message]))
@@ -821,7 +846,11 @@ class Inform:
     # _render_message {{{2
     @staticmethod
     def _render_message(args, kwargs):
-        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        template = kwargs.get('template')
+        if template is None:
+            message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        else:
+            message = template.format(*args, **kwargs)
         wrap = kwargs.get('wrap')
         if wrap:
             from textwrap import fill
@@ -966,7 +995,13 @@ class Error(Exception):
         self.kwargs = kwargs
 
     def get_message(self):
-        return self.kwargs.get('sep', ' ').join(str(a) for a in self.args)
+        template = self.kwargs.get('template')
+        if template is None:
+            sep = self.kwargs.get('sep', ' ')
+            message = sep.join(str(arg) for arg in self.args)
+        else:
+            message = template.format(*self.args, **self.kwargs)
+        return message
 
     def get_culprit(self):
         culprit = self.kwargs.get('culprit')

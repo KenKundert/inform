@@ -6,7 +6,7 @@ from .inform import (
     indent, cull, is_str, is_iterable, is_collection,
 
     # user utilities
-    Color, fmt, render, os_error, conjoin, plural, full_stop, ppp, ddd, vvv,
+    Color, fmt, render, os_error, conjoin, plural, full_stop, ppp, ddd, vvv, sss,
 
     # inform classes
     InformantFactory, Inform, Error,

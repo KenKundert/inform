@@ -199,6 +199,30 @@ be shown to the user.
 Any keyword arguments provided will be available in *e.kwargs*, but certain 
 keyword arguments are reserved by inform (see above).
 
+One common approach to using *Error* is to pass all the arguments that make up 
+the error message as unnamed arguments and then assemble them into the message 
+by providing a template.  In that way the arguments are directly available to 
+the handler if needed. For example:
+
+.. code-block:: python
+
+    >>> from difflib import get_close_matches
+    >>> from inform import Error, codicil, conjoin, fmt
+
+    >>> known_names = 'alpha beta gamma delta epsilon'.split()
+    >>> name = 'alfa'
+
+    >>> try:
+    ...     if name not in known_names:
+    ...         raise Error(name, template="name '{}' is not defined.")
+    ... except Error as e:
+    ...     candidates = get_close_matches(e.args[0], known_names, 1, 0.6)
+    ...     candidates = conjoin(candidates, conj=' or ')
+    ...     e.report()
+    ...     codicil(fmt('Did you mean {candidates}?'))
+    myprog error: name 'alfa' is not defined.
+        Did you mean alpha?
+
 
 Inform Class
 ------------
@@ -536,7 +560,7 @@ to the message and the header is colored magenta.
     myprog DEBUG: HERE!
 
 The *debug* informant is being deprecated in favor of the debugging functions 
-``ddd()``, ``ppp()`` and ``vvv()``.
+``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
 
 
 warn
@@ -633,6 +657,11 @@ The available controls (named arguments) are:
 
 sep = ' ':
    Specifies the string used to join the unnamed arguments.
+template = None:
+   A template that if present interpolates the arguments to form the final 
+   message rather than simply joining the unnamed arguments with *sep*. The 
+   template is a string, and its *format* method is called with the unnamed and 
+   named arguments of the message passed as arguments.
 end = '\\n':
    Specifies a string to append to the message.
 wrap = False:
@@ -843,13 +872,13 @@ ppp(\*args, \*\*kwargs):
 
     .. code:: python
 
-        >>> from inform import ppp, ddd, vvv
+        >>> from inform import ppp, ddd, sss, vvv
         >>> a = 1
         >>> b = 'this is a test'
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[80]>:1, __main__:
+        DEBUG: <doctest README.rst[85]>:1, __main__:
             1 this is a test (2, 3)
 
 ddd(\*args, \*\*kwyargs):
@@ -858,7 +887,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a, b, c, d)
-        DEBUG: <doctest README.rst[81]>:1, __main__:
+        DEBUG: <doctest README.rst[86]>:1, __main__:
             1
             'this is a test'
             (2, 3)
@@ -873,7 +902,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest README.rst[82]>:1, __main__:
+        DEBUG: <doctest README.rst[87]>:1, __main__:
             a = 1
             b = 'this is a test'
             c = (2, 3)
@@ -895,7 +924,7 @@ ddd(\*args, \*\*kwyargs):
         ...         ddd(self=self)
 
         >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest README.rst[83]>:4, __main__.Info.__init__():
+        DEBUG: <doctest README.rst[88]>:4, __main__.Info.__init__():
             self = {
                 'email': 'ted@ledbelly.com',
                 'name': 'Ted Ledbelly',
@@ -909,7 +938,7 @@ vvv(\*args):
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest README.rst[85]>:1, __main__:
+        DEBUG: <doctest README.rst[90]>:1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,
@@ -925,9 +954,25 @@ vvv(\*args):
 
         >>> aa = 1
         >>> vvv(a)
-        DEBUG: <doctest README.rst[87]>:1, __main__:
+        DEBUG: <doctest README.rst[92]>:1, __main__:
             a = 1
             aa = 1
+
+sss(\*args):
+    This function prints a stack trace, which can answer the *How did I get 
+    here?* question better than a simple print function.
+
+    .. code:: python
+
+        >> def foo():
+        ..     sss()
+        ..     print('CONTINUING')
+
+        >> foo()
+        DEBUG: <doctest README.rst[93]>:2, __main__.foo():
+            Traceback (most recent call last):
+                ...
+        CONTINUING
 
 
 Color Class
