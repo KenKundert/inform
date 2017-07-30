@@ -13,15 +13,16 @@ Inform - Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/pyversions/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
-.. image:: https://img.shields.io/pypi/dd/inform.svg
-    :target: https://pypi.python.org/pypi/inform/
+.. IGNORE: pypi statistics are broken and unlikely to be fixed
+    .. image:: https://img.shields.io/pypi/dd/inform.svg
+        :target: https://pypi.python.org/pypi/inform/
 
 | Version: 1.9.3
 | Released: 2017-07-03
 |
 
 A light-weight package with few dependencies that provides various print-like 
-functions that are uses when communicating with the user. It allows you to 
+functions that are used when communicating with the user. It allows you to 
 easily print attractive, informative, and consistent error messages.  For 
 example:
 

@@ -45,11 +45,12 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     sep (string):
         the string used to separate the lines
 
-    Examples:
-    >>> from inform import indent
-    >>> print(indent('And the answer is ...\n42!', first=-1))
-    And the answer is ...
-        42!
+    Examples::
+
+        >>> from inform import indent
+        >>> print(indent('And the answer is ...\n42!', first=-1))
+        And the answer is ...
+            42!
 
     """
     # do the indent
@@ -135,33 +136,35 @@ class Color:
 # User Utilities {{{1
 # fmt {{{2
 def fmt(message, *args, **kwargs):
-    r"""
+    """
     Convert a message with embedded attributes to a string. The values for the 
     attributes can come from the argument list, as with ''.format(), or they may
     come from the local scope (found by introspection).
 
-    Examples:
-    >>> from inform import fmt
-    >>> s = 'str var'
-    >>> d = {'msg': 'dict val'}
-    >>> class Class:
-    ...     a = 'cls attr'
+    Examples::
 
-    >>> print(fmt("by order: {0}, {1[msg]}, {2.a}.", s, d, Class))
-    by order: str var, dict val, cls attr.
-    >>> print(fmt("by name: {S}, {D[msg]}, {C.a}.", S=s, D=d, C=Class))
-    by name: str var, dict val, cls attr.
+        >>> from inform import fmt
+        >>> s = 'str var'
+        >>> d = {'msg': 'dict val'}
+        >>> class Class:
+        ...     a = 'cls attr'
 
-    The following works, but does not work with doctests
-    # >>> print(fmt("by magic: {s}, {d[msg]}, {c.a}."))
-    # by magic: str var, dict val, cls attr.
+        >>> print(fmt("by order: {0}, {1[msg]}, {2.a}.", s, d, Class))
+        by order: str var, dict val, cls attr.
+        >>> print(fmt("by name: {S}, {D[msg]}, {C.a}.", S=s, D=d, C=Class))
+        by name: str var, dict val, cls attr.
+
+        The following works, but does not work with doctests
+        # >>> print(fmt("by magic: {s}, {d[msg]}, {c.a}."))
+        # by magic: str var, dict val, cls attr.
 
     You can change the level at which the introspection occurs using the _lvl 
     keyword argument.
-       _lvl=0 searches for variables in the scope that calls fmt(), the default
-       _lvl=-1 searches in the parent of the scope that calls fmt()
-       _lvl=-2 searches in the grandparent, etc.
-       _lvl=1 search root scope, etc.
+
+        | _lvl=0 searches for variables in the scope that calls fmt(), the default
+        | _lvl=-1 searches in the parent of the scope that calls fmt()
+        | _lvl=-2 searches in the grandparent, etc.
+        | _lvl=1 search root scope, etc.
     """
     import inspect
 
@@ -910,11 +913,12 @@ class Inform:
         """Termination
 
         Recommended status codes:
-            None: return 1 if errors occurred and 0 otherwise
-            0: success
-            1: unexpected error
-            2: invalid invocation
-            3: panic
+            | None: return 1 if errors occurred and 0 otherwise
+            | 0: success
+            | 1: unexpected error
+            | 2: invalid invocation
+            | 3: panic
+
         Status may also be a string, in which case it is printed to stderr and 
         the exit status is 1.
         """

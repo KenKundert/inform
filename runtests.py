@@ -247,7 +247,7 @@ def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test
         elif os.path.isdir(test):
             summaryFileName = './%s/.%s.sum' % (test, testKey)
             _deleteYamlFile(summaryFileName)
-            cmd = 'cd %s; %s %s %s' % (test, pythonCmd, testKey, _childOpts(test))
+            cmd = 'cd %s; %s %s %s' % (test, python, testKey, _childOpts(test))
             error = _invoke(cmd)
         else:
             print(exception(
