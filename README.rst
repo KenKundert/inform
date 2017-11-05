@@ -725,16 +725,17 @@ conjoin(iterable, conj=' and ', sep=', '):
 
 cull(collection, [remove]):
     Strips items from a list that have a particular value. By default, it strips 
-    a list of values that if casted to a boolean would have a value of False (0, 
-    False, None, '', (), [], etc.).  A particular value may be specified using 
-    the 'remove' as a keyword argument.  The value of remove may be a function, 
-    in which case it takes a single item as an argument and returns *True* if 
-    that item should be removed from the list.
+    a list of values that would be False when cast to a boolean (0, False, None, 
+    '', (), [], etc.).  A particular value may be specified using the 'remove' 
+    as a keyword argument.  The value of remove may be a collection, in which 
+    case any value in the collection is removed, or it may be a function, in 
+    which case it takes a single item as an argument and returns *True* if that 
+    item should be removed from the list.
 
 fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
 
-render(obj, sort=None):
+render(obj, sort=None, level=0, tab='    '):
     Recursively convert an object to a string with reasonable formatting.  Has 
     built in support for the base Python types (None, bool, int, float, str, 
     set, tuple, list, and dict).  If you confine yourself to these types, the 

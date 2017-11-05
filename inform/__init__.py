@@ -12,7 +12,7 @@ from .inform import (
     InformantFactory, Inform, Error,
 
     # inform functions
-    done, terminate, terminate_if_errors, errors_accrued,
+    done, terminate, terminate_if_errors, errors_accrued, get_prog_name,
 
     # built-in informants
     log, comment, codicil, narrate, display, output,

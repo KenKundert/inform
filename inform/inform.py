@@ -66,6 +66,8 @@ def cull(collection, **kwargs):
         remove = kwargs['remove']
         if callable(remove):
             return [each for each in collection if not remove(each)]
+        elif is_collection(remove):
+            return [each for each in collection if each not in remove]
         else:
             return [each for each in collection if each != remove]
     except KeyError:
@@ -183,7 +185,7 @@ def fmt(message, *args, **kwargs):
     return message.format(*args, **attrs)
 
 # render {{{2
-def render(obj, sort=None, _level=0):
+def render(obj, sort=None, level=0, tab='    '):
     """
     Recursively convert object to string with reasonable formatting.
     Has built in support for the base Python types (None, bool, int, float, str,
@@ -209,21 +211,21 @@ def render(obj, sort=None, _level=0):
 
     # define function for computing the amount of indentation needed
     def leader(relative_level=0):
-        return (_level+relative_level)*'    '
+        return (level+relative_level)*tab
 
     code = []
     if type(obj) == dict:
         endcaps = '{ }'
-        content = ['%r: %s' % (k, render(obj[k], sort, _level+1)) for k in order(obj)]
+        content = ['%r: %s' % (k, render(obj[k], sort, level+1)) for k in order(obj)]
     elif type(obj) is list:
         endcaps = '[ ]'
-        content = [render(v, sort, _level+1) for v in obj]
+        content = [render(v, sort, level+1) for v in obj]
     elif type(obj) is tuple:
         endcaps = '( )'
-        content = [render(v, sort, _level+1) for v in obj]
+        content = [render(v, sort, level+1) for v in obj]
     elif type(obj) is set:
         endcaps = '{ }'
-        content = [render(v, sort, _level+1) for v in order(obj)]
+        content = [render(v, sort, level+1) for v in order(obj)]
     elif is_str(obj) and '\n' in obj:
         endcaps = None
         content = [
@@ -561,7 +563,7 @@ output = InformantFactory(
     log=True,
 )
 notify = InformantFactory(
-    output=lambda inform: not inform.quiet and not inform.mute,
+    output=False,
     notify=True,
     log=True,
 )
@@ -739,7 +741,7 @@ class Inform:
         self.mute = bool(mute)
 
     # set_logfile {{{2
-    def set_logfile(self, logfile):
+    def set_logfile(self, logfile, encoding='utf-8'):
         try:
             if self.logfile:
                 self.logfile.close()
@@ -748,12 +750,22 @@ class Inform:
 
         if logfile is True:
             logfile = '.%s.log' % self.prog_name if self.prog_name else '.log'
-        if is_str(logfile):
-            try:
-                logfile = open(logfile, 'w')
-            except (IOError, OSError) as err:
-                print(os_error(err), file=sys.stderr)
-                logfile = None
+        try:
+            if is_str(logfile):
+                try:                # python 3
+                    logfile = open(logfile, 'w', encoding=encoding)
+                except TypeError:   # python 2
+                    import codecs
+                    logfile = codecs.open(logfile, 'w', encoding=encoding)
+            elif logfile:  # pathlib
+                try:
+                    logfile = logfile.open(mode='w', encoding=encoding)
+                except AttributeError:
+                    pass
+        except (IOError, OSError) as err:
+            print(os_error(err), file=sys.stderr)
+            logfile = None
+
         self.logfile = logfile
         if not logfile:
             return
@@ -951,6 +963,11 @@ class Inform:
             self.errors = 0
         return count
 
+    # get_prog_name {{{2
+    def get_prog_name(self, default):
+        "Returns the program name"
+        return self.prog_name if self.prog_name else default
+
     # disconnect {{{2
     def disconnect(self):
         "Disconnect informer"
@@ -983,6 +1000,10 @@ def terminate_if_errors(status=1):
 # errors_accrued {{{3
 def errors_accrued(reset=False):
     return INFORMER.errors_accrued(reset)
+
+# get_prog_name {{{3
+def get_prog_name(default):
+    return INFORMER.get_prog_name(default)
 
 
 # Instantiate default informer {{{1
