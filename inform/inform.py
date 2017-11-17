@@ -319,6 +319,27 @@ def full_stop(sentence):
     sentence = str(sentence)
     return sentence if sentence[-1] in '.?!' else sentence + '.'
 
+
+# columns {{{1
+def columns(array, pagewidth=79, alignment='<', leader='    '):
+    "Distribute array over enough columns to fill the screen."
+    textwidth = pagewidth - len(leader)
+    width = max([len(e) for e in array])+1
+    numcols = max(1, textwidth//(width+1))
+    stride = len(array)//numcols + 1
+    fmt = '{{:{align}{width}s}}'.format(align=alignment, width=width)
+    table = []
+    for i in range(len(array)//numcols+1):
+        row = []
+        for j in range(numcols):
+            try:
+                row.append(fmt.format(array[stride*j+i]))
+            except IndexError:
+                pass
+        table.append(leader + ' '.join(row).rstrip())
+    return '\n'.join(table)
+
+
 # debug functions {{{2
 def _debug(frame_depth, args, kwargs):
     import inspect

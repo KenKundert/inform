@@ -756,6 +756,9 @@ full_stop(string):
     argument, so it is generally a suitable replacement for str in 
     str(exception) when trying extract an error message from an exception.
 
+columns(array, pagewidth=79, alignment='<', leader='    ')
+    Distribute array over enough columns to fill the screen.
+
 os_error(exception):
     Generates clean messages for operating system errors.
 
@@ -853,6 +856,24 @@ Here is an example of render():
         's': 'alpha string',
     }
 
+Finally, here is an example of full_stop and columns. It prints out the phonetic 
+alphabet.
+
+.. code-block:: python
+
+    >>> from inform import columns, full_stop
+    >>> title = 'Display the NATO phonetic alphabet'
+    >>> words = """
+    ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett Kilo
+    ...     Lima Mike November Oscar Papa Quebec Romeo Sierra Tango Uniform
+    ...     Victor Whiskey X-ray Yankee Zulu
+    ... """.split()
+    >>> display(full_stop(title), columns(words), sep='\n')
+    Display the NATO phonetic alphabet.
+        Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
+        Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
+        Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
+        Delta     Hotel     Lima      Papa      Tango     X-ray
 
 Debugging Functions
 """""""""""""""""""
@@ -880,7 +901,7 @@ ppp(\*args, \*\*kwargs):
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[85]>:1, __main__:
+        DEBUG: <doctest README.rst[89]>:1, __main__:
             1 this is a test (2, 3)
 
 ddd(\*args, \*\*kwyargs):
@@ -889,7 +910,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a, b, c, d)
-        DEBUG: <doctest README.rst[86]>:1, __main__:
+        DEBUG: <doctest README.rst[90]>:1, __main__:
             1
             'this is a test'
             (2, 3)
@@ -904,7 +925,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest README.rst[87]>:1, __main__:
+        DEBUG: <doctest README.rst[91]>:1, __main__:
             a = 1
             b = 'this is a test'
             c = (2, 3)
@@ -926,7 +947,7 @@ ddd(\*args, \*\*kwyargs):
         ...         ddd(self=self)
 
         >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest README.rst[88]>:4, __main__.Info.__init__():
+        DEBUG: <doctest README.rst[92]>:4, __main__.Info.__init__():
             self = {
                 'email': 'ted@ledbelly.com',
                 'name': 'Ted Ledbelly',
@@ -940,7 +961,7 @@ vvv(\*args):
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest README.rst[90]>:1, __main__:
+        DEBUG: <doctest README.rst[94]>:1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,
@@ -956,7 +977,7 @@ vvv(\*args):
 
         >>> aa = 1
         >>> vvv(a)
-        DEBUG: <doctest README.rst[92]>:1, __main__:
+        DEBUG: <doctest README.rst[96]>:1, __main__:
             a = 1
             aa = 1
 
