@@ -1035,12 +1035,26 @@ INFORMER = DEFAULT_INFORMER
 # Exceptions {{{1
 # Error {{{2
 class Error(Exception):
-    '''A generic exception'''
+    """A generic exception.
+
+    The exception accepts both unnamed and named arguments.
+    All are recorded and available for later use.
+    """
+
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
 
     def get_message(self):
+        """Get exception message.
+
+        If the *template* keyword argument was specified, it is treated as a
+        format string and is passed both the unnamed and named arguments. The
+        resulting string is treated as the message and returned.
+
+        Otherwise the unnamed are joined using spaces to form the message.
+        """
+
         template = self.kwargs.get('template')
         if template is None:
             sep = self.kwargs.get('sep', ' ')
@@ -1050,6 +1064,13 @@ class Error(Exception):
         return message
 
     def get_culprit(self):
+        """Get exception culprit.
+
+        If the *culprit* keyword argument was specified as a string, it is
+        returned. If it was specified as a collection, the members are converted
+        to strings and joined with commas. The resulting string is returned.
+        """
+
         culprit = self.kwargs.get('culprit')
         if is_collection(culprit):
             return ', '.join(str(c) for c in culprit if c is not None)
@@ -1057,9 +1078,17 @@ class Error(Exception):
             return str(culprit)
 
     def report(self):
+        """Report exception.
+
+        The :func:`inform.error` function is called with the exception arguments.
+        """
         error(*self.args, **self.kwargs)
 
     def terminate(self):
+        """Report exception and terminate.
+
+        The :func:`inform.fatal` function is called with the exception arguments.
+        """
         fatal(*self.args, **self.kwargs)
 
     def __str__(self):
