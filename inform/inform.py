@@ -19,7 +19,6 @@
 
 # Imports {{{1
 from __future__ import print_function
-from copy import copy
 import re
 import os
 import sys
@@ -38,7 +37,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     leader (string):
         the string added to be beginning of a line to indent it.
     first (integer):
-        number of indentations for the first line relative to others (may be 
+        number of indentations for the first line relative to others (may be
         negative but (first + stops) should not be).
     stops (integer):
         number of indentations (number of leaders to add to beginning lines).
@@ -59,6 +58,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     # resplit it and replace the blank lines with empty lines
     return '\n'.join([line.rstrip() for line in indented.split('\n')])
 
+
 # cull {{{2
 def cull(collection, **kwargs):
     """Cull items of a particular value from a list."""
@@ -73,33 +73,37 @@ def cull(collection, **kwargs):
     except KeyError:
         return [each for each in collection if each]
 
+
 # is_str {{{2
 def is_str(obj):
     from six import string_types
     """Identifies strings in all their various guises."""
     return isinstance(obj, string_types)
 
+
 # is_iterable {{{2
-import collections
 def is_iterable(obj):
     """Identifies objects that can be iterated over, including strings."""
+    import collections
     return isinstance(obj, collections.Iterable)
+
 
 # is_collection {{{2
 def is_collection(obj):
     """Identifies objects that can be iterated over, excluding strings."""
     return is_iterable(obj) and not is_str(obj)
 
+
 # Color class {{{2
 class Color:
     """Color
 
-    Used to create colorizers, which are used to render text in a particular 
+    Used to create colorizers, which are used to render text in a particular
     color.
     """
-    COLORS = ['black','red','green','yellow','blue','magenta','cyan','white'] 
-        # The order of the above colors must match order of the standard 
-        # terminal
+    COLORS = 'black red green yellow blue magenta cyan white'.split()
+        # The order of the above colors must match order
+        # of the standard terminal
     COLOR_CODE_REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
     def __init__(self, color, scheme=True, enable=True):
@@ -139,9 +143,9 @@ class Color:
 # fmt {{{2
 def fmt(message, *args, **kwargs):
     """
-    Convert a message with embedded attributes to a string. The values for the 
-    attributes can come from the argument list, as with ''.format(), or they may
-    come from the local scope (found by introspection).
+    Convert a message with embedded attributes to a string. The values for the
+    attributes can come from the argument list, as with ''.format(), or they
+    may come from the local scope (found by introspection).
 
     Examples::
 
@@ -160,7 +164,7 @@ def fmt(message, *args, **kwargs):
         # >>> print(fmt("by magic: {s}, {d[msg]}, {c.a}."))
         # by magic: str var, dict val, cls attr.
 
-    You can change the level at which the introspection occurs using the _lvl 
+    You can change the level at which the introspection occurs using the _lvl
     keyword argument.
 
         | _lvl=0 searches for variables in the scope that calls fmt(), the default
@@ -175,7 +179,7 @@ def fmt(message, *args, **kwargs):
     level = 1 - level if level <= 0 else -level
     frame = inspect.stack()[level][0]
 
-    # Collect all the variables in the scope of the calling code, so they 
+    # Collect all the variables in the scope of the calling code, so they
     # can be substituted into the message.
     attrs = {}
     attrs.update(frame.f_globals)
@@ -184,14 +188,15 @@ def fmt(message, *args, **kwargs):
 
     return message.format(*args, **attrs)
 
+
 # render {{{2
 def render(obj, sort=None, level=0, tab='    '):
     """
     Recursively convert object to string with reasonable formatting.
-    Has built in support for the base Python types (None, bool, int, float, str,
-    set, tuple, list, and dict).  If you confine yourself to these types, the
-    output of render can be read by the Python interpreter. Other types are
-    converted to string with repr().
+    Has built in support for the base Python types (None, bool, int, float,
+    str, set, tuple, list, and dict).  If you confine yourself to these types,
+    the output of render can be read by the Python interpreter.
+    Other types are converted to string with repr().
     """
     from textwrap import dedent
 
@@ -213,10 +218,12 @@ def render(obj, sort=None, level=0, tab='    '):
     def leader(relative_level=0):
         return (level+relative_level)*tab
 
-    code = []
     if type(obj) == dict:
         endcaps = '{ }'
-        content = ['%r: %s' % (k, render(obj[k], sort, level+1)) for k in order(obj)]
+        content = [
+            '%r: %s' % (k, render(obj[k], sort, level+1))
+            for k in order(obj)
+        ]
     elif type(obj) is list:
         endcaps = '[ ]'
         content = [render(v, sort, level+1) for v in obj]
@@ -255,14 +262,18 @@ def render(obj, sort=None, level=0, tab='    '):
         )
     return '\n'.join(content)
 
+
 # os_error {{{2
-# Generates a reasonable error message for an operating system errors, those 
+# Generates a reasonable error message for an operating system errors, those
 # generated by OSError and its ilk.
 def os_error(err):
-    filenames = ' -> '.join(cull([err.filename, getattr(err, 'filename2', None)]))
+    filenames = ' -> '.join(
+        cull([err.filename, getattr(err, 'filename2', None)])
+    )
     text = err.strerror if err.strerror else str(err)
     msg = ': '.join(cull([filenames, text.lower()]))
     return full_stop(msg)
+
 
 # conjoin {{{2
 # Like join, but supports conjunction
@@ -291,6 +302,7 @@ def conjoin(iterable, conj=' and ', sep=', '):
     if conj is not None and len(lst) > 1:
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst)
+
 
 # plural {{{2
 def plural(count, singular, plural=None):
@@ -346,9 +358,9 @@ def _debug(frame_depth, args, kwargs):
     frame = inspect.stack()[frame_depth + 1][0]
 
     try:
-        # If the calling frame is inside a class (deduced based on the presence 
-        # of a 'self' variable), name the logger after that class.  Otherwise 
-        # if the calling frame is inside a function, name the logger after that 
+        # If the calling frame is inside a class (deduced based on the presence
+        # of a 'self' variable), name the logger after that class.  Otherwise
+        # if the calling frame is inside a function, name the logger after that
         # function.  Otherwise name it after the module of the calling scope.
         from pathlib import Path
 
@@ -386,9 +398,10 @@ def _debug(frame_depth, args, kwargs):
         print(message, **kwargs)
 
     finally:
-        # Failing to explicitly delete the frame can lead to long-lived 
+        # Failing to explicitly delete the frame can lead to long-lived
         # reference cycles.
         del frame
+
 
 def ppp(*args, **kwargs):
     '''Print function tailored for debugging.
@@ -398,6 +411,7 @@ def ppp(*args, **kwargs):
     '''
     frame_depth = 1
     _debug(frame_depth, args, kwargs)
+
 
 def ddd(*args, **kwargs):
     '''Print arguments function tailored for debugging.
@@ -418,7 +432,8 @@ def ddd(*args, **kwargs):
         for k, v in sorted(kwargs.items())
     ]
     frame_depth = 1
-    _debug(frame_depth, args, kwargs={'sep':'\n'})
+    _debug(frame_depth, args, kwargs=dict(sep='\n'))
+
 
 def vvv(*args):
     '''Print variables function tailored for debugging.
@@ -440,12 +455,12 @@ def vvv(*args):
         if not isinstance(v, (FunctionType, type, ModuleType))
         if not args or v in args
     ]
-    _debug(frame_depth, args, kwargs={'sep':'\n'})
+    _debug(frame_depth, args, kwargs=dict(sep='\n'))
+
 
 def sss(*args):
     import traceback
     tb = traceback.extract_stack()
-    highlight_body = Color('blue', enable=Color.isTTY(sys.stdout))
     stacktrace = []
     for filename, lineno, funcname, text in tb[:-1]:
         filename = 'File {!r}'.format(filename) if filename else None
@@ -454,14 +469,13 @@ def sss(*args):
         text = '\n    {}'.format(text) if text else None
         stacktrace.append(', '.join(cull([filename, lineno, funcname, text])))
 
-    import inspect
     frame_depth = 1
-    frame = inspect.stack()[frame_depth][0]
-    _debug(frame_depth, stacktrace, kwargs={'sep':'\n'})
+    _debug(frame_depth, stacktrace, kwargs=dict(sep='\n'))
+
 
 # InformantFactory class {{{1
-# A bit of terminology. The active Inform object is called the informer, 
-# whereas the print functions returned from InformantFactory are referred to 
+# A bit of terminology. The active Inform object is called the informer,
+# whereas the print functions returned from InformantFactory are referred to
 # as informants.
 class InformantFactory:
     def __init__(
@@ -480,36 +494,36 @@ class InformantFactory:
         Arguments:
         severity (string)
             Messages with severities get headers; the severity acts as label.
-            If the message has a header and the message text contains 
-            a newline, then the text is indented and placed on the line that 
+            If the message has a header and the message text contains
+            a newline, then the text is indented and placed on the line that
             follows the header.
         is_error (bool)
             Message is counted as an error.
         log (bool)
-            Send message to the log file.  May be a boolean or a function that 
+            Send message to the log file.  May be a boolean or a function that
             accepts the informer as an argument and returns a boolean.
         output (bool)
-            Send message to the output stream.  May be a boolean or a function 
+            Send message to the output stream.  May be a boolean or a function
             that accepts the informer as an argument and returns a boolean.
         notify (bool)
-            Send message to the notifier.  The notifier will display the message
-            that appears temporarily in a bubble at the top of the screen.
-            May be a boolean or a function that accepts the informer as an
-            argument and returns a boolean.
+            Send message to the notifier.  The notifier will display the
+            message that appears temporarily in a bubble at the top of the
+            screen.  May be a boolean or a function that accepts the informer
+            as an argument and returns a boolean.
         terminate (bool or integer)
-            Terminate the program.  Exit status is the value of terminate 
-            unless terminate==True, in which case 1 is returned if an error 
+            Terminate the program.  Exit status is the value of terminate
+            unless terminate==True, in which case 1 is returned if an error
             occurred and 0 otherwise.
         is_continuation (bool)
-            This message is a continuation of the previous message.  It will 
-            use the properties of the previous message (output, log, message 
-            color, etc) and if the previous message had a header, that header 
+            This message is a continuation of the previous message.  It will
+            use the properties of the previous message (output, log, message
+            color, etc) and if the previous message had a header, that header
             is not output and instead the message is indented.
         message_color (string)
-            Color used to display the message.  Choose from: black, red, green, 
+            Color used to display the message.  Choose from: black, red, green,
             yellow, blue, magenta, cyan or white.
         header_color (string)
-            Color used to display the header, if one is produced.  Choose from: 
+            Color used to display the header, if one is produced.  Choose from:
             black, red, green, yellow, blue, magenta, cyan or white.
         """
         self.severity = severity
@@ -524,23 +538,23 @@ class InformantFactory:
         self.stream = sys.stderr if self.terminate else sys.stdout
 
     def __call__(self, *args, **kwargs):
-        INFORMER.report(args, kwargs, self)
+        INFORMER._report(args, kwargs, self)
 
-    def produce_output(self, informer):
-        "Will informant produce output either directly to the user or to the logfile?"
+    def _produce_output(self, informer):
+        "Will informant produce output either directly to user or to logfile?"
         return (
-            self.write_output(informer) or self.write_logfile(informer) or
-            self.notify_user(informer)
+            self._write_output(informer) or self._write_logfile(informer) or
+            self._notify_user(informer)
         )
 
-    def write_output(self, informer):
+    def _write_output(self, informer):
         "Will informant produce output directly to the user?"
         try:
             return self.output(informer)
         except TypeError:
             return self.output
 
-    def write_logfile(self, informer):
+    def _write_logfile(self, informer):
         "Will informant produce output to the logfile?"
         # returns a boolean
         try:
@@ -548,7 +562,7 @@ class InformantFactory:
         except TypeError:
             return self.log
 
-    def notify_user(self, informer):
+    def _notify_user(self, informer):
         "Will informant produce output to the notifier?"
         # returns a boolean
         try:
@@ -629,8 +643,8 @@ panic = InformantFactory(
 class Inform:
     """Inform
 
-    Handles all informants, which in turn handle user messaging.  Generally 
-    copies messages to the logfile while sending most to standard out as well, 
+    Handles all informants, which in turn handle user messaging.  Generally
+    copies messages to the logfile while sending most to standard out as well,
     however all is controllable.
     """
 
@@ -651,7 +665,7 @@ class Inform:
         stdout=None,
         stderr=None,
         length_thresh=80,
-        culprit_sep = ', ',
+        culprit_sep=', ',
         **kwargs
     ):
         """
@@ -665,38 +679,38 @@ class Inform:
         narrate (bool)
             Narration is output to user, normally it is just logged.
         logfile (string or stream or bool)
-            May be a string, in which case it is taken to be the path of the 
-            logfile.  May be *True*, in which case ./.<prog_name>.log is used.  
-            May be an open stream.  Or it may be *False*, in which case no log 
+            May be a string, in which case it is taken to be the path of the
+            logfile.  May be *True*, in which case ./.<prog_name>.log is used.
+            May be an open stream.  Or it may be *False*, in which case no log
             file is created.
         prog_name (string)
-            The program name. Is appended to the message headers and used to 
-            create the default logfile name. May be a string, in which case it 
-            is used as the name of the program.  May be *True*, in which case 
-            basename(argv[0]) is used.  May be *False* to indicate that program 
+            The program name. Is appended to the message headers and used to
+            create the default logfile name. May be a string, in which case it
+            is used as the name of the program.  May be *True*, in which case
+            basename(argv[0]) is used.  May be *False* to indicate that program
             name should not be added to message headers.
         argv (list of strings)
-            System command line arguments (logged). By default, sys.argv is 
+            System command line arguments (logged). By default, sys.argv is
             used.
         version (string)
             program version (logged)
         termination_callback (func)
-            A function that is called at program termination. The list of 
+            A function that is called at program termination. The list of
             recorded messages is provided as the only argument.
         colorscheme (None, 'light', or 'dark')
-            Color scheme to use. None indicates that messages should not be 
-            colorized. Colors are not used if desired output stream is not 
+            Color scheme to use. None indicates that messages should not be
+            colorized. Colors are not used if desired output stream is not
             a TTY.
         flush (bool)
-            Flush the stream after each write. Is useful if you program is 
-            crashing, causing loss of the latest writes. Can cause programs to 
-            run considerably slower if they produce a lot of output. Not 
+            Flush the stream after each write. Is useful if you program is
+            crashing, causing loss of the latest writes. Can cause programs to
+            run considerably slower if they produce a lot of output. Not
             available with python2.
         stdout (stream)
-            Messages are sent here by default. Generally used for testing. If 
+            Messages are sent here by default. Generally used for testing. If
             not given, sys.stdout is used.
         stderr (stream)
-            Termination messages are sent here by default. Generally used for 
+            Termination messages are sent here by default. Generally used for
             testing.  If not given, sys.stderr is used.
         length_thresh (integer)
             Split header from body if line length would be greater than
@@ -704,7 +718,7 @@ class Inform:
         culprit_sep (string)
             Join string used for culprit collections.
         **kwargs
-            Any additional keyword arguments are made attributes that are 
+            Any additional keyword arguments are made attributes that are
             ignored by Inform, but may be accessed by the informants.
         """
         self.errors = 0
@@ -810,7 +824,7 @@ class Inform:
             self.logfile.flush()
 
     # report {{{2
-    def report(self, args, kwargs, action):
+    def _report(self, args, kwargs, action):
 
         # handle continuations
         is_continuation = action.is_continuation
@@ -822,7 +836,7 @@ class Inform:
                 self.errors += 1
 
         # assemble the message
-        if action.produce_output(self):
+        if action._produce_output(self):
             options = self._get_print_options(kwargs, action)
             message = self._render_message(args, kwargs)
             culprit = self._render_culprit(kwargs)
@@ -837,7 +851,7 @@ class Inform:
 
             messege_color = action.message_color
             header_color = action.header_color
-            if action.write_output(self):
+            if action._write_output(self):
                 cs = self.colorscheme if Color.isTTY(options['file']) else None
                 self._show_msg(
                     header_color(header, scheme=cs) if header else header,
@@ -846,7 +860,7 @@ class Inform:
                     multiline,
                     options
                 )
-            if action.write_logfile(self) and self.logfile:
+            if action._write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
                 self._show_msg(
                     header,
@@ -855,7 +869,7 @@ class Inform:
                     multiline,
                     options
                 )
-            if action.notify_user(self):
+            if action._notify_user(self):
                 import subprocess
                 body = ': '.join(cull([header, culprit, message]))
                 subprocess.call(cull([NOTIFIER, self.prog_name, body]))
@@ -952,7 +966,7 @@ class Inform:
             | 2: invalid invocation
             | 3: panic
 
-        Status may also be a string, in which case it is printed to stderr and 
+        Status may also be a string, in which case it is printed to stderr and
         the exit status is 1.
         """
         if status is None or status is True:
@@ -1005,22 +1019,27 @@ class Inform:
     def __exit__(self, type, value, traceback):
         self.disconnect()
 
+
 # Direct access to class methods {{{2
 # done {{{3
 def done():
     INFORMER.done()
 
+
 # terminate {{{3
 def terminate(status=True):
     INFORMER.terminate(status)
+
 
 # terminate_if_errors {{{3
 def terminate_if_errors(status=1):
     INFORMER.terminate_if_errors(status)
 
+
 # errors_accrued {{{3
 def errors_accrued(reset=False):
     return INFORMER.errors_accrued(reset)
+
 
 # get_prog_name {{{3
 def get_prog_name(default):
@@ -1097,7 +1116,7 @@ class Error(Exception):
         return "%s: %s" % (culprit, message) if culprit else message
 
     def __getattr__(self, name):
-        # returns the value associated with name in kwargs if it exists, 
+        # returns the value associated with name in kwargs if it exists,
         # otherwise None
         if name.startswith('__'):
             raise AttributeError(name)
