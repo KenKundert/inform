@@ -3,7 +3,7 @@ __released__ = '2017-12-03'
 
 from .inform import (
     # inform utilities
-    indent, cull, is_str, is_iterable, is_collection,
+    indent, cull, is_str, is_iterable, is_collection, join,
 
     # user utilities
     Color, fmt, render, os_error, conjoin, plural, full_stop, columns,

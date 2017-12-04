@@ -93,6 +93,40 @@ def is_collection(obj):
     """Identifies objects that can be iterated over, excluding strings."""
     return is_iterable(obj) and not is_str(obj)
 
+# join {{{2
+def join(*args, **kwargs):
+    """Combines arguments into a string.
+
+    By defaults it returns the unnamed arguments joined with a single space.
+
+    sep=' ':
+        Use specified string as join string rather than single space.
+    template = None:
+        A python format string. If specified, the unnamed and named arguments
+        are combined under the control of the strings format method.
+    wrap = False:
+        If true the string is wrapped using a width of 70. If an integer value
+        is passed, is used as the width of the wrap.
+    """
+    return _join(args, kwargs)
+
+
+# _join {{{2
+def _join(args, kwargs):
+    template = kwargs.get('template')
+    if template is None:
+        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+    else:
+        message = template.format(*args, **kwargs)
+    wrap = kwargs.get('wrap')
+    if wrap:
+        from textwrap import fill
+        if type(wrap) == int:
+            message = fill(message, width=wrap)
+        else:
+            message = fill(message)
+    return message
+
 
 # Color class {{{2
 class Color:
@@ -112,8 +146,9 @@ class Color:
         self.enable = enable
 
     def __call__(self, *args, **kwargs):
+        text = _join(args, kwargs)
+
         # scheme is acting as an override, and False prevents the override.
-        text = kwargs.get('sep', ' ').join(str(a) for a in args)
         scheme = kwargs.get('scheme', self.scheme)
         if scheme and self.color and self.enable:
             assert self.color in self.COLORS
@@ -276,7 +311,7 @@ def os_error(err):
 
 
 # conjoin {{{2
-# Like join, but supports conjunction
+# Like string join method, but supports conjunction
 def conjoin(iterable, conj=' and ', sep=', '):
     """Conjunction join
 
@@ -392,7 +427,7 @@ def _debug(frame_depth, args, kwargs):
         header = 'DEBUG: {fname}:{lineno}, {name}'.format(
             filename=filename, fname=fname, lineno=lineno, name=name
         )
-        body = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+        body = _join(args, kwargs)
         header += ':\n' if body else '.'
         message = highlight_header(header) + highlight_body(indent(body))
         print(message, **kwargs)
@@ -896,19 +931,7 @@ class Inform:
     # _render_message {{{2
     @staticmethod
     def _render_message(args, kwargs):
-        template = kwargs.get('template')
-        if template is None:
-            message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
-        else:
-            message = template.format(*args, **kwargs)
-        wrap = kwargs.get('wrap')
-        if wrap:
-            from textwrap import fill
-            if type(wrap) == int:
-                message = fill(message, width=wrap)
-            else:
-                message = fill(message)
-        return message
+        return _join(args, kwargs)
 
     # _render_culprit {{{2
     def _render_culprit(self, kwargs):
@@ -1073,14 +1096,7 @@ class Error(Exception):
 
         Otherwise the unnamed are joined using spaces to form the message.
         """
-
-        template = self.kwargs.get('template')
-        if template is None:
-            sep = self.kwargs.get('sep', ' ')
-            message = sep.join(str(arg) for arg in self.args)
-        else:
-            message = template.format(*self.args, **self.kwargs)
-        return message
+        return _join(self.args, self.kwargs)
 
     def get_culprit(self):
         """Get exception culprit.

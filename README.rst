@@ -85,8 +85,8 @@ specify options:
 
 An object of the Inform class is referred to as an informer (not to be confused 
 with the print functions, which are  referred to as informants). Once 
-instantiated, an informer can be used to terminate the program or return a count 
-of the number of errors that have occurred.
+instantiated, you can use the informer to change various settings, terminate the 
+program, or return a count of the number of errors that have occurred.
 
 .. code-block:: python
 
@@ -732,6 +732,11 @@ cull(collection, [remove]):
     which case it takes a single item as an argument and returns *True* if that 
     item should be removed from the list.
 
+join(\*args, \**kwargs):
+    Combines the arguments in a manner very similar to an informant and returns 
+    the result as a string.  Uses the *sep*, *template* and *wrap* keyword 
+    arguments to combine the arguments.
+
 fmt(msg, \*args, \**kwargs):
     Similar to ''.format(), but it can pull arguments from the local scope.
 
@@ -879,7 +884,7 @@ Debugging Functions
 """""""""""""""""""
 The debugging functions are intended to be used when you want to print something 
 out when debugging your program.  They are colorful to make it easier to find 
-them amoung the program's normal output, and a header is added that describes 
+them among the program's normal output, and a header is added that describes 
 the location they were called from. This makes it easier to distinguish several 
 debug message and also makes it easy to find and remove the functions once you 
 are done debugging.
@@ -1051,6 +1056,18 @@ unnamed arguments:
 
 sep = ' ':
    The join string, used when joining the unnamed arguments.
+
+template = None:
+   A template that if present interpolates the arguments to form the final 
+   message rather than simply joining the unnamed arguments with *sep*. The 
+   template is a string, and its *format* method is called with the unnamed and 
+   named arguments of the message passed as arguments.
+
+wrap = False:
+   Specifies whether message should be wrapped. *wrap* may be True, in which 
+   case the default width of 70 is used.  Alternately, you may specify the 
+   desired width. The wrapping occurs on the final message after the arguments 
+   have been joined.
 
 scheme = *False*:
    Use to override the colorscheme when rendering the text.  Choose from *None*, 
