@@ -198,3 +198,42 @@ def test_pardon():
             assert False
         except SystemExit:
             assert True
+
+def test_possess():
+    with messenger(stream_policy='header') as (msg, stdout, stderr, logfile):
+        out = [
+            'hey now!',
+            'hey now!',
+        ]
+        err = [
+            'Aiko aiko all day',
+            'jockomo feeno na na nay',
+            'jockomo feena nay.',
+        ]
+        display(*out)
+        warn(*err, sep=', ')
+
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == ' '.join(out)
+        assert strip(stderr) == 'warning: ' + ', '.join(err)
+
+def test_unbuckle():
+    with messenger() as (msg, stdout, stderr, logfile):
+        msg.set_stream_policy(lambda i, so, se: se if i.severity else so)
+        out = [
+            'hey now!',
+            'hey now!',
+        ]
+        err = [
+            'Aiko aiko all day',
+            'jockomo feeno na na nay',
+            'jockomo feena nay.',
+        ]
+        display(*out)
+        warn(*err, sep=', ')
+
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == ' '.join(out)
+        assert strip(stderr) == 'warning: ' + ', '.join(err)

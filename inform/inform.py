@@ -26,6 +26,12 @@ import sys
 # Globals {{{1
 INFORMER = None
 NOTIFIER = 'notify-send'
+STREAM_POLICIES = {
+    'termination': lambda i, so, se: se if i.terminate else so,
+        # stderr is used on final termination message
+    'header':  lambda i, so, se: se if i.severity else so,
+        # stderr is used on all messages that include headers
+}
 
 
 # Inform Utilities {{{1
@@ -785,6 +791,11 @@ class InformantFactory:
             *black*, *red*, *green*, *yellow*, *blue*, *magenta*, *cyan* or
             *white*.
 
+        stream (stream):
+            Output stream to use. Typically sys.stdout or sys.stderr. If not
+            specified, the stream to use will be determine by stream policy of
+            active informer.
+
         Example:
 
             The following generates an informant named *show* that outputs
@@ -814,6 +825,7 @@ class InformantFactory:
         is_continuation=False,
         message_color=None,
         header_color=None,
+        stream=None,
     ):
         self.severity = severity
         self.is_error = is_error
@@ -824,7 +836,7 @@ class InformantFactory:
         self.is_continuation = is_continuation
         self.message_color = Color(message_color)
         self.header_color = Color(header_color)
-        self.stream = sys.stderr if self.terminate else sys.stdout
+        self.stream = stream
 
     def __call__(self, *args, **kwargs):
         INFORMER._report(args, kwargs, self)
@@ -1021,6 +1033,27 @@ class Inform:
         culprit_sep (string):
             Join string used for culprit collections. Default is ', '.
 
+        stream_policy (string or func):
+            The default stream policy, which determines which stream each
+            informant uses by default (which stream is used if the stream is not
+            specifically specified when the informant is created).
+
+            The following named policies are available:
+                'termination':
+                    stderr is used for the final termination message.
+                    stdout is used otherwise.
+                'header':
+                    stderr is used for all messages with headers/severities.
+                    stdout is used otherwise.
+
+            May also be a function that returns the stream and takes three
+            arguments: the active informant, Inform's stdout, and Inform's
+            stderr. 
+
+            If no stream is specified, either explicitly on the informant when
+            it is defined, or through the stream policy, then Inform's stdout
+            is used.
+
         \*\*kwargs:
             Any additional keyword arguments are made attributes that are
             ignored by *Inform*, but may be accessed by the informants.
@@ -1044,6 +1077,7 @@ class Inform:
         stderr=None,
         length_thresh=80,
         culprit_sep=', ',
+        stream_policy='termination',
         **kwargs
     ):
         self.errors = 0
@@ -1057,6 +1091,10 @@ class Inform:
         self.logfile = None
         self.length_thresh = length_thresh
         self.culprit_sep = culprit_sep
+        if is_str(stream_policy):
+            self.stream_policy = STREAM_POLICIES[stream_policy]
+        else:
+            self.stream_policy = stream_policy
 
         # make verbosity flags consistent
         self.mute = mute
@@ -1151,6 +1189,14 @@ class Inform:
         if self.logfile:
             self.logfile.flush()
 
+    # set_stream_policy {{{2
+    def set_stream_policy(self, stream_policy):
+        "Allows you to change the stream policy (see :class:`inform.Inform`)."
+        if is_str(stream_policy):
+            self.stream_policy = STREAM_POLICIES[stream_policy]
+        else:
+            self.stream_policy = stream_policy
+
     # _report {{{2
     def _report(self, args, kwargs, action):
 
@@ -1207,18 +1253,17 @@ class Inform:
 
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
-        opts = {
-            # 'sep': kwargs.get('sep', ' '), -- handled in _render_message
-            'end': kwargs.get('end', '\n'),
-            'file': kwargs.get(
-                'file',
-                self.stderr if action.terminate else self.stdout
-            ),
-            'flush': kwargs.get('flush', self.flush),
-        }
+        opts = dict(
+            end=kwargs.get('end', '\n'),
+            flush=kwargs.get('flush', self.flush),
+        )
+            # sep is handled in _render_message
         if sys.version[0] == '2':
-            # flush is not supported in python2
-            opts.pop('flush')
+            opts.pop('flush')  # flush is not supported in python2
+        if 'file' in kwargs:
+            opts['file'] = kwargs['file']
+        else:
+            opts['file'] = self.stream_policy(action, self.stdout, self.stderr)
         return opts
 
     # _render_message {{{2
