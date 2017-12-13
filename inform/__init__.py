@@ -2,11 +2,13 @@ __version__ = '1.10.2'
 __released__ = '2017-12-04'
 
 from .inform import (
-    # inform utilities
+    # inform utility functions
     indent, cull, is_str, is_iterable, is_collection, join,
 
-    # user utilities
+    # user utility functions
     Color, fmt, render, os_error, conjoin, plural, full_stop, columns,
+
+    # debug functions
     ppp, ddd, vvv, sss,
 
     # inform classes

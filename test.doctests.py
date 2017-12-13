@@ -24,19 +24,27 @@ trying = status('Trying:')
 # can capture the output of the program being tested. Inform was imported from 
 # runtests, and it already saved away stdout. By unloading it here, it will be 
 # imported again after doctest has replaced stdout.
-to_delete = [m for m in sys.modules.keys() if m.startswith('inform')]
-for module in to_delete:
-    del sys.modules[module]
+def unload_inform():
+    to_delete = [m for m in sys.modules.keys() if m.startswith('inform')]
+    for module in to_delete:
+        del sys.modules[module]
+
 if coverage is False:
     python = pythonCmd()
 else:
     python = coverageCmd(source=coverage)
 
+tests = '''
+    README.rst inform/inform.py doc/api.rst doc/examples.rst doc/index.rst
+    doc/user.rst
+'''.split()
+
 # Tests {{{1
 failures = tests_run = 0
-for test in ['README.rst', 'inform/inform.py']:
+for test in tests:
     if printTests:
         print(trying, test)
+    unload_inform()
     fails, tests = doctest.testfile(test, optionflags=doctest.ELLIPSIS)
     failures += fails
     tests_run += tests

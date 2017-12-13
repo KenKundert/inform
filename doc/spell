@@ -1,0 +1,12 @@
+#!/bin/csh -f
+
+set nonomatch
+
+foreach f (*.rst ../README.rst)
+    if ($f == '*.rst') continue
+
+    echo "=== ${f} ==="
+    rstspell $f
+end
+
+# Use 'rstspell -u filename.rst' to update the exceptions file.

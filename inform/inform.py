@@ -34,20 +34,24 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     r"""
     Add indentation.
 
-    leader (string):
-        the string added to be beginning of a line to indent it.
-    first (integer):
-        number of indentations for the first line relative to others (may be
-        negative but (first + stops) should not be).
-    stops (integer):
-        number of indentations (number of leaders to add to beginning lines).
-    sep (string):
-        the string used to separate the lines
+    Args:
+        leader (string):
+            the string added to be beginning of a line to indent it.
 
-    Examples::
+        first (integer):
+            number of indentations for the first line relative to others (may be
+            negative but (first + stops) should not be).
 
-        >>> from inform import indent
-        >>> print(indent('And the answer is ...\n42!', first=-1))
+        stops (integer):
+            number of indentations (number of leaders to add to beginning lines).
+
+        sep (string):
+            the string used to separate the lines
+
+    Example::
+
+        >>> from inform import display, indent
+        >>> display(indent('And the answer is ...\n42!', first=-1))
         And the answer is ...
             42!
 
@@ -61,7 +65,25 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
 
 # cull {{{2
 def cull(collection, **kwargs):
-    """Cull items of a particular value from a list."""
+    """Cull items of a particular value from a list.
+
+    Strips items from a list that have a particular value. By default, it strips 
+    a list of values that would be False when cast to a boolean (0, False, None, 
+    '', (), [], etc.).  A particular value may be specified using the 'remove' 
+    as a keyword argument.  The value of remove may be a collection, in which 
+    case any value in the collection is removed, or it may be a function, in 
+    which case it takes a single item as an argument and returns *True* if that 
+    item should be removed from the list.
+
+    Example::
+
+        >>> from inform import cull, display
+        >>> display(', '.join(cull([
+        ...     'apple', 'banana', 'cranberry', 'date', None, None, 'guava'
+        ... ])))
+        apple, banana, cranberry, date, guava
+
+    """
     try:
         remove = kwargs['remove']
         if callable(remove):
@@ -75,58 +97,63 @@ def cull(collection, **kwargs):
 
 
 # is_str {{{2
-def is_str(obj):
+def is_str(arg):
+    """Identifies strings in all their various guises.
+
+    Returns *True* if argument is a string.
+
+    Example::
+
+        >>> from inform import is_str
+        >>> is_str('abc')
+        True
+
+        >>> is_str(['a', 'b', 'c'])
+        False
+
+    """
     from six import string_types
-    """Identifies strings in all their various guises."""
-    return isinstance(obj, string_types)
+
+    return isinstance(arg, string_types)
 
 
 # is_iterable {{{2
 def is_iterable(obj):
-    """Identifies objects that can be iterated over, including strings."""
+    """Identifies objects that can be iterated over, including strings.
+
+    Returns *True* if argument is a collecton or a string.
+
+    Example::
+
+        >>> from inform import is_iterable
+        >>> is_iterable('abc')
+        True
+
+        >>> is_iterable(['a', 'b', 'c'])
+        True
+
+    """
     import collections
     return isinstance(obj, collections.Iterable)
 
 
 # is_collection {{{2
 def is_collection(obj):
-    """Identifies objects that can be iterated over, excluding strings."""
-    return is_iterable(obj) and not is_str(obj)
+    """Identifies objects that can be iterated over, excluding strings.
 
-# join {{{2
-def join(*args, **kwargs):
-    """Combines arguments into a string.
+    Returns *True* if argument is a collecton (tuple, list, set or dictionary).
 
-    By defaults it returns the unnamed arguments joined with a single space.
+    Example::
 
-    sep=' ':
-        Use specified string as join string rather than single space.
-    template = None:
-        A python format string. If specified, the unnamed and named arguments
-        are combined under the control of the strings format method.
-    wrap = False:
-        If true the string is wrapped using a width of 70. If an integer value
-        is passed, is used as the width of the wrap.
+        >>> from inform import is_collection
+        >>> is_collection('abc')
+        False
+
+        >>> is_collection(['a', 'b', 'c'])
+        True
+
     """
-    return _join(args, kwargs)
-
-
-# _join {{{2
-def _join(args, kwargs):
-    template = kwargs.get('template')
-    if template is None:
-        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
-    else:
-        message = template.format(*args, **kwargs)
-    wrap = kwargs.get('wrap')
-    if wrap:
-        from textwrap import fill
-        if type(wrap) == int:
-            message = fill(message, width=wrap)
-        else:
-            message = fill(message)
-    return message
-
+    return is_iterable(obj) and not is_str(obj)
 
 # Color class {{{2
 class Color:
@@ -134,6 +161,54 @@ class Color:
 
     Used to create colorizers, which are used to render text in a particular
     color.
+
+    Args:
+        color (string):
+            The desired color. Choose from:
+            *black* *red* *green* *yellow* *blue* *magenta* *cyan* *white*.
+        scheme (string):
+            Use the specified colorscheme when rendering the text.
+            Choose from *None*, 'light' or 'dark', default is 'dark'.
+        enalbe (bool):
+            If set to False, the colorizer does not render the text in color.
+
+    Example:
+
+        >>> from inform import Color
+        >>> fail = Color('red')
+
+    In this example, *fail* is a colorizer. It behave just like
+    :func:`inform.join` in that it combines its arguments into a string that
+    it returns. The difference is that colorizers add color codes that will
+    cause most terminals to display the string in the desired color.
+
+    Like :func:`inform.join`, colorizers take the following arguments:
+
+        unnamed arguments:
+            The unnamed arguments are converted to strings and joined to form
+            the text to be colored.
+
+        sep = ' ':
+            The join string, used when joining the unnamed arguments.
+
+        template = None:
+            A template that if present interpolates the arguments to form the
+            final message rather than simply joining the unnamed arguments with
+            *sep*. The template is a string, and its *format* method is called
+            with the unnamed and named arguments of the message passed as
+            arguments.
+
+        wrap = False:
+            Specifies whether message should be wrapped. *wrap* may be True, in
+            which case the default width of 70 is used.  Alternately, you may
+            specify the desired width. The wrapping occurs on the final message
+            after the arguments have been joined.
+
+        scheme = *False*:
+            Use to override the colorscheme when rendering the text.  Choose
+            from *None*, *False*, 'light' or 'dark'.  If you specify *False*
+            (the default), the colorscheme specified when creating the colorizer
+            is used.
     """
     COLORS = 'black red green yellow blue magenta cyan white'.split()
         # The order of the above colors must match order
@@ -161,6 +236,10 @@ class Color:
 
     @staticmethod
     def isTTY(stream=sys.stdout):
+        """Takes a stream as an argument and returns true if it is a TTY.
+
+        If not given, *stdout* is used as the stream.
+        """
         try:
             return os.isatty(stream.fileno())
         except Exception:
@@ -168,6 +247,7 @@ class Color:
 
     @classmethod
     def strip_colors(cls, text):
+        """Takes a string as its input and return that string stripped of any color codes."""
         if '\033' in text:
             return cls.COLOR_CODE_REGEX.sub('', text)
         else:
@@ -175,63 +255,81 @@ class Color:
 
 
 # User Utilities {{{1
-# fmt {{{2
-def fmt(message, *args, **kwargs):
-    """
-    Convert a message with embedded attributes to a string. The values for the
-    attributes can come from the argument list, as with ''.format(), or they
-    may come from the local scope (found by introspection).
+# join {{{2
+def join(*args, **kwargs):
+    """Combines arguments into a string.
+
+    Combines the arguments in a manner very similar to an informant and returns
+    the result as a string.  Uses the *sep*, *template* and *wrap* keyword
+    arguments to combine the arguments.
+
+    If *template* is specified it controls how the arguments are combined and
+    the result returned.  Otherwise the unnamed arguments are joined using the
+    separator and returned.
+
+    Args:
+        sep=' ':
+            Use specified string as join string rather than single space.
+            The unnamed arguments will be joined with using this string as a
+            separator.
+
+        template = None:
+            A python format string. If specified, the unnamed and named arguments
+            are combined under the control of the strings format method.
+
+        wrap = False:
+            If true the string is wrapped using a width of 70. If an integer value
+            is passed, is used as the width of the wrap.
 
     Examples::
 
-        >>> from inform import fmt
-        >>> s = 'str var'
-        >>> d = {'msg': 'dict val'}
-        >>> class Class:
-        ...     a = 'cls attr'
+        >>> from inform import join
+        >>> join('a', 'b', 'c', x='x', y='y', z='z')
+        'a b c'
 
-        >>> print(fmt("by order: {0}, {1[msg]}, {2.a}.", s, d, Class))
-        by order: str var, dict val, cls attr.
-        >>> print(fmt("by name: {S}, {D[msg]}, {C.a}.", S=s, D=d, C=Class))
-        by name: str var, dict val, cls attr.
+        >>> join('a', 'b', 'c', x='x', y='y', z='z', template='{2} {z}')
+        'c z'
 
-        The following works, but does not work with doctests
-        # >>> print(fmt("by magic: {s}, {d[msg]}, {c.a}."))
-        # by magic: str var, dict val, cls attr.
-
-    You can change the level at which the introspection occurs using the _lvl
-    keyword argument.
-
-        | _lvl=0 searches for variables in the scope that calls fmt(), the default
-        | _lvl=-1 searches in the parent of the scope that calls fmt()
-        | _lvl=-2 searches in the grandparent, etc.
-        | _lvl=1 search root scope, etc.
     """
-    import inspect
+    return _join(args, kwargs)
 
-    # Inspect variables from the source frame.
-    level = kwargs.pop('_lvl', 0)
-    level = 1 - level if level <= 0 else -level
-    frame = inspect.stack()[level][0]
 
-    # Collect all the variables in the scope of the calling code, so they
-    # can be substituted into the message.
-    attrs = {}
-    attrs.update(frame.f_globals)
-    attrs.update(frame.f_locals)
-    attrs.update(kwargs)
-
-    return message.format(*args, **attrs)
+# _join {{{2
+def _join(args, kwargs):
+    template = kwargs.get('template')
+    if template is None:
+        message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
+    else:
+        message = template.format(*args, **kwargs)
+    wrap = kwargs.get('wrap')
+    if wrap:
+        from textwrap import fill
+        if type(wrap) == int:
+            message = fill(message, width=wrap)
+        else:
+            message = fill(message)
+    return message
 
 
 # render {{{2
 def render(obj, sort=None, level=0, tab='    '):
     """
-    Recursively convert object to string with reasonable formatting.
-    Has built in support for the base Python types (None, bool, int, float,
-    str, set, tuple, list, and dict).  If you confine yourself to these types,
-    the output of render can be read by the Python interpreter.
-    Other types are converted to string with repr().
+    Recursively convert object to string with reasonable formatting.  Has built
+    in support for the base Python types (*None*, *bool*, *int*, *float*, *str*,
+    *set*, *tuple*, *list*, and *dict*).  If you confine yourself to these
+    types, the output of render can be read by the Python interpreter.  Other
+    types are converted to string with *repr()*.
+
+    The dictionary keys and set values are sorted if sort is *True*. Sometimes
+    this is not possible because the values are not comparable, in which case
+    render reverts to the natural order.
+
+    Example::
+
+        >>> from inform import display, render
+        >>> display('result =', render({'a': (0, 1), 'b': [2, 3, 4]}))
+        result = {'a': (0, 1), 'b': [2, 3, 4]}
+
     """
     from textwrap import dedent
 
@@ -298,10 +396,75 @@ def render(obj, sort=None, level=0, tab='    '):
     return '\n'.join(content)
 
 
+# fmt {{{2
+def fmt(message, *args, **kwargs):
+    """
+    Similar to ''.format(), but it can pull arguments from the local scope.
+
+    Convert a message with embedded attributes to a string. The values for the
+    attributes can come from the argument list, as with ''.format(), or they
+    may come from the local scope (found by introspection).
+
+    Examples::
+
+        >>> from inform import fmt
+        >>> s = 'str var'
+        >>> d = {'msg': 'dict val'}
+        >>> class Class:
+        ...     a = 'cls attr'
+
+        >>> display(fmt("by order: {0}, {1[msg]}, {2.a}.", s, d, Class))
+        by order: str var, dict val, cls attr.
+
+        >>> display(fmt("by name: {S}, {D[msg]}, {C.a}.", S=s, D=d, C=Class))
+        by name: str var, dict val, cls attr.
+
+        >> display(fmt("by magic: {s}, {d[msg]}, {c.a}."))
+        by magic: str var, dict val, cls attr.
+
+    You can change the level at which the introspection occurs using the _lvl
+    keyword argument.
+
+        | _lvl=0 searches for variables in the scope that calls fmt(), the default
+        | _lvl=-1 searches in the parent of the scope that calls fmt()
+        | _lvl=-2 searches in the grandparent, etc.
+        | _lvl=1 search root scope, etc.
+    """
+    import inspect
+
+    # Inspect variables from the source frame.
+    level = kwargs.pop('_lvl', 0)
+    level = 1 - level if level <= 0 else -level
+    frame = inspect.stack()[level][0]
+
+    # Collect all the variables in the scope of the calling code, so they
+    # can be substituted into the message.
+    attrs = {}
+    attrs.update(frame.f_globals)
+    attrs.update(frame.f_locals)
+    attrs.update(kwargs)
+
+    return message.format(*args, **attrs)
+
+
 # os_error {{{2
 # Generates a reasonable error message for an operating system errors, those
 # generated by OSError and its ilk.
 def os_error(err):
+    """Generates clean messages for operating system errors.
+
+    Example::
+
+        >>> from inform import display, os_error
+        >>> try:
+        ...     with open('config') as f:
+        ...         contents = f.read()
+        ... except (OSError, IOError) as e:
+        ...     display(os_error(e))
+        config: no such file or directory.
+
+    """
+
     filenames = ' -> '.join(
         cull([err.filename, getattr(err, 'filename2', None)])
     )
@@ -315,22 +478,24 @@ def os_error(err):
 def conjoin(iterable, conj=' and ', sep=', '):
     """Conjunction join
 
-    Return the list joined into a string, where conj is used to join the last
-    two items in the list, and sep is used to join the others.
+    Return the items of the *iterable* joined into a string, where *conj* is
+    used to join the last two items in the list, and *sep* is used to join the
+    others.
 
     Examples:
-    >>> from inform import conjoin
-    >>> print(conjoin([], ' or '))
-    <BLANKLINE>
 
-    >>> print(conjoin(['a'], ' or '))
-    a
+        >>> from inform import conjoin, display
+        >>> display(conjoin([], ' or '))
+        <BLANKLINE>
 
-    >>> print(conjoin(['a', 'b'], ' or '))
-    a or b
+        >>> display(conjoin(['a'], ' or '))
+        a
 
-    >>> print(conjoin(['a', 'b', 'c']))
-    a, b and c
+        >>> display(conjoin(['a', 'b'], ' or '))
+        a or b
+
+        >>> display(conjoin(['a', 'b', 'c']))
+        a, b and c
 
     """
     lst = list(iterable)
@@ -343,9 +508,17 @@ def conjoin(iterable, conj=' and ', sep=', '):
 def plural(count, singular, plural=None):
     '''Pluralize a word
 
-    If count is 1 or has length 1, the singular argument is returned, otherwise
-    the plural argument is returned. If plural is None, then it is created by
-    adding an 's' to the end of singular argument.
+    If *count* is 1 or has length 1, the *singular* argument is returned,
+    otherwise the *plural* argument is returned. If *plural* is None, then it is
+    created by adding an 's' to the end of *singular* argument.
+
+    Example::
+
+        >>> from inform import display, plural
+        >>> fruits = 'apple banana cranberry date'.split()
+        >>> display('I have {} {} of fruit.'.format(len(fruits), plural(fruits, 'piece')))
+        I have 4 pieces of fruit.
+
     '''
     if plural is None:
         plural = singular + 's'
@@ -357,19 +530,67 @@ def plural(count, singular, plural=None):
 
 # full_stop {{{2
 def full_stop(sentence):
-    """Add period to end of string if it is needed
+    """Add period to end of string if it is needed.
 
-    full_stop(str) --> str
-    A period (full stop) is added if there is no terminating punctuation at the
+    A full stop (a period) is added if there is no terminating punctuation at the
     end of the string.
+
+    Examples::
+
+        >>> from inform import full_stop
+        >>> full_stop('The file is out of date')
+        'The file is out of date.'
+
+        >>> full_stop('The file is out of date.')
+        'The file is out of date.'
+
+        >>> full_stop('Is the file is out of date?')
+        'Is the file is out of date?'
+
     """
     sentence = str(sentence)
     return sentence if sentence[-1] in '.?!' else sentence + '.'
 
 
-# columns {{{1
+# columns {{{2
 def columns(array, pagewidth=79, alignment='<', leader='    '):
-    "Distribute array over enough columns to fill the screen."
+    """Distribute array over enough columns to fill the screen.
+
+    Returns a list of strings, one for each line.
+
+    Args:
+        array (collection of strings):
+            The array to be printed.
+
+        pagewidth (int):
+            The number of characters available for each line.
+
+        alignment ('<' or '>'):
+            Whether to left ('<') or right ('>') align the *array* items in
+            their columns.
+
+        leader (str):
+            The string to prepend to each line.
+
+    Example::
+
+        >>> from inform import columns, display, full_stop
+        >>> title = 'Display the NATO phonetic alphabet'
+        >>> words = '''
+        ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett
+        ...     Kilo Lima Mike November Oscar Papa Quebec Romeo Sierra Tango
+        ...     Uniform Victor Whiskey X-ray Yankee Zulu
+        ... '''.split()
+        >>> newline = '''
+        ... '''
+        >>> display(full_stop(title), columns(words), sep=newline)
+        Display the NATO phonetic alphabet.
+            Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
+            Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
+            Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
+            Delta     Hotel     Lima      Papa      Tango     X-ray
+
+    """
     textwidth = pagewidth - len(leader)
     width = max([len(e) for e in array])+1
     numcols = max(1, textwidth//(width+1))
@@ -451,7 +672,7 @@ def ppp(*args, **kwargs):
 def ddd(*args, **kwargs):
     '''Print arguments function tailored for debugging.
 
-    Pretty-prints its arguments. Arguments may be name or unnamed.
+    Pretty-prints its arguments. Arguments may be named or unnamed.
     '''
     # if an argument has __dict__ attribute, render that rather than arg itself
     def expand(arg):
@@ -494,6 +715,7 @@ def vvv(*args):
 
 
 def sss(*args):
+    "Print a stack trace."
     import traceback
     tb = traceback.extract_stack()
     stacktrace = []
@@ -513,6 +735,74 @@ def sss(*args):
 # whereas the print functions returned from InformantFactory are referred to
 # as informants.
 class InformantFactory:
+    """
+    An object of InformantFactory is referred to as an informant. It is
+    generally treated as a function that is called to produce the desired
+    output.
+
+    Args:
+        severity (string):
+            Messages with severities get headers. The header consists of the
+            severity, the program name (if desired), and the culprit (if
+            provided). If the message text does not contain a newline it is
+            appended to the header.  Otherwise the message text is indented and
+            placed on the next line.
+
+        is_error (bool):
+            Message is counted as an error.
+
+        log (bool):
+            Send message to the log file.  May be a boolean or a function that
+            accepts the informer as an argument and returns a boolean.
+
+        output (bool):
+            Send message to the output stream.  May be a boolean or a function
+            that accepts the informer as an argument and returns a boolean.
+
+        notify (bool):
+            Send message to the notifier.  The notifier will display the
+            message that appears temporarily in a bubble at the top of the
+            screen.  May be a boolean or a function that accepts the informer
+            as an argument and returns a boolean.
+
+        terminate (bool or integer):
+            Terminate the program.  Exit status is the value of *terminate*
+            unless *terminate* is *True*, in which case 1 is returned if an
+            error occurred and 0 otherwise.
+
+        is_continuation (bool):
+            This message is a continuation of the previous message.  It will
+            use the properties of the previous message (output, log, message
+            color, etc) and if the previous message had a header, that header
+            is not output and instead the message is indented.
+
+        message_color (string):
+            Color used to display the message.  Choose from: *black*, *red*,
+            *green*, *yellow*, *blue*, *magenta*, *cyan* or *white*.
+
+        header_color (string):
+            Color used to display the header, if one is produced.  Choose from:
+            *black*, *red*, *green*, *yellow*, *blue*, *magenta*, *cyan* or
+            *white*.
+
+        Example:
+
+            The following generates an informant named *show* that outputs
+            messages to both standare output and to the logfile. Output to the
+            standard output is suppressed if *mute* is *True*::
+
+                show = InformantFactory(
+                    output=lambda inform: not inform.mute,
+                    log=True,
+                )
+
+            *show* is an informant. Once created, it can be used to give
+            messages to the user::
+
+                show('Hey there!')
+
+    """
+
     def __init__(
         self,
         severity=None,
@@ -525,42 +815,6 @@ class InformantFactory:
         message_color=None,
         header_color=None,
     ):
-        """
-        Arguments:
-        severity (string)
-            Messages with severities get headers; the severity acts as label.
-            If the message has a header and the message text contains
-            a newline, then the text is indented and placed on the line that
-            follows the header.
-        is_error (bool)
-            Message is counted as an error.
-        log (bool)
-            Send message to the log file.  May be a boolean or a function that
-            accepts the informer as an argument and returns a boolean.
-        output (bool)
-            Send message to the output stream.  May be a boolean or a function
-            that accepts the informer as an argument and returns a boolean.
-        notify (bool)
-            Send message to the notifier.  The notifier will display the
-            message that appears temporarily in a bubble at the top of the
-            screen.  May be a boolean or a function that accepts the informer
-            as an argument and returns a boolean.
-        terminate (bool or integer)
-            Terminate the program.  Exit status is the value of terminate
-            unless terminate==True, in which case 1 is returned if an error
-            occurred and 0 otherwise.
-        is_continuation (bool)
-            This message is a continuation of the previous message.  It will
-            use the properties of the previous message (output, log, message
-            color, etc) and if the previous message had a header, that header
-            is not output and instead the message is indented.
-        message_color (string)
-            Color used to display the message.  Choose from: black, red, green,
-            yellow, blue, magenta, cyan or white.
-        header_color (string)
-            Color used to display the header, if one is produced.  Choose from:
-            black, red, green, yellow, blue, magenta, cyan or white.
-        """
         self.severity = severity
         self.is_error = is_error
         self.log = log
@@ -678,9 +932,98 @@ panic = InformantFactory(
 class Inform:
     """Inform
 
-    Handles all informants, which in turn handle user messaging.  Generally
-    copies messages to the logfile while sending most to standard out as well,
-    however all is controllable.
+    Manages all informants, which in turn handle user messaging.  Generally
+    informant copy messages to the logfile while most also send to the standard
+    output as well, however all is controllable.
+
+    Args:
+        mute (bool):
+            All output is suppressed (it is still logged).
+
+            With the provided informants all output is suppressed when set (it
+            is still logged). This is generally used when the program being run
+            is being run by another program that is generating its own messages
+            and does not want the user confused by additional messages. In this
+            case, the calling program is responsible for observing and reacting
+            to the exit status of the called program.
+
+        quiet (bool):
+            Normal output is suppressed (it is still logged).
+
+            With the provided informants normal output is suppressed when set
+            (it is still logged). This is used when the user has indicated that
+            they are uninterested in any conversational messages and just want
+            to see the essentials (generally error messages).
+
+        verbose (bool):
+            Comments are output to user, normally they are just logged.
+
+            With the provided informants comments are output to user when set;
+            normally they are just logged. Comments are generally used to
+            document unusual occurrences that might warrant the user's
+            attention.
+
+        narrate (bool):
+            Narration is output to user, normally it is just logged.
+
+            With the provided informants narration is output to user when set,
+            normally it is just logged.  Narration is generally used to inform
+            the user as to what is going on. This can help place errors and
+            warnings in context so that they are easier to understand.
+
+        logfile (string or stream or bool):
+            May be a string, in which case it is taken to be the path of the
+            logfile.  May be *True*, in which case ./.<prog_name>.log is used.
+            May be an open stream.  Or it may be *False*, in which case no log
+            file is created.
+
+        prog_name (string):
+            The program name. Is appended to the message headers and used to
+            create the default logfile name. May be a string, in which case it
+            is used as the name of the program.  May be *True*, in which case
+            *basename(argv[0])* is used.  May be *False* to indicate that
+            program name should not be added to message headers.
+
+        argv (list of strings):
+            System command line arguments (logged). By default, *sys.argv* is
+            used.  If *False* is passed in, *argv* is not logged and *argv[0]*
+            is not available to be the program name.
+
+        version (string):
+            program version (logged if provided).
+
+        termination_callback (func):
+            A function that is called at program termination.
+
+        colorscheme (*None*, 'light', or 'dark'):
+            Color scheme to use. *None* indicates that messages should not be
+            colorized. Colors are not used if desired output stream is not
+            a TTY.
+
+        flush (bool):
+            Flush the stream after each write. Is useful if you program is
+            crashing, causing loss of the latest writes. Can cause programs to
+            run considerably slower if they produce a lot of output. Not
+            available with python2.
+
+        stdout (stream):
+            Messages are sent here by default. Generally used for testing. If
+            not given, *sys.stdout* is used.
+
+        stderr (stream):
+            Termination messages are sent here by default. Generally used for
+            testing.  If not given, *sys.stderr* is used.
+
+        length_thresh (integer):
+            Split header from body if line length would be greater than
+            threshold.
+
+        culprit_sep (string):
+            Join string used for culprit collections. Default is ', '.
+
+        \*\*kwargs:
+            Any additional keyword arguments are made attributes that are
+            ignored by *Inform*, but may be accessed by the informants.
     """
 
     # constructor {{{2
@@ -703,59 +1046,6 @@ class Inform:
         culprit_sep=', ',
         **kwargs
     ):
-        """
-        Arguments:
-        mute (bool)
-            All output is suppressed (it is still logged).
-        quiet (bool)
-            Normal output is suppressed (it is still logged).
-        verbose (bool)
-            Comments are output to user, normally they are just logged.
-        narrate (bool)
-            Narration is output to user, normally it is just logged.
-        logfile (string or stream or bool)
-            May be a string, in which case it is taken to be the path of the
-            logfile.  May be *True*, in which case ./.<prog_name>.log is used.
-            May be an open stream.  Or it may be *False*, in which case no log
-            file is created.
-        prog_name (string)
-            The program name. Is appended to the message headers and used to
-            create the default logfile name. May be a string, in which case it
-            is used as the name of the program.  May be *True*, in which case
-            basename(argv[0]) is used.  May be *False* to indicate that program
-            name should not be added to message headers.
-        argv (list of strings)
-            System command line arguments (logged). By default, sys.argv is
-            used.
-        version (string)
-            program version (logged)
-        termination_callback (func)
-            A function that is called at program termination. The list of
-            recorded messages is provided as the only argument.
-        colorscheme (None, 'light', or 'dark')
-            Color scheme to use. None indicates that messages should not be
-            colorized. Colors are not used if desired output stream is not
-            a TTY.
-        flush (bool)
-            Flush the stream after each write. Is useful if you program is
-            crashing, causing loss of the latest writes. Can cause programs to
-            run considerably slower if they produce a lot of output. Not
-            available with python2.
-        stdout (stream)
-            Messages are sent here by default. Generally used for testing. If
-            not given, sys.stdout is used.
-        stderr (stream)
-            Termination messages are sent here by default. Generally used for
-            testing.  If not given, sys.stderr is used.
-        length_thresh (integer)
-            Split header from body if line length would be greater than
-            threshold.
-        culprit_sep (string)
-            Join string used for culprit collections.
-        **kwargs
-            Any additional keyword arguments are made attributes that are
-            ignored by Inform, but may be accessed by the informants.
-        """
         self.errors = 0
         self.version = version
         self.termination_callback = termination_callback
@@ -808,10 +1098,12 @@ class Inform:
 
     # suppress_output {{{2
     def suppress_output(self, mute):
+        "Allows you to change the mute flag (only available as a method)."
         self.mute = bool(mute)
 
     # set_logfile {{{2
     def set_logfile(self, logfile, encoding='utf-8'):
+        "Allows you to change the logfile (only available as a method)."
         try:
             if self.logfile:
                 self.logfile.close()
@@ -855,10 +1147,11 @@ class Inform:
 
     # flush_logfile {{{2
     def flush_logfile(self):
+        "Flush the logfile."
         if self.logfile:
             self.logfile.flush()
 
-    # report {{{2
+    # _report {{{2
     def _report(self, args, kwargs, action):
 
         # handle continuations
@@ -953,7 +1246,7 @@ class Inform:
                 return '%s' % action.severity
         return ''
 
-    # show_msg {{{2
+    # _show_msg {{{2
     def _show_msg(self, header, culprit, message, multiline, options):
         if multiline:
             head = ': '.join(cull([header, culprit]))
@@ -966,7 +1259,7 @@ class Inform:
 
     # done {{{2
     def done(self):
-        "Normal termination"
+        "Terminate the program with normal exit status."
         if self.termination_callback:
             self.termination_callback()
         if self.prog_name:
@@ -980,7 +1273,11 @@ class Inform:
 
     # terminate {{{2
     def terminate(self, status=None):
-        """Termination
+        """Terminate the program with specified exit status.
+
+        Args:
+            status (int or string):
+                The desired exit status or exit message.
 
         Recommended status codes:
             | None: return 1 if errors occurred and 0 otherwise
@@ -1009,26 +1306,43 @@ class Inform:
 
     # terminate_if_errors {{{2
     def terminate_if_errors(self, status=1):
-        "Terminate if error count is nonzero"
+        """Terminate the program if error count is nonzero.
+
+        Args:
+            status (int or string):
+                The desired exit status or exit message.
+        """
+
         if self.errors:
             self.terminate(status)
 
     # errors_accrued {{{2
     def errors_accrued(self, reset=False):
-        "Returns number of errors that have accrued"
+        """Returns number of errors that have accrued.
+
+        Args:
+            reset (bool):
+                Reset the error count to 0 if *True*.
+        """
         count = self.errors
         if reset:
             self.errors = 0
         return count
 
     # get_prog_name {{{2
-    def get_prog_name(self, default):
-        "Returns the program name"
+    def get_prog_name(self, default=None):
+        """Returns the program name.
+
+        Args:
+            default (string):
+                Returns the program name if available otherwise it returns the
+                default.
+        """
         return self.prog_name if self.prog_name else default
 
     # disconnect {{{2
     def disconnect(self):
-        "Disconnect informer"
+        "Disconnect informer."
         if self.logfile:
             self.logfile.flush()
         global INFORMER
@@ -1046,26 +1360,46 @@ class Inform:
 # Direct access to class methods {{{2
 # done {{{3
 def done():
+    """Terminate the program with normal exit status.
+
+    Calls :meth:`inform.Inform.done` for the active informer.
+    """
     INFORMER.done()
 
 
 # terminate {{{3
 def terminate(status=True):
+    """Terminate the program with specified exit status."
+
+    Calls :meth:`inform.Inform.terminate` for the active informer.
+    """
     INFORMER.terminate(status)
 
 
 # terminate_if_errors {{{3
 def terminate_if_errors(status=1):
+    """Terminate the program if error count is nonzero."
+
+    Calls :meth:`inform.Inform.terminate_if_errors` for the active informer.
+    """
     INFORMER.terminate_if_errors(status)
 
 
 # errors_accrued {{{3
 def errors_accrued(reset=False):
+    """Returns number of errors that have accrued."
+
+    Calls :meth:`inform.Inform.errors_accrued` for the active informer.
+    """
     return INFORMER.errors_accrued(reset)
 
 
 # get_prog_name {{{3
-def get_prog_name(default):
+def get_prog_name(default=None):
+    """Returns the program name."
+
+    Calls :meth:`inform.Inform.get_prog_name` for the active informer.
+    """
     return INFORMER.get_prog_name(default)
 
 
