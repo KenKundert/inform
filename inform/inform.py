@@ -71,35 +71,62 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
 
 # cull {{{2
 def cull(collection, **kwargs):
-    """Cull items of a particular value from a list.
+    """Cull items of a particular value from a collection.
 
-    Strips items from a list that have a particular value. By default, it strips 
-    a list of values that would be False when cast to a boolean (0, False, None, 
-    '', (), [], etc.).  A particular value may be specified using the 'remove' 
-    as a keyword argument.  The value of remove may be a collection, in which 
-    case any value in the collection is removed, or it may be a function, in 
-    which case it takes a single item as an argument and returns *True* if that 
-    item should be removed from the list.
+    Args:
+        collection:
+            The collection may be list-like (list, tuples, sets, etc.) or
+            dictionary-like (dict, OrderedDict, etc.).  A new collection of the
+            same type is returned with the undesirable values removed.
+
+        remove:
+            Must be specified as keyword argument. May be a function, a
+            collection, or a scalar.  The function would take a single argument,
+            one of the values in the collection, and return True if the value
+            should be culled. The scalar or the collection simply specified the
+            specific value of values to be culled.
+
+            If remove is not specified, the value is culled if its value would
+            be False when cast to a boolean (0, False, None, '', (), [], {}, etc.)
 
     Example::
 
         >>> from inform import cull, display
-        >>> display(', '.join(cull([
-        ...     'apple', 'banana', 'cranberry', 'date', None, None, 'guava'
-        ... ])))
+        >>> from collections import OrderedDict
+        >>> fruits = OrderedDict([
+        ...    ('a','apple'), ('b','banana'), ('c','cranberry'), ('d','date'),
+        ...    ('e',None), ('f',None), ('g','guava'),
+        ... ])
+        >>> display(*cull(list(fruits.values())), sep=', ')
         apple, banana, cranberry, date, guava
 
+        >>> for k, v in cull(fruits).items():
+        ...     display('{k} is for {v}'.format(k=k, v=v))
+        a is for apple
+        b is for banana
+        c is for cranberry
+        d is for date
+        g is for guava
+
     """
-    try:
-        remove = kwargs['remove']
-        if callable(remove):
-            return [each for each in collection if not remove(each)]
-        elif is_collection(remove):
-            return [each for each in collection if each not in remove]
+    # convert remove into a function
+    if 'remove' in kwargs:
+        if callable(kwargs['remove']):
+            remove = kwargs['remove']
+        elif is_collection(kwargs['remove']):
+            remove = lambda x: x in kwargs['remove']
         else:
-            return [each for each in collection if each != remove]
-    except KeyError:
-        return [each for each in collection if each]
+            remove = lambda x: x == kwargs['remove']
+    else:
+        remove = lambda x: not x
+
+    # cull the herd
+    try:
+        items = [(k,v) for k, v in collection.items() if not remove(v)]
+        return collection.__class__(items)
+    except (AttributeError, TypeError):
+        values = [v for v in collection if not remove(v)]
+        return collection.__class__(values)
 
 
 # is_str {{{2
@@ -274,14 +301,31 @@ def join(*args, **kwargs):
     separator and returned.
 
     Args:
-        sep=' ':
+        sep (string):
             Use specified string as join string rather than single space.
             The unnamed arguments will be joined with using this string as a
-            separator.
+            separator. Default is ' '.
 
-        template = None:
+        template (string or collection of strings):
             A python format string. If specified, the unnamed and named arguments
-            are combined under the control of the strings format method.
+            are combined under the control of the strings format method. This
+            may also be a collection of strings, in which case each is tried in
+            sequence, and the first for which all the interpolated arguments are
+            known is used.  By default, an argument is 'known' if it would be
+            True if casted to a boolean.
+
+        remove:
+            Used if *template* is a collection.
+
+            May be a function, a collection, or a scalar.  The function would
+            take a single argument, one of the values in the collection, and
+            return True if the value should not be considered known. The scalar
+            or the collection simply specified the specific value of values that
+            should not be considered known.
+
+            If remove is not specified, the value should not be considered known
+            if its value would be False when cast to a boolean (0, False, None,
+            '', (), [], {}, etc.)
 
         wrap = False:
             If true the string is wrapped using a width of 70. If an integer value
@@ -306,7 +350,22 @@ def _join(args, kwargs):
     if template is None:
         message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
     else:
-        message = template.format(*args, **kwargs)
+        if is_str(template):
+            message = template.format(*args, **kwargs)
+        else:
+            remove = dict(remove=kwargs['remove']) if 'remove' in kwargs else {}
+            kwargs_filtered = cull(kwargs, **remove)
+            args_filtered = cull(args, **remove)
+
+            for tmplt in template:
+                try:
+                    message = tmplt.format(*args_filtered, **kwargs_filtered)
+                    break
+                except (KeyError, IndexError):
+                    pass
+            else:
+               raise KeyError()
+
     wrap = kwargs.get('wrap')
     if wrap:
         from textwrap import fill
