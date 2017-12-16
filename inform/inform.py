@@ -1194,7 +1194,7 @@ class Inform:
         return self.__dict__.get(name)
 
     # suppress_output {{{2
-    def suppress_output(self, mute):
+    def suppress_output(self, mute=True):
         "Allows you to change the mute flag (only available as a method)."
         self.mute = bool(mute)
 
@@ -1461,7 +1461,7 @@ class Inform:
         self.disconnect()
 
 
-# Direct access to class methods {{{2
+# Direct access to class methods {{{1
 # done {{{3
 def done():
     """Terminate the program with normal exit status.
@@ -1505,6 +1505,12 @@ def get_prog_name(default=None):
     Calls :meth:`inform.Inform.get_prog_name` for the active informer.
     """
     return INFORMER.get_prog_name(default)
+
+
+# get_informer {{{3
+def get_informer():
+    """Returns the active informer."""
+    return INFORMER
 
 
 # Instantiate default informer {{{1

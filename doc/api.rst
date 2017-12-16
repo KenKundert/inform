@@ -26,6 +26,10 @@ These functions access the currently active informer.
 
 .. autofunction:: inform.get_prog_name
 
+You can also request the active informer:
+
+.. autofunction:: inform.get_informer
+
 
 InformantFactory
 ================

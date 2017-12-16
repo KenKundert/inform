@@ -20,4 +20,7 @@ from .inform import (
     # built-in informants
     log, comment, codicil, narrate, display, output,
     notify, debug, warn, error, fatal, panic,
+
+    # the currently active informer
+    get_informer
 )

@@ -126,8 +126,8 @@ arguments, and form them into a message using the *template* argument:
     green = 4fff33
       red = ff5733
 
-You can every specify a collection of templates. In this case{k: v for k, v in kwargs if v }
-The first one for which all keys are known is used.  For example;
+You can every specify a collection of templates.  The first one for which all 
+keys are known is used.  For example;
 
     >>> colors = {
     ...     'red': ('ff5733', 'failure'),
