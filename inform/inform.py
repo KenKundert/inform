@@ -1182,6 +1182,7 @@ class Inform:
 
         # Activate the actions
         global INFORMER
+        self.previous_informer = INFORMER
         INFORMER = self
 
         # activate the logfile
@@ -1446,11 +1447,14 @@ class Inform:
 
     # disconnect {{{2
     def disconnect(self):
-        "Disconnect informer."
+        "Disconnect informer, returning to previous informer."
         if self.logfile:
             self.logfile.flush()
         global INFORMER
-        INFORMER = DEFAULT_INFORMER
+        if self.previous_informer:
+            INFORMER = self.previous_informer
+        else:
+            INFORMER = DEFAULT_INFORMER
 
     # __enter__ {{{2
     def __enter__(self):
