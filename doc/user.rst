@@ -458,8 +458,8 @@ The program is terminated with an exit status of 3.
 
 .. informers:
 
-Informers
----------
+Informant Control
+-----------------
 
 For more control of the informants, you can import and instantiate the 
 :class:`inform.Inform` class yourself along with the desired informants.  This 
@@ -1064,7 +1064,7 @@ ppp(\*args, \*\*kwargs):
             1 this is a test (2, 3)
 
 ddd(\*args, \*\*kwyargs):
-    This function is pretty prints all of both the unnamed and named arguments.
+    This function pretty prints all of both the unnamed and named arguments.
 
     .. code:: python
 

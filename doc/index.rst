@@ -233,12 +233,6 @@ constructing messages.
 
 .. list-table::
 
-   * - :func:`inform.ddd`,
-       :func:`inform.ppp`,
-       :func:`inform.sss`,
-       :func:`inform.vvv`
-     - Print functions used when debugging code.
-
    * - :class:`inform.Color`
      - Used to color messages sent to the console.
 
@@ -251,6 +245,9 @@ constructing messages.
    * - :func:`inform.cull`
      - Strips unintersting value from collections.
 
+   * - :func:`inform.ddd`
+     - Pretty prints its arguments, used when debugging code.
+
    * - :func:`inform.fmt`
      - Similar to format(), but can pull argument from the local scope.
 
@@ -260,23 +257,36 @@ constructing messages.
    * - :func:`inform.indent`
      - Adds indentation.
 
-   * - :func:`inform.is_str`,
-       :func:`inform.is_iterable`,
-       :func:`inform.is_collection`
-     - Identifies important characteristics of objects.
+   * - :func:`inform.is_collection`
+     - Is object a collection (i.e., is it iterable and not a string)?
+
+   * - :func:`inform.is_iterable`
+     - Is object iterable (includes strings).
+
+   * - :func:`inform.is_str`
+     - Is object a string?
 
    * - :func:`inform.join`
      - Combines arguments into a string in the same way as informant.
 
+   * - :func:`inform.os_error`
+     - Generates clean messages for operating system errors
+
    * - :func:`inform.plural`
      - Pluralizes a word if needed.
 
-   * - :func:`inform.os_error`
-     - Generates clean messages for operating system errors
+   * - :func:`inform.ppp`
+     - Print function, used when debugging code.
 
    * - :func:`inform.render`
      - Converts many of the built-in Python data types into attractive, compact, 
        and easy to read strings.
+
+   * - :func:`inform.sss`
+     - Prints stack trace, used when debugging code.
+
+   * - :func:`inform.vvv`
+     - Print all variables that have given value, used when debugging code.
 
 One of the most used is *os_error*.  It converts *OSError* exceptions into 
 a simple well formatted string that can be used to describe the exception to the 
