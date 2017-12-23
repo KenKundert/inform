@@ -779,7 +779,7 @@ def vvv(*args):
     _debug(frame_depth, args, kwargs=dict(sep='\n'))
 
 
-def sss(*args):
+def sss():
     "Print a stack trace."
     import traceback
     tb = traceback.extract_stack()
@@ -1221,12 +1221,27 @@ class Inform:
 
     # suppress_output {{{2
     def suppress_output(self, mute=True):
-        "Allows you to change the mute flag (only available as a method)."
+        """Allows you to change the mute flag (only available as a method).
+
+        Args:
+            mute (bool):
+                If *mute* is True all output is suppressed (it is still logged).
+        """
         self.mute = bool(mute)
 
     # set_logfile {{{2
     def set_logfile(self, logfile, encoding='utf-8'):
-        "Allows you to change the logfile (only available as a method)."
+        """Allows you to change the logfile (only available as a method).
+
+        Args:
+            logfile:
+                May be a string, in which case it is taken to be the path of the
+                logfile.  May be *True*, in which case ./.<prog_name>.log is
+                used.  May be an open stream.  Or it may be *False*, in which
+                case no log file is created.
+            encoding (string):
+                The encoding to use when writing the file.
+        """
         try:
             if self.logfile:
                 self.logfile.close()

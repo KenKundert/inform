@@ -4,8 +4,8 @@
     >>> inform = Inform(prog_name=False)
 
 
-Inform User's Guide
-===================
+User's Guide
+============
 
 .. _using informants:
 
@@ -462,20 +462,24 @@ Informant Control
 -----------------
 
 For more control of the informants, you can import and instantiate the 
-:class:`inform.Inform` class yourself along with the desired informants.  This 
-gives you the ability to specify options:
+:class:`inform.Inform` class along with the desired informants.  This gives you 
+the ability to specify options:
 
 .. code-block:: python
 
     >>> from inform import Inform, display, error
-    >>> Inform(logfile=False, prog_name=False)
+    >>> Inform(logfile=False, prog_name=False, quiet=True)
     <...>
 
     >>> display('hello')
-    hello
 
     >>> error('file not found.', culprit='data.in')
     error: data.in: file not found.
+
+The *logfile* argument disables opening and writing to the logfile. The 
+*prog_name* argument stops *Inform* from adding the program name to the error 
+messae. And *quiet* turns off non-essential output, and in this case it causes 
+the output of *display* to be suppressed.
 
 An object of the Inform class is referred to as an informer (not to be confused 
 with the print functions, which are  referred to as informants). Once 
@@ -491,11 +495,11 @@ program, or return a count of the number of errors that have occurred.
     >>> informer.errors_accrued()
     1
 
-You can also use a *with* statement to invoke the informer. This closes the 
-informer when the *with* statement terminates (you must not use the informants 
-when no informer is present). This is useful when writing tests. In this case 
-you can provide your own output streams so that you can access the normally 
-printed output of your code:
+You can also use a *with* statement to invoke the informer. This activates the 
+informer for the duration of the *with* statement, returning to the previous 
+informer when the *with* statement terminates. This is useful when writing 
+tests.  In this case you can provide your own output streams so that you can 
+access the normally printed output of your code:
 
 .. code-block:: python
 
@@ -541,9 +545,11 @@ printed output of your code:
 .. user define informants:
 
 User Defined Informants
-------------------------
+-----------------------
 
-You can create your own informants using :class:`inform.InformantFactory`:
+You can create your own informants using :class:`inform.InformantFactory`. One 
+application of this is to support multiple levels of verbosity. To do this, an 
+informant would be created for each level of verbosity, as follows:
 
 .. code-block:: python
 
@@ -551,6 +557,7 @@ You can create your own informants using :class:`inform.InformantFactory`:
 
     >>> verbose1 = InformantFactory(output=lambda m: m.verbosity >= 1)
     >>> verbose2 = InformantFactory(output=lambda m: m.verbosity >= 2)
+
     >>> with Inform(verbosity=0):
     ...     verbose1('First level of verbosity.')
     ...     verbose2('Second level of verbosity.')
@@ -566,10 +573,26 @@ You can create your own informants using :class:`inform.InformantFactory`:
     First level of verbosity.
     Second level of verbosity.
 
-The argument *verbosity* is not an explicitly supported argument of *Inform*.  
-In this case *Inform* simply saves the value and makes it available as an 
-attribute, and it is this attribute that is queried by the lambda function 
-passed to *InformantFactory* when creating the informants.
+The argument *verbosity* is not an explicitly supported argument of 
+:class:`inform.Inform`.  In this case *Inform* simply saves the value and makes 
+it available as an attribute, and it is this attribute that is queried by the 
+lambda function passed to *InformantFactory* when creating the informants.
+
+Another use for user-defined informants is to create print functions that output 
+is a particular color:
+
+.. code-block:: python
+
+    >>> from inform import InformantFactory
+
+    >>> succeed = InformantFactory(message_color='green')
+    >>> fail = InformantFactory(message_color='red')
+
+    >>> succeed('This message would be green.')
+    This message would be green.
+
+    >>> fail('This message would be red.')
+    This message would be red.
 
 
 .. _exceptions:
@@ -600,13 +623,13 @@ message and the culprit. You can also cast the exception to a string to get
 a string that contains both the message and the culprit formatted so that it can 
 be shown to the user.
 
-Any keyword arguments provided will be available in *e.kwargs*, but certain 
-keyword arguments are reserved by *Inform* (see :ref:`using informants`).
+All positional arguments are available in *e.args* and any keyword arguments 
+provided are available in *e.kwargs*.
 
 One common approach to using *Error* is to pass all the arguments that make up 
-the error message as unnamed arguments and then assemble them into the message 
-by providing a template.  In that way the arguments are directly available to 
-the handler if needed. For example:
+the error message as arguments and then assemble them into the message by 
+providing a template.  In that way the arguments are directly available to the 
+handler if needed. For example:
 
 .. code-block:: python
 
@@ -618,237 +641,18 @@ the handler if needed. For example:
 
     >>> try:
     ...     if name not in known_names:
-    ...         raise Error(name, template="name '{}' is not defined.")
+    ...         raise Error(name, choices=known_names, template="name '{}' is not defined.")
     ... except Error as e:
-    ...     candidates = get_close_matches(e.args[0], known_names, 1, 0.6)
+    ...     candidates = get_close_matches(e.args[0], e.choices, 1, 0.6)
     ...     candidates = conjoin(candidates, conj=' or ')
     ...     e.report()
     ...     codicil(fmt('Did you mean {candidates}?'))
     myprog error: name 'alfa' is not defined.
         Did you mean alpha?
 
-
-Inform Class
-------------
-The :class:`infor.Inform` class controls the active informants. It takes the 
-following arguments as options (the value given for the argument is its 
-default):
-
-
-Arguments
-"""""""""
-mute=False (bool)
-   With the provided informants all output is suppressed when set (it is still 
-   logged). This is generally used when the program being run is being run by 
-   another program that is generating its own messages and does not want the 
-   user confused by additional messages. In this case, the calling program is 
-   responsible for observing and reacting to the exit status of the called 
-   program.
-quiet=False (bool):
-   With the provided informants normal output is suppressed when set (it is 
-   still logged). This is used when the user has indicated that they are 
-   uninterested in any conversational messages and just want to see the 
-   essentials (generally error messages).
-verbose=False (bool):
-   With the provided informants comments are output to user when set; normally 
-   they are just logged. Comments are generally used to document unusual 
-   occurrences that might warrant the user's attention.
-narrate=False (bool):
-   With the provided informants narration is output to user when set, normally 
-   it is just logged.  Narration is generally used to inform the user as to what 
-   is going on. This can help place errors and warnings in context so that they 
-   are easier to understand.
-logfile=False (string or stream):
-   May be a string, in which case it is taken to be the path of the logfile.  
-   May be *True*, in which case ./.<prog_name>.log is used.  May be an open 
-   stream.  Or it may be *False*, in which case no log file is created.
-prog_name=True (string):
-   The program name. Is appended to the message headers and used to create the 
-   default logfile name. May be a string, in which case it is used as the name 
-   of the program.  May be *True*, in which case basename(argv[0]) is used.  May 
-   be *False* to indicate that program name should not be added to message 
-   headers.
-argv=None (list of strings):
-   System command line arguments (logged). By default, sys.argv is used. If 
-   False is passed in, argv is not logged and argv[0] is not available to be the 
-   program name.
-version=None (string):
-   Program version (logged if provided).
-termination_callback=None (func):
-   A function that is called at program termination.
-colorscheme='dark' (*None*, 'light', or 'dark'):
-   Color scheme to use. *None* indicates that messages should not be colorized.  
-   Colors are not used if output stream is not a TTY.
-flush=False (bool):
-   Flush the stream after each write. Is useful if you program is crashing, 
-   causing loss of the latest writes. Can cause programs to run considerably 
-   slower if they produce a lot of output. Not available with python2.
-stdout=None (stream):
-   Messages are sent here by default. Generally used for testing. If 
-   not given, sys.stdout is used.
-stderr=None (stream):
-   Termination messages are sent here by default. Generally used for 
-   testing.  If not given, sys.stderr is used.
-length_thresh=80
-   If length of line would be greater than this, split header from body.
-culprit_sep=', '
-   Join string used for culprit collections.
-\**kwargs:
-   Any additional keyword arguments are made attributes that are ignored by 
-   Inform, but may be accessed by the informants.
-
-Methods
-"""""""
-
-The Inform class provides the following user accessible methods. Most of these 
-methods are also available as functions, which act on the current informer.
-
-suppress_output():
-   Allows you to change the mute flag (only available as a method).
-
-set_logfile():
-   Allows you to change the logfile (only available as a method).
-
-done():
-   Terminates the program normally (exit status is 0).
-
-terminate(status = *None*):
-   Terminate the program with the given exit status. If specified, the exit 
-   status should be a positive integer less than 128. Usually, the following 
-   values are used:
-
-   | 0: success  
-   | 1: unexpected error 
-   | 2: invalid invocation
-   | 3: panic
-
-   If the exit status is not specified, then the exit status is set to 1 if an 
-   error occurred and 0 otherwise.
-
-   You may also pass a string for the status, in which case the program prints 
-   the string to stderr and terminates with an exit status of 1.
-
-terminate_if_errors(status=1):
-   Terminate the program with the given exit status if an error has occurred.  
-
-errors_accrued(reset = *False*):
-   Return the number of errors that have accrued.
-
-disconnect():
-   Deactivate the current informer, restoring the default.
-
-Functions
-"""""""""
-
-Several of the above methods are also available as stand-alone functions that 
-act on the currently active informer.  This make it easy to use their 
-functionality even if you do not have local access to the informer. They are:
-
-| done()
-| terminate()
-| terminate_if_errors()
-| errors_accrued()
-
-InformantFactory Class
-----------------------
-The InformantFactory class takes the following arguments:
-
-severity = *None*:
-   Messages with severities get headers. The header consists of the severity, 
-   the program name (if desired), and the culprit (if provided). If the message 
-   text does not contain a newline it is appended to the header.  Otherwise the 
-   message text is indented and placed on the next line.
-is_error = *False*:
-   Should message be counted as an error.
-log = *True*:
-   Send message to the log file. May be a boolean or a function that accepts the 
-   Inform object as an argument and returns a boolean.
-output = *True*:
-   Send to the output stream. May be a boolean or a function that accepts the 
-   Inform object as an argument and returns a boolean.
-notify = *False*:
-   Send message to the notifier.  The notifier will display the message that 
-   appears temporarily in a bubble at the top of the screen.  May be a boolean 
-   or a function that accepts the informer as an argument and returns a boolean.
-terminate = *False*:
-   Terminate the program, exit status is the value of the terminate unless 
-   *terminate* is *True*, in which case 1 is returned if an error occurred and 
-   0 otherwise.
-is_continuation = *False*:
-   This message is a continuation of the previous message.  It will use the 
-   properties of the previous message (output, log, message color, etc) and if 
-   the previous message had a header, that header is not output and instead the 
-   message is indented.
-message_color = *None*:
-   Color used to display the message. Choose from *black*, *red*, *green*, 
-   *yellow*, *blue*, *magenta*, *cyan*, *white*.
-header_color = *None*:
-   Color used to display the header, if one is produced.
-
-An object of InformantFactory is referred to as an informant. It is generally 
-treated as a function that is called to produce the desired output.
-
-.. code-block:: python
-
-    >>> from inform import InformantFactory
-
-    >>> succeed = InformantFactory(message_color='green')
-    >>> fail = InformantFactory(message_color='red')
-
-    >>> succeed('This message would be green.')
-    This message would be green.
-
-    >>> fail('This message would be red.')
-    This message would be red.
-
-
-Informant Control
------------------
-
-The exception (Error) and all informants take arguments very much like the 
-standard print function: unnamed arguments are converted to strings and joined 
-together to produce the output, the named arguments act to control the process.  
-The available controls (named arguments) are:
-
-sep = ' ':
-   Specifies the string used to join the unnamed arguments.
-template = None:
-   A template that if present interpolates the arguments to form the final 
-   message rather than simply joining the unnamed arguments with *sep*. The 
-   template is a string, and its *format* method is called with the unnamed and 
-   named arguments of the message passed as arguments.
-end = '\\n':
-   Specifies a string to append to the message.
-wrap = False:
-   Specifies whether message should be wrapped. *wrap* may be True, in which 
-   case the default width of 70 is used.  Alternately, you may specify the 
-   desired width. The wrapping occurs on the final message after the arguments 
-   have been joined.
-culprit = *None*:
-   A string that is added to the beginning of the message that identifies the 
-   culprit (the object for which the problem being reported was found). May also 
-   be a collection of strings, in which case they are joined with *culprit_sep* 
-   (default is ', ').
-file = stdout:
-   The destination stream (a file pointer).
-flush = *False*:
-   Whether the message should flush the destination stream (not available in 
-   python2).
-
-Here is an example that demonstrates the wrap and composite culprit features.
-
-..  code-block:: python
-
-   >>> value = -1
-   >>> error(
-   ...     'Encountered illegal value',
-   ...     value,
-   ...     'when filtering. Consider regenerating data again.',
-   ...     culprit=('input.data', 32), wrap=True,
-   ... )
-   myprog error: input.data, 32:
-       Encountered illegal value -1 when filtering. Consider regenerating
-       data again.
+Notice that useful information (*choices*) is passed into the exception that may 
+be useful when processing the exception even though it is not incorporated into 
+the message.
 
 
 Utilities
@@ -857,88 +661,116 @@ Utilities
 Several utility functions are provided for your convenience. They are often 
 helpful when creating messages.
 
-indent(text, leader='    ',  first=0, stops=1, sep='\\n'):
-    Indents the text. Multiples of *leader* are added to the beginning of the 
-    lines to indent.  *first* is the number of indentations used for the first 
-    line relative to the others (may be negative but (first + stops) should not 
-    be. *stops* is the default number of indentations to use. *sep* is the 
-    string used to separate the lines.
 
-conjoin(iterable, conj=' and ', sep=', '):
-    Like ''.join(), but allows you to specify a conjunction that is placed 
-    between the last two elements, ex:
+.. _indent:
 
-    .. code-block:: python
+indent
+""""""
 
-        >>> from inform import conjoin
-        >>> conjoin(['a', 'b', 'c'])
-        'a, b and c'
+.. py:function:: indent(text, leader='    ',  first=0, stops=1, sep='\\n')
 
-        >>> conjoin(['a', 'b', 'c'], conj=' or ')
-        'a, b or c'
+:func:`inform.indent` indents *text*. Multiples of *leader* are added to the 
+beginning of the lines to indent.  *first* is the number of indentations used 
+for the first line relative to the others (may be negative but (first + stops) 
+should not be.  *stops* is the default number of indentations to use. *sep* is 
+the string used to separate the lines.
 
-cull(collection, [remove]):
-    Strips items from a list that have a particular value. By default, it strips 
-    a list of values that would be False when cast to a boolean (0, False, None, 
-    '', (), [], etc.).  A particular value may be specified using the 'remove' 
-    as a keyword argument.  The value of remove may be a collection, in which 
-    case any value in the collection is removed, or it may be a function, in 
-    which case it takes a single item as an argument and returns *True* if that 
-    item should be removed from the list.
 
-join(\*args, \**kwargs):
-    Combines the arguments in a manner very similar to an informant and returns 
-    the result as a string.  Uses the *sep*, *template* and *wrap* keyword 
-    arguments to combine the arguments.
+.. _conjoin:
 
-fmt(msg, \*args, \**kwargs):
-    Similar to ''.format(), but it can pull arguments from the local scope.
+conjoin
+"""""""
 
-render(obj, sort=None, level=0, tab='    '):
-    Recursively convert an object to a string with reasonable formatting.  Has 
-    built in support for the base Python types (None, bool, int, float, str, 
-    set, tuple, list, and dict).  If you confine yourself to these types, the 
-    output of render() can be read by the Python interpreter. Other types are 
-    converted to string with repr(). The dictionary keys and set values are 
-    sorted if sort is True. Sometimes this is not possible because the values 
-    are not comparable, in which case render reverts to the natural order.
+.. py:function:: conjoin(iterable, conj=' and ', sep=', ')
 
-plural(count, singular_form, plural_form = *None*):
-    Produces either the singular or plural form of a word based on a count.
-    The count may be an integer, or an iterable, in which case its length is 
-    used. If the plural form is not give, the singular form is used with an 's' 
-    added to the end.
-
-full_stop(string):
-    Adds a period to the end of the string if needed (if the last character is 
-    not a period, question mark or exclamation mark). It applies str() to its 
-    argument, so it is generally a suitable replacement for str in 
-    str(exception) when trying extract an error message from an exception.
-
-columns(array, pagewidth=79, alignment='<', leader='    ')
-    Distribute array over enough columns to fill the screen.
-
-os_error(exception):
-    Generates clean messages for operating system errors.
-
-is_str(obj):
-    Returns *True* if its argument is a string-like object.
-
-is_iterable(obj):
-    Returns *True* if its argument is iterable.
-
-is_collection(obj):
-    Returns *True* if its argument is iterable but is not a string.
-
-For example:
+:func:`inform.conjoin` is like ''.join(), but allows you to specify 
+a conjunction that is placed between the last two elements. For example:
 
 .. code-block:: python
 
-    >>> from inform import Inform, display, error, conjoin, cull, fmt, plural, os_error
+    >>> from inform import conjoin
+    >>> conjoin(['a', 'b', 'c'])
+    'a, b and c'
 
-    >>> Inform(prog_name=False)
-    <...>
-    >>> filenames = cull(['a', 'b', None, 'd'])
+    >>> conjoin(['a', 'b', 'c'], conj=' or ')
+    'a, b or c'
+
+
+.. _cull:
+
+cull
+""""
+
+.. py:function:: cull(collection, [remove])
+
+:func:`inform.cull` strips items from a collection that have a particular value.  
+The collection may be list-like (*list*, *tuple*, *set*, etc.) or 
+a dictionary-like (*dict*, *OrderedDict*).  A new collection of the same type is 
+returned with the unddesirable values removed.
+
+By default, :func:`inform.cull` strips values that would be *False* when cast to 
+a Boolean (0, *False*, *None*, '', (), [], etc.).  A particular value may be 
+specified using the *remove* as a keyword argument.  The value of remove may be 
+a collection, in which case any value in the collection is removed, or it may be 
+a function, in which case it takes a single item as an argument and returns 
+*True* if that item should be removed from the list.
+
+.. code-block:: python
+
+    >>> from inform import cull, display
+    >>> display(*cull(['a', 'b', None, 'd']), sep=', ')
+    a, b, d
+
+    >>> accounts = dict(checking=1100.16, savings=13948.78, brokerage=0)
+    >>> for name, amount in sorted(cull(accounts).items()):
+    ...     display(name, amount, template='{:>10s}: ${:,.2f}')
+      checking: $1,100.16
+       savings: $13,948.78
+
+
+.. _join:
+
+
+join
+""""
+
+.. py:function:: join(\*args, \**kwargs)
+
+:func:`inform.join` combines the arguments in a manner very similar to an 
+:ref:`informant <using informants>` and returns the result as a string.  Uses 
+the *sep*, *template* and *wrap* keyword arguments to combine the arguments.
+
+
+.. code-block:: python
+
+    >>> from inform import display, join
+
+    >>> accounts = dict(checking=1100.16, savings=13948.78, brokerage=0)
+    >>> lines = []
+    >>> for name, amount in accounts.items():
+    ...     lines.append(join(name, amount, template='{:>10s}: ${:,.2f}'))
+
+    display(lines, sep='\n')
+     brokerage: $0.00
+      checking: $1,100.16
+       savings: $13,948.78
+
+
+.. _fmt:
+
+fmt
+"""
+
+.. py:function:: fmt(msg, \*args, \**kwargs)
+
+:func:`inform.fmt` is similar to ''.format(), but it can pull arguments from the 
+local scope.
+
+.. code-block:: python
+
+    >>> from inform import conjoin, display, fmt, plural
+
+    >>> filenames = ['a', 'b', 'c', 'd']
     >>> filetype = 'CSV'
     >>> display(
     ...     fmt(
@@ -947,25 +779,31 @@ For example:
     ...         names=conjoin(filenames),
     ...     )
     ... )
-    Reading CSV files: a, b and d.
-
-    >>> contents = {}
-    >>> for name in filenames:
-    ...     try:
-    ...         with open(name) as f:
-    ...             contents[name] = f.read()
-    ...     except IOError as e:
-    ...         error(os_error(e))
-    error: a: no such file or directory.
-    error: b: no such file or directory.
-    error: d: no such file or directory.
+    Reading CSV files: a, b, c and d.
 
 Notice that *filetype* was not explicitly passed into *fmt()* even though it was 
 explicitly called out in the format string.  *filetype* can be left out of the 
 argument list because if *fmt* does not find a named argument in its argument 
 list, it will look for a variable of the same name in the local scope.
 
-Here is an example of render():
+
+.. _render:
+
+render
+""""""
+
+.. py:function:: render(obj, sort=None, level=0, tab='    ')
+
+:func"`inform.render` recursively converts an object to a string with reasonable 
+formatting.  Has built in support for the base Python types (*None*, *bool*, 
+*int*, *float*, *str*, *set*, *tuple*, *list*, and *dict*).  If you confine 
+yourself to these types, the output of :func:`inform.render` can be read by the 
+Python interpreter. Other types are converted to string with *repr()*. The 
+dictionary keys and set values are sorted if sort is *True*. Sometimes this is 
+not possible because the values are not comparable, in which case render reverts 
+to the natural order.
+
+This example prints several Python data types:
 
 .. code-block:: python
 
@@ -1015,24 +853,170 @@ Here is an example of render():
         's': 'alpha string',
     }
 
-Finally, here is an example of full_stop and columns. It prints out the phonetic 
-alphabet.
+
+.. _plural:
+
+plural
+""""""
+
+.. py:function:: plural(count, singular_form, plural_form=*None*)
+
+Produces either the singular or plural form of a word based on a count.
+The count may be an integer, or an iterable, in which case its length is 
+used. If the plural form is not give, the singular form is used with an 's' 
+added to the end.
 
 .. code-block:: python
 
-    >>> from inform import columns, full_stop
-    >>> title = 'Display the NATO phonetic alphabet'
+    >>> from inform import conjoin, display, plural
+
+    >>> filenames = ['a', 'b', 'c', 'd']
+    >>> display(
+    ...     files=plural(filenames, 'file'), names=conjoin(filenames),
+    ...     template='Reading {files}: {names}.'
+    ... )
+    Reading files: a, b, c and d.
+
+
+.. _full_stop:
+
+full_stop
+"""""""""
+
+.. py:function:: full_stop(string)
+
+:func:`inform.full_stop` adds a period to the end of the string if needed (if 
+the last character is not a period, question mark or exclamation mark). It 
+applies str() to its argument, so it is generally a suitable replacement for str 
+in str(exception) when trying extract an error message from an exception.
+
+This is generally useful if you need to print a string that should have 
+punctionation, but may not.
+
+.. code-block:: python
+
+    >>> from inform import Error, error, full_stop
+
+    >>> try:
+    ...     raise Error('not found', culprit='marbles')
+    ... except Error as e:
+    ...     error(full_stop(e))
+    myprog error: marbles: not found.
+
+
+.. _columns:
+
+columns
+"""""""
+
+.. py:function:: columns(array, pagewidth=79, alignment='<', leader='    ')
+
+:fund:`inform.columns` distributes the values of an array over enough columns to 
+fill the screen.
+
+This example uses prints out the phonetic alphabet:
+
+.. code-block:: python
+
+    >>> from inform import columns
+
+    >>> title = 'Display the NATO phonetic alphabet.'
     >>> words = """
     ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett Kilo
     ...     Lima Mike November Oscar Papa Quebec Romeo Sierra Tango Uniform
     ...     Victor Whiskey X-ray Yankee Zulu
     ... """.split()
-    >>> display(full_stop(title), columns(words), sep='\n')
+
+    >>> display(title, columns(words), sep='\n')
     Display the NATO phonetic alphabet.
         Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
         Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
         Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
         Delta     Hotel     Lima      Papa      Tango     X-ray
+
+.. _os_error:
+
+os_error
+""""""""
+
+.. py:function:: os_error(exception)
+
+:func:`inform.os_error` generates clean messages for operating system errors.
+
+.. code-block:: python
+
+    >>> from inform import error, os_error
+
+    >>> try:
+    ...     with open('config') as f:
+    ...         contents = f.read()
+    ... except (OSError, IOError) as e:
+    ...     error(os_error(e))
+    myprog error: config: no such file or directory.
+
+
+.. _is_str:
+
+is_str
+""""""
+
+.. py:function:: is_str(obj)
+
+:func:`inform.is_str` returns *True* if its argument is a string-like object.
+
+.. code-block:: python
+
+    >>> from inform import is_str
+
+    >>> is_str('abc')
+    True
+
+    >>> is_str(['a', 'b', 'c'])
+    False
+
+
+.. _is_iterable:
+
+is_iterable
+"""""""""""
+
+.. py:function:: is_iterable(obj)
+
+:func:`inform.is_iterable` returns *True* if its argument is a collection or 
+a string.
+
+.. code-block:: python
+
+    >>> from inform import is_iterable
+
+    >>> is_iterable('abc')
+    True
+
+    >>> is_iterable(['a', 'b', 'c'])
+    True
+
+
+.. _is_collection:
+
+is_collection
+"""""""""""""
+
+.. py:function:: is_collection(obj)
+
+:func:`inform.is_collection` returns *True* if its argument is a collection.  
+This includes objects such as lists, sets, dictionaries, etc.  It does not 
+include strings.
+
+.. code-block:: python
+
+    >>> from inform import is_collection
+
+    >>> is_collection('abc')
+    False
+
+    >>> is_collection(['a', 'b', 'c'])
+    True
+
 
 Debugging Functions
 """""""""""""""""""
@@ -1043,115 +1027,153 @@ the location they were called from. This makes it easier to distinguish several
 debug message and also makes it easy to find and remove the functions once you 
 are done debugging.
 
-ppp(\*args, \*\*kwargs):
-    This function is very similar to the normal Python print function in that it 
-    prints out the values of the unnamed arguments under the control of the 
-    named arguments. It also takes the same named arguments as ``print()``, such 
-    as ``sep`` and ``end``.
 
-    If given without unnamed arguments, it will just print the header, which 
-    good way of confirming that a line of code has been reached.
+.. _ppp:
+
+ppp
+"""
+
+.. py:function:: ppp(\*args, \*\*kwargs)
+
+:func:`inform.ppp` is very similar to the normal Python print function in that 
+it prints out the values of the unnamed arguments under the control of the named 
+arguments. It also takes the same named arguments as ``print()``, such as 
+``sep`` and ``end``.
+
+If given without unnamed arguments, it will just print the header, which 
+good way of confirming that a line of code has been reached.
+
+.. code:: python
+
+    >>> from inform import ppp
+    >>> a = 1
+    >>> b = 'this is a test'
+    >>> c = (2, 3)
+    >>> d = {'a': a, 'b': b, 'c': c}
+    >>> ppp(a, b, c)
+    DEBUG: <doctest user.rst[122]>:1, __main__:
+        1 this is a test (2, 3)
+
+
+.. _ddd:
+
+ddd
+"""
+
+.. py:function:: ddd(\*args, \*\*kwargs)
+
+:func:`inform.ddd` pretty prints all of both its unnamed and named arguments.
+
+.. code:: python
+
+    >>> from inform import ddd
+    >>> ddd(a, b, c, d)
+    DEBUG: <doctest user.rst[124]>:1, __main__:
+        1
+        'this is a test'
+        (2, 3)
+        {
+            'a': 1,
+            'b': 'this is a test',
+            'c': (2, 3),
+        }
+
+If you give named arguments, the name is prepended to its value:
+
+.. code:: python
+
+    >>> from inform import ddd
+    >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
+    DEBUG: <doctest user.rst[126]>:1, __main__:
+        a = 1
+        b = 'this is a test'
+        c = (2, 3)
+        d = {
+            'a': 1,
+            'b': 'this is a test',
+            'c': (2, 3),
+        }
+        s = 'hey now!'
+
+If an arguments has a __dict__ attribute, it is printed rather than the 
+argument itself.
+
+.. code:: python
+
+    >>> from inform import ddd
+
+    >>> class Info:
+    ...     def __init__(self, **kwargs):
+    ...         self.__dict__.update(kwargs)
+    ...         ddd(self=self)
+
+    >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
+    DEBUG: <doctest user.rst[128]>:4, __main__.Info.__init__():
+        self = {
+            'email': 'ted@ledbelly.com',
+            'name': 'Ted Ledbelly',
+        }
+
+
+.. _vvv:
+
+vvv
+"""
+
+.. py:function:: vvv(\*args)
+
+:func:`inform.vvv` prints variables from the calling scope. If no arguments are 
+given, then all the variables are printed. You can optionally give specific 
+variables on the argument list and only those variables are printed.
+
+.. code:: python
+
+    >>> from inform import vvv
+
+    >>> vvv(b, d)
+    DEBUG: <doctest user.rst[131]>:1, __main__:
+        b = 'this is a test'
+        d = {
+            'a': 1,
+            'b': 'this is a test',
+            'c': (2, 3),
+        }
+
+This last feature is not completely robust. The checking is done by value, 
+so if several variables share the value of one requested, they are all 
+shown.
+
+.. code:: python
+
+    >>> from inform import vvv
+
+    >>> aa = 1
+    >>> vvv(a)
+    DEBUG: <doctest user.rst[134]>:1, __main__:
+        a = 1
+        aa = 1
+
+
+.. _sss:
+
+sss
+"""
+
+.. py:function:: sss()
+
+:func:`inform.sss` prints a stack trace, which can answer the *How did I get 
+here?* question better than a simple print function.
 
     .. code:: python
 
-        >>> from inform import ppp, ddd, sss, vvv
-        >>> a = 1
-        >>> b = 'this is a test'
-        >>> c = (2, 3)
-        >>> d = {'a': a, 'b': b, 'c': c}
-        >>> ppp(a, b, c)
-        DEBUG: <doctest user.rst[103]>:1, __main__:
-            1 this is a test (2, 3)
-
-ddd(\*args, \*\*kwyargs):
-    This function pretty prints all of both the unnamed and named arguments.
-
-    .. code:: python
-
-        >>> ddd(a, b, c, d)
-        DEBUG: <doctest user.rst[104]>:1, __main__:
-            1
-            'this is a test'
-            (2, 3)
-            {
-                'a': 1,
-                'b': 'this is a test',
-                'c': (2, 3),
-            }
-
-    If you give named arguments, the name is prepended to its value:
-
-    .. code:: python
-
-        >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest user.rst[105]>:1, __main__:
-            a = 1
-            b = 'this is a test'
-            c = (2, 3)
-            d = {
-                'a': 1,
-                'b': 'this is a test',
-                'c': (2, 3),
-            }
-            s = 'hey now!'
-
-    If an arguments has a __dict__ attribute, it is printed rather than the 
-    argument itself.
-
-    .. code:: python
-
-        >>> class Info:
-        ...     def __init__(self, **kwargs):
-        ...         self.__dict__.update(kwargs)
-        ...         ddd(self=self)
-
-        >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest user.rst[106]>:4, __main__.Info.__init__():
-            self = {
-                'email': 'ted@ledbelly.com',
-                'name': 'Ted Ledbelly',
-            }
-
-vvv(\*args):
-    This function prints variables from the calling scope. If no arguments are 
-    given, then all the variables are printed. You can optionally give specific 
-    variables on the argument list and only those variables are printed.
-
-    .. code:: python
-
-        >>> vvv(b, d)
-        DEBUG: <doctest user.rst[108]>:1, __main__:
-            b = 'this is a test'
-            d = {
-                'a': 1,
-                'b': 'this is a test',
-                'c': (2, 3),
-            }
-
-    This last feature is not completely robust. The checking is done by value, 
-    so if several variables share the value of one requested, they are all 
-    shown.
-
-    .. code:: python
-
-        >>> aa = 1
-        >>> vvv(a)
-        DEBUG: <doctest user.rst[110]>:1, __main__:
-            a = 1
-            aa = 1
-
-sss(\*args):
-    This function prints a stack trace, which can answer the *How did I get 
-    here?* question better than a simple print function.
-
-    .. code:: python
+        >> from inform import sss
 
         >> def foo():
         ..     sss()
         ..     print('CONTINUING')
 
         >> foo()
-        DEBUG: <doctest user.rst[112]>:2, __main__.foo():
+        DEBUG: <doctest user.rst[137]>:2, __main__.foo():
             Traceback (most recent call last):
                 ...
         CONTINUING

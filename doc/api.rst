@@ -14,7 +14,9 @@ The Inform class controls the active informants.
 Direct Access Functions
 -----------------------
 
-These functions access the currently active informer.
+Several of the above methods are also available as stand-alone functions that
+act on the currently active informer.  This make it easy to use their
+functionality even if you do not have local access to the informer.
 
 .. autofunction:: inform.done
 
