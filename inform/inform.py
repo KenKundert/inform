@@ -855,22 +855,47 @@ class InformantFactory:
             specified, the stream to use will be determine by stream policy of
             active informer.
 
-        Example:
+    Example:
 
-            The following generates an informant named *show* that outputs
-            messages to both standare output and to the logfile. Output to the
-            standard output is suppressed if *mute* is *True*::
+        The following generates two informants, *pass*, which prints its
+        messages in green, and *fail*, which prints its messages in red.  Output
+        to the standard output for both is suppressed if *quiet* is *True*::
 
-                show = InformantFactory(
-                    output=lambda inform: not inform.mute,
-                    log=True,
-                )
+            >>> from inform import InformantFactory, Inform
 
-            *show* is an informant. Once created, it can be used to give
-            messages to the user::
+            >>> passes = InformantFactory(
+            ...     output=lambda inform: not inform.quiet,
+            ...     log=True,
+            ...     message_color='green',
+            ... )
+            >>> fails = InformantFactory(
+            ...     output=lambda inform: not inform.quiet,
+            ...     log=True,
+            ...     message_color='red',
+            ... )
 
-                show('Hey there!')
+        *pass*  and *fail* are both informants. Once created, the can be used to
+        give messages to the user::
 
+            >>> results = [
+            ...     (0,   0.005, 0.025),
+            ...     (0.5, 0.512, 0.025),
+            ...     (1,   0.875, 0.025),
+            ... ]
+            >>> for expected, measured, tolerance in results:
+            ...     if abs(expected - measured) > tolerance:
+            ...         report, label = fails, 'FAIL'
+            ...     else:
+            ...         report, label = passes, 'Pass'
+            ...     report(
+            ...         label, measured, expected, measured-expected,
+            ...         template='{}: measured = {:.3f}V, expected = {:.3f}V, diff = {:.3f}V'
+            ...     )
+            Pass: measured = 0.005V, expected = 0.000V, diff = 0.005V
+            Pass: measured = 0.512V, expected = 0.500V, diff = 0.012V
+            FAIL: measured = 0.875V, expected = 1.000V, diff = -0.125V
+
+        The passes are rendered in green and the failures in red.
     """
 
     def __init__(
