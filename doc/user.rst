@@ -1182,10 +1182,10 @@ here?* question better than a simple print function.
 Color Class
 """""""""""
 
-The Color class creates colorizers, which are used to render text in 
-a particular color.  They are like the Python print function in that they take 
-any number of unnamed arguments that are converted to strings and then joined 
-into a single string. The string is then coded for the chosen color and 
+The :class:`inform.Color` class creates colorizers, which are used to render 
+text in a particular color.  They are like the Python print function in that 
+they take any number of unnamed arguments that are converted to strings and then 
+joined into a single string. The string is then coded for the chosen color and 
 returned. For example:
 
 .. code-block:: python
@@ -1207,9 +1207,9 @@ returned. For example:
 When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
 
 The Color class has the concept of a colorscheme. There are three supported 
-schemes: *None*, light, and dark. With *None* the text is not colored. In 
-general it is best to use the light colorscheme on dark backgrounds and the dark 
-colorscheme on light backgrounds.
+schemes: *None*, 'light', and 'dark'. With *None* the text is not colored. In 
+general it is best to use the 'light' colorscheme on 'dark' backgrounds and the 
+dark colorscheme on light backgrounds.
 
 The Color class takes the following arguments when creating a colorizer:
 
@@ -1226,7 +1226,7 @@ enable = True:
 
 A colorizer takes the following arguments:
 
-unnamed arguments:
+*args:
    The unnamed arguments are converted to strings and joined to form the text to 
    be colored.
 
@@ -1239,6 +1239,9 @@ template = None:
    template is a string, and its *format* method is called with the unnamed and 
    named arguments of the message passed as arguments.
 
+remove:
+   Specifies the argument values that are unavailable to the template.
+
 wrap = False:
    Specifies whether message should be wrapped. *wrap* may be True, in which 
    case the default width of 70 is used.  Alternately, you may specify the 
@@ -1250,9 +1253,11 @@ scheme = *False*:
    *False*, 'light' or 'dark'.  If you specify *False* (the default), the 
    colorscheme specified when creating the colorizer is used.
 
+**kwargs:
+   Any remaining keyword arguments are available to the template.
 
 Colorizers have one user settable attribute: *enable*. By default *enable* is 
-True. If you set it to *False* the colorizer no longer renders the text in 
+*True*. If you set it to *False* the colorizer no longer renders the text in 
 color:
 
 .. code-block:: python
