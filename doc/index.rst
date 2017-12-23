@@ -1,3 +1,9 @@
+.. Initialize Inform and suppress outputting of program name
+
+    >>> from inform import Inform
+    >>> inform = Inform(prog_name=False)
+
+
 Inform: Print & Logging Utilities
 =================================
 
@@ -9,39 +15,37 @@ Inform: Print & Logging Utilities
   `inform@nurdletech.com <mailto://inform@nurdletech.com>`_).
 
 
-A light-weight package with few dependencies that provides various print-like 
-functions that are used in command-line programs when communicating with the 
-user.  It allows you to easily print attractive, informative, and consistent 
-user messages.  For example:
+*Inform* is designed to display messages from programs that are typically run 
+from a console.  It provides a collection of 'print' functions that allow you to 
+simply and cleanly print different types of messages.  For example:
 
 .. code-block:: python
 
-    >> from inform import display, warn, error, fatal
-    >> display('This is a plain message.')
+    >>> from inform import display, warn, error, fatal
+    >>> display('This is a plain message.')
     This is a plain message.
 
-    >> warn('this is a warning message.')
-    warning: this is a warning message.
-
-    >> error('this is an error message.')
+    >>> error('this is an error message.')
     error: this is an error message.
 
-    >> fatal('this is a fatal error message.')
-    error: this is a fatal error message.
+These functions behave in a way that is very similar to the *print* function 
+that is built-in to Python3, but they also provide some additonal features as 
+well. For example, they can be configured to log their messages and they can be 
+disabled en masse.
 
-
-Inform also provides logging, output control, a generic exception, and various 
+Finally, *Inform* provides a generic exception and a collection of small 
 utilities that are useful when creating messages.
 
-Alternative
------------
+
+Alternatives
+------------
 
 The Python standard library provides the `logging 
 <https://docs.python.org/3/library/logging.html>`_ package.  This package 
 differs from *Inform* in that it is really intended to log events to a file. It 
 is more intended for daemons that run in the background and the logging is not 
 meant to communicate directly to the user in real time, but rather record enough 
-information into a log file for an administration to understand how well the 
+information into a log file for an administrator to understand how well the 
 program is performing and whether anything unusual is happening.
 
 In contrast, *Inform* is meant to used to provide information from command line 
@@ -66,37 +70,43 @@ Install with::
 Requires Python2.7 or Python3.3 or better.
 
 
-Just a Taste
-------------
+Quick Tour
+----------
+
+Informants
+""""""""""
 
 *Inform* defines a collection of *print*-like functions that have different 
-roles.  These functions are referred to as 'informants' and include include 
-*display*, *warn*, *error*, and *fatal*.  All of them take arguments in the same 
-manner as Python's built-in print function and all of them write the desired 
-message to standard output, with the last three adding a header to the message 
-that indicates the type of message.  For example:
+roles.  These functions are referred to as 'informants' and include 
+:ref:`display`, :ref:`warn`, :ref:`error`, and :ref:`fatal`.  All of them take 
+arguments in the same manner as Python's built-in print function and all of them 
+write the desired message to standard output, with the last three adding 
+a header to the message that indicates the type of message.  For example:
 
 .. code-block:: python
 
     >>> from inform import display, warn, error, fatal
-    >>> display(
-    ...     'Display is like print',
-    ...     'except that it supports logging and can be disabled.')
-    Display is like print except that it supports logging and can be disabled.
+    >>> display('ice', 9)
+    ice 9
 
-    >> warn('warnings get a header that is printed in yellow.')
-    warning: warnings get a header that is printed in yellow.
+    >>> warn('cannot write to file, logging suppressed.')
+    warning: cannot write to file, logging suppressed.
 
-    >> error('errors get a header that is printed in red.')
-    error: errors get a header that is printed in red.
+    >>> filename = 'config'
+    >>> error('%s: file not found.' % filename)
+    error: config: file not found.
 
-    >> fatal('fatals are like errors, except that they are, well, fatal.')
-    error: fatals are like errors, except that they are, well, fatal.
+    >>  fatal('defective input file.', culprit=filename)
+    error: config: defective input file.
 
-*fatal* produces the same message as does *error*, but also terminates the 
-program.  To make the error messages stand out, the header is generally rendered 
-in a color appropriate to the message, so warnings use yellow and errors use 
-red.  The headers are only colored if they are being written to a TTY.
+Notice that in the error message the filename was explicitly added to the front 
+of the message. This is an extremely common idiom and it provided by *Inform* 
+using the *culprit* named argument as shown in the fatal message.
+*fatal* is similar to *error* but additionally terminates the program.  To make 
+the error messages stand out, the header is generally rendered in a color 
+appropriate to the message, so warnings use yellow and errors use red.  However, 
+they are not colored above because messages are only colored if they are being 
+written to a TTY.
 
 In a manner similar to Python3's built-in *print* function, unnamed arguments 
 are converted to strings and then joined using the separator, which by default 
@@ -105,10 +115,12 @@ is a single space but can be specified using the *sep* named argument.
 .. code-block:: python
 
     >>> colors = dict(red='ff5733', green='4fff33', blue='3346ff')
+
     >>> lines = []
     >>> for key in sorted(colors.keys()):
     ...     val = colors[key]
     ...     lines.append('{key:>5s} = {val}'.format(key=key, val=val))
+
     >>> display(*lines, sep='\n')
      blue = 3346ff
     green = 4fff33
@@ -121,19 +133,21 @@ arguments, and form them into a message using the *template* argument:
 
     >>> for key in sorted(colors.keys()):
     ...     val = colors[key]
-    ...     display(k=key, v=val, template='{k:>5s} = {v}')
+    ...     display(val, k=key, template='{k:>5s} = {}')
      blue = 3346ff
     green = 4fff33
       red = ff5733
 
-You can every specify a collection of templates.  The first one for which all 
+You can even specify a collection of templates.  The first one for which all 
 keys are known is used.  For example;
 
-    >>> colors = {
-    ...     'red': ('ff5733', 'failure'),
-    ...     'green': ('4fff33', 'success'),
-    ...     'blue': ('3346ff', None),
-    ... }
+.. code-block:: python
+
+    >>> colors = dict(
+    ...     red = ('ff5733', 'failure'),
+    ...     green = ('4fff33', 'success'),
+    ...     blue = ('3346ff', None),
+    ... )
 
     >>> for name in sorted(colors.keys()):
     ...     code, desc = colors[name]
@@ -151,18 +165,10 @@ keys are known is used.  For example;
     green = 4fff33  -- success
       red = ff5733  -- failure
 
-Informants also take the named argument *culprit*, which is used to identify the 
-object of the message.  For example:
-
-.. code-block:: python
-
-    >>> import os
-    >>> filename = 'config'
-    >>> if not os.path.exists(filename):
-    ...     display('missing.', culprit=filename)
-    config: missing.
-
-The *culprit* can also be a tuple:
+All informants support the *culprit* named argument, which is used to identify 
+the object of the message.  The *culprit* can be a scalar, as above, or 
+a collection, in which case the members of the collection are joined 
+togehter:
 
 .. code-block:: python
 
@@ -170,22 +176,42 @@ The *culprit* can also be a tuple:
     >>> display('syntax error.', culprit=(filename, line))
     config, 5: syntax error.
 
-For more control of the informants, you can import and instantiate the *Inform* 
-class yourself along with the desired informants.  This gives you the ability to 
-specify options:
+Besides the four informants already described, *Inform* provides several others, 
+including :ref:`log`, :ref:`codicil`, :ref:`comment`, :ref:`narrate`, 
+:ref:`output`, :ref:`notify`, :ref:`debug` and :ref:`panic`.  Informants in 
+general can write to the log file, to the standard output, or to a notifier.  
+They can add headers and specify the color of the header and the message. They 
+can also continue the previous message or they can terminate the program.  Each 
+informant each embody a predefined set of these choices. In addition, they are 
+affected by options passed to the active informer, which is often used to enable 
+or disable informants based on various verbosity options.
+
+
+Controlling Informants
+""""""""""""""""""""""
+
+For more control of the informants, you can import and instantiate the 
+:class:`inform.Inform` class yourself along with the desired informants.  This 
+gives you the ability to specify options:
 
 .. code-block:: python
 
     >>> from inform import Inform, display, error
-    >>> Inform(logfile=False, prog_name="myprog", quiet=True)
+    >>> Inform(logfile=True, prog_name="teneya", quiet=True)
     <...>
     >>> display('Initializing ...')
 
     >>> error('file not found.', culprit='data.in')
-    myprog error: data.in: file not found.
+    teneya error: data.in: file not found.
 
-An object of the Inform class is referred to as an informer (not to be confused 
-with the print functions, which are  referred to as informants). Once 
+Notice that in this case the call to *display* did not print anything. That is 
+because the *quiet* argument was passed to *Inform*, which acts to suppress all 
+but error messages. However, a logfile was specified, so the message would be 
+logged. In addition, the program name was specfied, with the result in it being 
+added to the header of the error message.
+
+An object of the *Inform* class is referred to as an informer (not to be 
+confused with the print functions, which are  referred to as informants). Once 
 instantiated, you can use the informer to change various settings, terminate the 
 program, or return a count of the number of errors that have occurred.
 
@@ -198,21 +224,63 @@ program, or return a count of the number of errors that have occurred.
     >>> informer.errors_accrued()
     1
 
-Besides the four informant already described, *Inform* provides several others, 
-including *log*, *codicil*, *comment*, *narrate*, *output*, *notify*. *debug* 
-and *panic*.  Informants in general can write to the log file, to the standard 
-output, or to a notifier. They can add headers and specify the color of the 
-header and the message. They can also continue the previous message or they can 
-terminate the program.  These informants each embody a predefined set of these 
-choices. In addition, they can be affected by options passed to the active 
-informer. Generally this is used to enable or disable informants based on 
-various verbosity options.
 
-At its simplest, *Inform* provides a flexible way of printing user messages.  In 
-addition, it provides a collection of utility functions that are often useful 
-when constructing messages. For example, *os_error* converts *OSError* exception 
-into a simple well formatted string that can be used to describe the exception 
-to the user. For example:
+Utility Functions
+"""""""""""""""""
+
+*Inform* provides a collection of utility functions that are often useful when 
+constructing messages.
+
+.. list-table::
+
+   * - :func:`inform.ddd`,
+       :func:`inform.ppp`,
+       :func:`inform.sss`,
+       :func:`inform.vvv`
+     - Print functions used when debugging code.
+
+   * - :class:`inform.Color`
+     - Used to color messages sent to the console.
+
+   * - :func:`inform.columns`
+     - Distribute an array over enough columns to fill the screen.
+
+   * - :func:`inform.conjoin`
+     - Like join, but adds a conjunction between the last two items.
+
+   * - :func:`inform.cull`
+     - Strips unintersting value from collections.
+
+   * - :func:`inform.fmt`
+     - Similar to format(), but can pull argument from the local scope.
+
+   * - :func:`inform.full_stop`
+     - Add a period to end of string if it has no other punctuation.
+
+   * - :func:`inform.indent`
+     - Adds indentation.
+
+   * - :func:`inform.is_str`,
+       :func:`inform.is_iterable`,
+       :func:`inform.is_collection`
+     - Identifies important characteristics of objects.
+
+   * - :func:`inform.join`
+     - Combines arguments into a string in the same way as informant.
+
+   * - :func:`inform.plural`
+     - Pluralizes a word if needed.
+
+   * - :func:`inform.os_error`
+     - Generates clean messages for operating system errors
+
+   * - :func:`inform.render`
+     - Converts many of the built-in Python data types into attractive, compact, 
+       and easy to read strings.
+
+One of the most used is *os_error*.  It converts *OSError* exceptions into 
+a simple well formatted string that can be used to describe the exception to the 
+user.
 
 .. code-block:: python
 
@@ -224,10 +292,19 @@ to the user. For example:
     ...     error(os_error(e))
     error: config: no such file or directory.
 
-*Inform* also provides a generic exception that can be used directly or can be 
-subclassed to create your own exceptions:
+
+Generic Exception
+"""""""""""""""""
+
+*Inform* also provides a generic exception, :class:`inform.Error`, that can be 
+used directly or can be subclassed to create your own exceptions.  It takes 
+arguments in the same manner as informants, and provides some useful methods 
+used when reporting errors:
+
+.. code-block:: python
 
     >>> from inform import Error
+
     >>> def read_config(filename):
     ...     try:
     ...         with open(filename) as f:

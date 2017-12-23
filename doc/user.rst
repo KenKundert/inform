@@ -1,21 +1,465 @@
+.. Initialize Inform and suppress outputting of program name
+
+    >>> from inform import Inform
+    >>> inform = Inform(prog_name=False)
+
+
 Inform User's Guide
 ===================
 
-This package defines a collection of 'print' functions that have different 
-roles.  These functions are referred to as 'informants' and are described below 
-in the Informants section. They include include *log*, *comment*, *codicil*, 
-*narrate*, *display*, *output*, *notify*, *debug*, *warn*, *error*, *fatal* and 
-*panic*.
+.. _using informants:
+
+Using Informants
+----------------
+
+This package defines a collection of 'print' functions that are referred to as 
+informants.  They include include :ref:`log`, :ref:`comment`, :ref:`codicil`, 
+:ref:`narrate`, :ref:`display`, :ref:`output`, :ref:`notify`, :ref:`debug`, 
+:ref:`warn`, :ref:`error`, :ref:`fatal` and :ref:`panic`.
+
+They all take arguments in a manner that is a generalization of Python's 
+built-in print function.  Each of the informants is used for a specific purpose, 
+but they all take and process arguments in the same manner.  These functions 
+will be distinguished in the :ref:`predefined informants` section.  In this 
+section, the manner in which they process their arguments is presented.
 
 With the simplest use of the program, you simply import the informants you need 
-and call them (they take the same arguments as Python's built-in *print* 
-function):
+and call them, placing those things that you wish to print in the argument list 
+as unnamed arguments:
 
 .. code-block:: python
 
     >>> from inform import display
     >>> display('ice', 9)
     ice 9
+
+By default, all of the unnamed arguments converted to strings and then joined 
+together using a space between each argument.  However, you can use named 
+arguments to change this behavior.  The following named arguments are used to 
+control the informants:
+
+sep = ' ':
+   Specifies the string used to join the unnamed arguments.
+
+end = '\\n':
+   Specifies a string to append to the message.
+
+file:
+   The destination stream (a file pointer).
+
+flush = *False*:
+   Whether the message should flush the destination stream (not available in 
+   python2).
+
+culprit = *None*:
+   A string that is added to the beginning of the message that identifies the 
+   culprit (the object for which the problem being reported was found). May also 
+   be a collection of strings, in which case they are joined with *culprit_sep* 
+   (default is ', ').
+
+wrap = False:
+   Specifies whether message should be wrapped. *wrap* may be True, in which 
+   case the default width of 70 is used.  Alternately, you may specify the 
+   desired width. The wrapping occurs on the final message after the arguments 
+   have been joined.
+
+template = None:
+   A template that if present interpolates the arguments to form the final 
+   message rather than simply joining the unnamed arguments with *sep*. The 
+   template is a string, and its *format* method is called with the unnamed and 
+   named arguments of the message passed as arguments. *template* may also be 
+   a collection of strings, in which case the first template for which all the 
+   necessary arguments are available is used.
+
+remove:
+   Specifies the argument values that are unavailable to the template.
+
+The first four are also accepted by Python's built-in *print* function and have 
+the same behavior.
+
+This example makes use of the *sep* and *end* named arguments:
+
+..  code-block:: python
+
+   >>> from inform import display
+
+   >>> actions = ['r: rewind', 'p: play/pause', 'f: fast forward']
+   >>> display('The choices include', *actions, sep=',\n    ', end='.\n')
+   The choices include,
+       r: rewind,
+       p: play/pause,
+       f: fast forward.
+
+*culprit* is used to identify the target of the message. If the message is 
+pointing out a problem the *culprit* is generally the source of the problem.
+
+Here is an example that demonstrates the wrap and composite culprit features:
+
+..  code-block:: python
+
+   >>> from inform import error
+
+   >>> value = -1
+   >>> error(
+   ...     'Encountered illegal value',
+   ...     value,
+   ...     'when filtering.  Consider regenerating the dataset.',
+   ...     culprit=('input.data', 32), wrap=True,
+   ... )
+   error: input.data, 32:
+       Encountered illegal value -1 when filtering.  Consider regenerating
+       the dataset.
+
+The *template* strings are the same as one would use with Python's built-in 
+format function and string method (as described in `Format String Syntax 
+<https://docs.python.org/3/library/string.html#format-string-syntax>`_.  The 
+*template* string can interpolate either named or unnamed arguments.  In this 
+example, named arguments are interpolated:
+
+.. code-block:: python
+
+    >>> colors = {
+    ...     'red': ('ff5733', 'failure'),
+    ...     'green': ('4fff33', 'success'),
+    ...     'blue': ('3346ff', None),
+    ... }
+
+    >>> for key in sorted(colors.keys()):
+    ...     val = colors[key]
+    ...     display(k=key, v=val, template='{k:>5s} = {v[0]}')
+     blue = 3346ff
+    green = 4fff33
+      red = ff5733
+
+You can also specify a collection of templates.  The first one for which all 
+keys are available is used.  For example;
+
+.. code-block:: python
+
+    >>> for name in sorted(colors.keys()):
+    ...     code, desc = colors[name]
+    ...     display(name, code, desc, template=('{:>5s} = {}  -- {}', '{:>5s} = {}'))
+     blue = 3346ff
+    green = 4fff33  -- success
+      red = ff5733  -- failure
+
+    >>> for name in sorted(colors.keys()):
+    ...     code, desc = colors[name]
+    ...     display(k=name, v=code, d=desc, template=('{k:>5s} = {v}  -- {d}', '{k:>5s} = {v}'))
+     blue = 3346ff
+    green = 4fff33  -- success
+      red = ff5733  -- failure
+
+The first loop interpolates unamed arguments, the second interpolates the named 
+arguments.
+
+By default, the values that are considered unavailable and so will invalidate 
+a template are those that would be False when cast to a Boolean.  So, by 
+default, the following values are considered unavailable: 0, False, None, '', 
+(), [], {}, etc.  You can use the *remove* named argument to control this.  
+*remove* may be a function, a collection, or a scalar.  The function would take 
+a single argument that is the value to consider and return True if the value
+should be unavailable. The scalar or the collection simply specifies the value 
+or values that should be unavailable.
+
+.. code-block:: python
+
+    >>> accounts = dict(checking=1100, savings=0, brokerage=None)
+
+    >>> for name, amount in sorted(accounts.items()):
+    ...     display(name, amount, template=('{:>10s} = ${}', '{:>10s} = NA'), remove=None)
+     brokerage = NA
+      checking = $1100
+       savings = $0
+
+
+.. _predefined informants:
+
+Predefined Informants
+---------------------
+
+The following informants are predefined in *Inform*. You can create custom 
+informants using :class:`inform.InformantFactory`.
+
+All of the informants except :ref:`panic` and :ref:`debug` do not produce any 
+output if *mute* is set.
+
+
+.. _log:
+
+log
+"""
+
+.. code-block:: python
+
+   log = InformantFactory(
+       output=False,
+       log=True,
+   )
+
+Saves a message to the log file without displaying it.
+
+
+.. _comment:
+
+comment
+"""""""
+
+.. code-block:: python
+
+   comment = InformantFactory(
+       output=lambda informer: informer.verbose and not informer.mute,
+       log=True,
+       message_color='cyan',
+   )
+
+Displays a message only if *verbose* is set. Logs the message. The message is 
+displayed in cyan when writing to the console.
+
+Comments are generally used to document unusual occurrences that might warrant 
+the user's attention.
+
+
+.. _codicil:
+
+codicil
+"""""""
+
+.. code-block:: python
+
+   codicil = InformantFactory(is_continuation=True)
+
+Continues a previous message. Continued messages inherit the properties (output, 
+log, message color, etc) of the previous message.  If the previous message had 
+a header, that header is not output and instead the message is indented.
+
+.. code-block:: python
+
+    >>> from inform import Inform, warn, codicil
+    >>> informer = Inform(prog_name="myprog")
+    >>> warn('file not found.', culprit='ghost')
+    myprog warning: ghost: file not found.
+
+    >>> codicil('skipping')
+        skipping
+
+
+.. _narrate:
+
+narrate
+"""""""
+
+.. code-block:: python
+
+   narrate = InformantFactory(
+       output=lambda informer: informer.narrate and not informer.mute,
+       log=True,
+       message_color='blue',
+   )
+
+Displays a message only if *narrate* is set. Logs the message. The message is 
+displayed in blue when writing to the console.
+
+Narration is generally used to inform the user as to what is going on. This can 
+help place errors and warnings in context so that they are easier to understand.
+Distinguishing narration from comments allows them to colored differently and 
+controlled separately.
+
+
+.. _display:
+
+display
+"""""""
+
+.. code-block:: python
+
+   display = InformantFactory(
+       output=lambda informer: not informer.quiet and not informer.mute,
+       log=True,
+   )
+
+Displays a message if *quiet* is not set. Logs the message.
+
+.. code-block:: python
+
+    >>> from inform import display
+    >>> display('We the people ...')
+    We the people ...
+
+
+.. _output:
+
+output
+""""""
+
+.. code-block:: python
+
+   output = InformantFactory(
+       output=lambda informer: not informer.mute,
+       log=True,
+   )
+
+Displays and logs a message. This is used for messages that are not errors that 
+are noteworthy enough that they need to get through even though the user has 
+asked for quiet.
+
+.. code-block:: python
+
+    >>> from inform import output
+    >>> output('We the people ...')
+    We the people ...
+
+
+.. _notify:
+
+notify
+""""""
+
+.. code-block:: python
+
+   notify = InformantFactory(
+       notify=True,
+       log=True,
+   )
+
+Temporarily display the message in a bubble at the top of the screen.  Also 
+prints the message on the standard output and sends it to the log file.  This is 
+used for messages that the user is otherwise unlikely to see because they have 
+no access to the standard output.
+
+.. code-block:: python
+
+    >>> from inform import output
+    >>> output('We the people ...')
+    We the people ...
+
+
+.. _debug:
+
+debug
+"""""
+
+.. code-block:: python
+
+   debug = InformantFactory(
+       severity='DEBUG',
+       output=True,
+       log=True,
+       header_color='magenta',
+   )
+
+Displays and logs a debugging message. A header with the label *DEBUG* is added 
+to the message and the header is colored magenta.
+
+.. code-block:: python
+
+    >>> from inform import Inform, debug
+    >>> informer = Inform(prog_name="myprog")
+    >>> debug('HERE!')
+    myprog DEBUG: HERE!
+
+The *debug* informant is being deprecated in favor of the debugging functions 
+``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
+
+
+.. _warn:
+
+warn
+""""
+
+.. code-block:: python
+
+   warn = InformantFactory(
+       severity='warning',
+       header_color='yellow',
+       output=lambda informer: not informer.quiet and not informer.mute,
+       log=True,
+   )
+
+Displays and logs a warning message. A header with the label *warning* is added 
+to the message. The header is colored yellow when writing to the console.
+
+.. code-block:: python
+
+    >>> from inform import Inform, warn
+    >>> informer = Inform(prog_name="myprog")
+    >>> warn('file not found, skipping.', culprit='ghost')
+    myprog warning: ghost: file not found, skipping.
+
+
+.. _error:
+
+error
+"""""
+
+.. code-block:: python
+
+   error = InformantFactory(
+       severity='error',
+       is_error=True,
+       header_color='red',
+       output=lambda informer: not informer.mute,
+       log=True,
+   )
+
+Displays and logs an error message. A header with the label *error* is added to 
+the message. The the header is colored red when writing to the console.
+
+.. code-block:: python
+
+    >>> from inform import Inform, error
+    >>> informer = Inform(prog_name="myprog")
+    >>> error('invalid value specified, expected number.', culprit='count')
+    myprog error: count: invalid value specified, expected number.
+
+
+.. _fatal:
+
+fatal
+"""""
+
+.. code-block:: python
+
+   fatal = InformantFactory(
+       severity='error',
+       is_error=True,
+       terminate=1,
+       header_color='red',
+       output=lambda informer: not informer.mute,
+       log=True,
+   )
+
+Displays and logs an error message. A header with the label *error* is added to 
+the message.  The header is colored red when writing to the console. The program 
+is terminated with an exit status of 1.
+
+
+.. _panic:
+
+panic
+"""""
+
+.. code-block:: python
+
+   panic = InformantFactory(
+       severity='internal error (please report)',
+       is_error=True,
+       terminate=3,
+       header_color='red',
+       output=True,
+       log=True,
+   )
+
+Displays and logs a panic message. A header with the label *internal error* is 
+added to the message.  The header is colored red when writing to the console.  
+The program is terminated with an exit status of 3.
+
+
+
+.. informers:
+
+Informers
+---------
 
 For more control of the informants, you can import and instantiate the 
 :class:`inform.Inform` class yourself along with the desired informants.  This 
@@ -93,6 +537,12 @@ printed output of your code:
     >>> str(logfile_text[:10]), str(logfile_text[-13:])
     ('Invoked as', 'running test\n')
 
+
+.. user define informants:
+
+User Defined Informants
+------------------------
+
 You can create your own informants using :class:`inform.InformantFactory`:
 
 .. code-block:: python
@@ -116,14 +566,17 @@ You can create your own informants using :class:`inform.InformantFactory`:
     First level of verbosity.
     Second level of verbosity.
 
-The argument *verbosity* is not an explicitly supported argument to Inform.  In 
-this case Inform simply saves the value and makes it available as an attribute, 
-and it is this attribute that is queried by the lambda function passed to the 
-InformantFactory when creating the informants.
+The argument *verbosity* is not an explicitly supported argument of *Inform*.  
+In this case *Inform* simply saves the value and makes it available as an 
+attribute, and it is this attribute that is queried by the lambda function 
+passed to *InformantFactory* when creating the informants.
 
 
-Exception
----------
+.. _exceptions:
+
+Exceptions
+----------
+
 An exception, :class:`inform.Error`, is provided that takes the same arguments 
 as an informant.  This allows you to catch the exception and handle it if you 
 like.  The exception provides the *report* and *terminate* methods that 
@@ -148,7 +601,7 @@ a string that contains both the message and the culprit formatted so that it can
 be shown to the user.
 
 Any keyword arguments provided will be available in *e.kwargs*, but certain 
-keyword arguments are reserved by inform (see above).
+keyword arguments are reserved by *Inform* (see :ref:`using informants`).
 
 One common approach to using *Error* is to pass all the arguments that make up 
 the error message as unnamed arguments and then assemble them into the message 
@@ -177,8 +630,9 @@ the handler if needed. For example:
 
 Inform Class
 ------------
-The Inform class controls the active informants. It takes the following 
-arguments as options (the value given for the argument is its default):
+The :class:`infor.Inform` class controls the active informants. It takes the 
+following arguments as options (the value given for the argument is its 
+default):
 
 
 Arguments
@@ -346,256 +800,6 @@ treated as a function that is called to produce the desired output.
 
     >>> fail('This message would be red.')
     This message would be red.
-
-
-Standard Informants
--------------------
-
-The following informants are provided. All of the informants except panic and 
-debug do not produce any output if *mute* is set.
-
-log
-"""
-
-.. code-block:: python
-
-   log = InformantFactory(
-       output=False,
-       log=True,
-   )
-
-Saves a message to the log file without displaying it.
-
-
-comment
-"""""""
-
-.. code-block:: python
-
-   comment = InformantFactory(
-       output=lambda informer: informer.verbose and not informer.mute,
-       log=True,
-       message_color='cyan',
-   )
-
-Displays a message only if *verbose* is set. Logs the message. The message is 
-displayed in cyan.
-
-Comments are generally used to document unusual occurrences that might warrant 
-the user's attention.
-
-codicil
-"""""""
-
-.. code-block:: python
-
-   codicil = InformantFactory(is_continuation=True)
-
-Continues a previous message. Continued messages inherit the properties (output, 
-log, message color, etc) of the previous message.  If the previous message had 
-a header, that header is not output and instead the message is indented.
-
-.. code-block:: python
-
-    >>> from inform import Inform, warn, codicil
-    >>> informer = Inform(prog_name="myprog")
-    >>> warn('file not found.', culprit='ghost')
-    myprog warning: ghost: file not found.
-
-    >>> codicil('skipping')
-        skipping
-
-
-narrate
-"""""""
-
-.. code-block:: python
-
-   narrate = InformantFactory(
-       output=lambda informer: informer.narrate and not informer.mute,
-       log=True,
-       message_color='blue',
-   )
-
-Displays a message only if *narrate* is set. Logs the message. The message is 
-displayed in blue.
-
-Narration is generally used to inform the user as to what is going on. This can 
-help place errors and warnings in context so that they are easier to understand.
-Distinguishing narration from comments allows them to colored differently and 
-controlled separately.
-
-
-display
-"""""""
-
-.. code-block:: python
-
-   display = InformantFactory(
-       output=lambda informer: not informer.quiet and not informer.mute,
-       log=True,
-   )
-
-Displays a message if *quiet* is not set. Logs the message.
-
-.. code-block:: python
-
-    >>> from inform import display
-    >>> display('We the people ...')
-    We the people ...
-
-
-output
-""""""
-
-.. code-block:: python
-
-   output = InformantFactory(
-       output=lambda informer: not informer.mute,
-       log=True,
-   )
-
-Displays and logs a message. This is used for messages that are not errors that 
-are noteworthy enough that they need to get through even though the user has 
-asked for quiet.
-
-.. code-block:: python
-
-    >>> from inform import output
-    >>> output('We the people ...')
-    We the people ...
-
-
-notify
-""""""
-
-.. code-block:: python
-
-   notify = InformantFactory(
-       notify=True,
-       log=True,
-   )
-
-Temporarily display the message in a bubble at the top of the screen.  Also 
-prints the message on the standard output and sends it to the log file.  This is 
-used for messages that the user is otherwise unlikely to see because they have 
-no access to the standard output.
-
-.. code-block:: python
-
-    >>> from inform import output
-    >>> output('We the people ...')
-    We the people ...
-
-
-debug
-"""""
-
-.. code-block:: python
-
-   debug = InformantFactory(
-       severity='DEBUG',
-       output=True,
-       log=True,
-       header_color='magenta',
-   )
-
-Displays and logs a debugging message. A header with the label *DEBUG* is added 
-to the message and the header is colored magenta.
-
-.. code-block:: python
-
-    >>> from inform import Inform, debug
-    >>> informer = Inform(prog_name="myprog")
-    >>> debug('HERE!')
-    myprog DEBUG: HERE!
-
-The *debug* informant is being deprecated in favor of the debugging functions 
-``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
-
-
-warn
-""""
-
-.. code-block:: python
-
-   warn = InformantFactory(
-       severity='warning',
-       header_color='yellow',
-       output=lambda informer: not informer.quiet and not informer.mute,
-       log=True,
-   )
-
-Displays and logs a warning message. A header with the label *warning* is added 
-to the message and the header is colored yellow.
-
-.. code-block:: python
-
-    >>> from inform import Inform, warn
-    >>> informer = Inform(prog_name="myprog")
-    >>> warn('file not found, skipping.', culprit='ghost')
-    myprog warning: ghost: file not found, skipping.
-
-
-error
-"""""
-
-.. code-block:: python
-
-   error = InformantFactory(
-       severity='error',
-       is_error=True,
-       header_color='red',
-       output=lambda informer: not informer.mute,
-       log=True,
-   )
-
-Displays and logs an error message. A header with the label *error* is added to 
-the message and the header is colored red.
-
-.. code-block:: python
-
-    >>> from inform import Inform, error
-    >>> informer = Inform(prog_name="myprog")
-    >>> error('invalid value specified, expected number.', culprit='count')
-    myprog error: count: invalid value specified, expected number.
-
-fatal
-"""""
-
-.. code-block:: python
-
-   fatal = InformantFactory(
-       severity='error',
-       is_error=True,
-       terminate=1,
-       header_color='red',
-       output=lambda informer: not informer.mute,
-       log=True,
-   )
-
-Displays and logs an error message. A header with the label *error* is added to 
-the message and the header is colored red. The program is terminated with an 
-exit status of 1.
-
-
-panic
-"""""
-
-.. code-block:: python
-
-   panic = InformantFactory(
-       severity='internal error (please report)',
-       is_error=True,
-       terminate=3,
-       header_color='red',
-       output=True,
-       log=True,
-   )
-
-Displays and logs a panic message. A header with the label *internal error* is 
-added to the message and the header is colored red. The program is terminated 
-with an exit status of 3.
 
 
 Informant Control
@@ -856,7 +1060,7 @@ ppp(\*args, \*\*kwargs):
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest user.rst[89]>:1, __main__:
+        DEBUG: <doctest user.rst[103]>:1, __main__:
             1 this is a test (2, 3)
 
 ddd(\*args, \*\*kwyargs):
@@ -865,7 +1069,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a, b, c, d)
-        DEBUG: <doctest user.rst[90]>:1, __main__:
+        DEBUG: <doctest user.rst[104]>:1, __main__:
             1
             'this is a test'
             (2, 3)
@@ -880,7 +1084,7 @@ ddd(\*args, \*\*kwyargs):
     .. code:: python
 
         >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest user.rst[91]>:1, __main__:
+        DEBUG: <doctest user.rst[105]>:1, __main__:
             a = 1
             b = 'this is a test'
             c = (2, 3)
@@ -902,7 +1106,7 @@ ddd(\*args, \*\*kwyargs):
         ...         ddd(self=self)
 
         >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest user.rst[92]>:4, __main__.Info.__init__():
+        DEBUG: <doctest user.rst[106]>:4, __main__.Info.__init__():
             self = {
                 'email': 'ted@ledbelly.com',
                 'name': 'Ted Ledbelly',
@@ -916,7 +1120,7 @@ vvv(\*args):
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest user.rst[94]>:1, __main__:
+        DEBUG: <doctest user.rst[108]>:1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,
@@ -932,7 +1136,7 @@ vvv(\*args):
 
         >>> aa = 1
         >>> vvv(a)
-        DEBUG: <doctest user.rst[96]>:1, __main__:
+        DEBUG: <doctest user.rst[110]>:1, __main__:
             a = 1
             aa = 1
 
@@ -947,7 +1151,7 @@ sss(\*args):
         ..     print('CONTINUING')
 
         >> foo()
-        DEBUG: <doctest user.rst[93]>:2, __main__.foo():
+        DEBUG: <doctest user.rst[112]>:2, __main__.foo():
             Traceback (most recent call last):
                 ...
         CONTINUING

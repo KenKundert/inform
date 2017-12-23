@@ -84,7 +84,7 @@ def cull(collection, **kwargs):
             collection, or a scalar.  The function would take a single argument,
             one of the values in the collection, and return True if the value
             should be culled. The scalar or the collection simply specified the
-            specific value of values to be culled.
+            specific value or values to be culled.
 
             If remove is not specified, the value is culled if its value would
             be False when cast to a boolean (0, False, None, '', (), [], {}, etc.)
