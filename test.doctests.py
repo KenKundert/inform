@@ -35,7 +35,7 @@ else:
     python = coverageCmd(source=coverage)
 
 tests = '''
-    README.rst inform/inform.py doc/api.rst doc/examples.rst doc/index.rst
+    README.rst inform/inform.py doc/api.rst doc/index.rst
     doc/user.rst
 '''.split()
 

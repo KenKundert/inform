@@ -29,7 +29,7 @@ simply and cleanly print different types of messages.  For example:
     error: this is an error message.
 
 These functions behave in a way that is very similar to the *print* function 
-that is built-in to Python3, but they also provide some additonal features as 
+that is built-in to Python3, but they also provide some additional features as 
 well. For example, they can be configured to log their messages and they can be 
 disabled en masse.
 
@@ -168,7 +168,7 @@ keys are known is used.  For example;
 All informants support the *culprit* named argument, which is used to identify 
 the object of the message.  The *culprit* can be a scalar, as above, or 
 a collection, in which case the members of the collection are joined 
-togehter:
+together:
 
 .. code-block:: python
 
@@ -207,7 +207,7 @@ gives you the ability to specify options:
 Notice that in this case the call to *display* did not print anything. That is 
 because the *quiet* argument was passed to *Inform*, which acts to suppress all 
 but error messages. However, a logfile was specified, so the message would be 
-logged. In addition, the program name was specfied, with the result in it being 
+logged. In addition, the program name was specified, with the result in it being 
 added to the header of the error message.
 
 An object of the *Inform* class is referred to as an informer (not to be 
@@ -243,7 +243,7 @@ constructing messages.
      - Like join, but adds a conjunction between the last two items.
 
    * - :func:`inform.cull`
-     - Strips unintersting value from collections.
+     - Strips uninteresting value from collections.
 
    * - :func:`inform.ddd`
      - Pretty prints its arguments, used when debugging code.
@@ -337,5 +337,4 @@ Documentation
 
    user
    api
-   examples
    releases

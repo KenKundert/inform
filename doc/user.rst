@@ -150,8 +150,8 @@ keys are available is used.  For example;
     green = 4fff33  -- success
       red = ff5733  -- failure
 
-The first loop interpolates unamed arguments, the second interpolates the named 
-arguments.
+The first loop interpolates positional (unnamed) arguments, the second 
+interpolates the keyword (named) arguments.
 
 By default, the values that are considered unavailable and so will invalidate 
 a template are those that would be False when cast to a Boolean.  So, by 
@@ -299,9 +299,9 @@ output
        log=True,
    )
 
-Displays and logs a message. This is used for messages that are not errors that 
-are noteworthy enough that they need to get through even though the user has 
-asked for quiet.
+Displays and logs a message. This is used for messages that are not errors and 
+that are noteworthy enough that they need to get through even though the user 
+has asked for quiet.
 
 .. code-block:: python
 
@@ -409,8 +409,8 @@ the message. The the header is colored red when writing to the console.
 
     >>> from inform import Inform, error
     >>> informer = Inform(prog_name="myprog")
-    >>> error('invalid value specified, expected number.', culprit='count')
-    myprog error: count: invalid value specified, expected number.
+    >>> error('invalid value specified, expected a number.', culprit='count')
+    myprog error: count: invalid value specified, expected a number.
 
 
 .. _fatal:
@@ -476,22 +476,24 @@ the ability to specify options:
     >>> error('file not found.', culprit='data.in')
     error: data.in: file not found.
 
-The *logfile* argument disables opening and writing to the logfile. The 
-*prog_name* argument stops *Inform* from adding the program name to the error 
-messae. And *quiet* turns off non-essential output, and in this case it causes 
-the output of *display* to be suppressed.
+In this example the *logfile* argument disables opening and writing to the 
+logfile.  The *prog_name* argument stops *Inform* from adding the program name 
+to the error message. And *quiet* turns off non-essential output, and in this 
+case it causes the output of *display* to be suppressed.
 
 An object of the Inform class is referred to as an informer (not to be confused 
 with the print functions, which are  referred to as informants). Once 
 instantiated, you can use the informer to change various settings, terminate the 
-program, or return a count of the number of errors that have occurred.
+program, return a count of the number of errors that have occurred, etc.
 
 .. code-block:: python
 
     >>> from inform import Inform, error
     >>> informer = Inform(prog_name="prog")
+
     >>> error('file not found.', culprit='data.in')
     prog error: data.in: file not found.
+
     >>> informer.errors_accrued()
     1
 
@@ -602,9 +604,10 @@ Exceptions
 
 An exception, :class:`inform.Error`, is provided that takes the same arguments 
 as an informant.  This allows you to catch the exception and handle it if you 
-like.  The exception provides the *report* and *terminate* methods that 
-processes the exception as an error or fatal error if you find that you can do 
-nothing else with the exception:
+like.  Any arguments you pass into the exception are retained and are available 
+when processing the exception.  The exception provides the *report* and 
+*terminate* methods that processes the exception as an error or fatal error if 
+you find that you can do nothing else with the exception:
 
 .. code-block:: python
 
@@ -662,21 +665,98 @@ Several utility functions are provided for your convenience. They are often
 helpful when creating messages.
 
 
-.. _indent:
+.. _color class desc:
 
-indent
-""""""
+Color Class
+"""""""""""
 
-.. py:function:: indent(text, leader='    ',  first=0, stops=1, sep='\\n')
+The :class:`inform.Color` class creates colorizers, which are functions used to 
+render text in a particular color.  They are like the Python print function in 
+that they take any number of unnamed arguments that are converted to strings and 
+then joined into a single string. The string is then coded for the chosen color 
+and returned. For example:
 
-:func:`inform.indent` indents *text*. Multiples of *leader* are added to the 
-beginning of the lines to indent.  *first* is the number of indentations used 
-for the first line relative to the others (may be negative but (first + stops) 
-should not be.  *stops* is the default number of indentations to use. *sep* is 
-the string used to separate the lines.
+.. code-block:: python
+
+   >> from inform import Color, display
+
+   >> green = Color('green')
+   >> red = Color('red')
+   >> success = green('pass:')
+   >> failure = red('FAIL:')
+
+   >> failures = {'outrigger': True, 'signalman': False}
+   >> for name, fails in failures.items():
+   ..     result = failure if fails else success
+   ..     display(result, name)
+   FAIL: outrigger
+   pass: signalman
+
+When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
+
+The Color class has the concept of a colorscheme. There are three supported 
+schemes: *None*, 'light', and 'dark'. With *None* the text is not colored. In 
+general it is best to use the 'light' colorscheme on 'dark' backgrounds and the 
+'dark' colorscheme on light backgrounds.
+
+Colorizers have one user settable attribute: *enable*. By default *enable* is 
+*True*. If you set it to *False* the colorizer no longer renders the text in 
+color:
+
+.. code-block:: python
+
+   >> warning = Color('yellow')
+   >> warning('This will be yellow on the console.')
+   This will be yellow on the console.
+
+   >> warning.enable = False
+   >> warning('This will not be yellow.')
+   This will not be yellow.
+
+Alternatively, you can enable or disable the colorizer when creating it. This 
+example uses the :meth:`inform.Color.isTTY` method to determine whether the 
+output stream, the standard output by default, is a console.
+
+.. code-block:: python
+
+   >> warning = Color('yellow', enable=Color.isTTY())
+   >> warning('Cannot find precursor, ignoring.')
+   Cannot find precursor, ignoring.
 
 
-.. _conjoin:
+
+.. _columns desc:
+
+columns
+"""""""
+
+.. py:function:: columns(array, pagewidth=79, alignment='<', leader='    ')
+
+:func:`inform.columns` distributes the values of an array over enough columns to 
+fill the screen.
+
+This example uses prints out the phonetic alphabet:
+
+.. code-block:: python
+
+    >>> from inform import columns
+
+    >>> title = 'Display the NATO phonetic alphabet.'
+    >>> words = """
+    ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett Kilo
+    ...     Lima Mike November Oscar Papa Quebec Romeo Sierra Tango Uniform
+    ...     Victor Whiskey X-ray Yankee Zulu
+    ... """.split()
+
+    >>> display(title, columns(words), sep='\n')
+    Display the NATO phonetic alphabet.
+        Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
+        Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
+        Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
+        Delta     Hotel     Lima      Papa      Tango     X-ray
+
+
+.. _conjoin desc:
 
 conjoin
 """""""
@@ -696,7 +776,7 @@ a conjunction that is placed between the last two elements. For example:
     'a, b or c'
 
 
-.. _cull:
+.. _cull desc:
 
 cull
 """"
@@ -706,7 +786,7 @@ cull
 :func:`inform.cull` strips items from a collection that have a particular value.  
 The collection may be list-like (*list*, *tuple*, *set*, etc.) or 
 a dictionary-like (*dict*, *OrderedDict*).  A new collection of the same type is 
-returned with the unddesirable values removed.
+returned with the undesirable values removed.
 
 By default, :func:`inform.cull` strips values that would be *False* when cast to 
 a Boolean (0, *False*, *None*, '', (), [], etc.).  A particular value may be 
@@ -728,35 +808,7 @@ a function, in which case it takes a single item as an argument and returns
        savings: $13,948.78
 
 
-.. _join:
-
-
-join
-""""
-
-.. py:function:: join(\*args, \**kwargs)
-
-:func:`inform.join` combines the arguments in a manner very similar to an 
-:ref:`informant <using informants>` and returns the result as a string.  Uses 
-the *sep*, *template* and *wrap* keyword arguments to combine the arguments.
-
-
-.. code-block:: python
-
-    >>> from inform import display, join
-
-    >>> accounts = dict(checking=1100.16, savings=13948.78, brokerage=0)
-    >>> lines = []
-    >>> for name, amount in accounts.items():
-    ...     lines.append(join(name, amount, template='{:>10s}: ${:,.2f}'))
-
-    display(lines, sep='\n')
-     brokerage: $0.00
-      checking: $1,100.16
-       savings: $13,948.78
-
-
-.. _fmt:
+.. _fmt desc:
 
 fmt
 """
@@ -787,14 +839,211 @@ argument list because if *fmt* does not find a named argument in its argument
 list, it will look for a variable of the same name in the local scope.
 
 
-.. _render:
+.. _full_stop desc:
+
+full_stop
+"""""""""
+
+.. py:function:: full_stop(string)
+
+:func:`inform.full_stop` adds a period to the end of the string if needed (if 
+the last character is not a period, question mark or exclamation mark). It 
+applies str() to its argument, so it is generally a suitable replacement for str 
+in str(exception) when trying extract an error message from an exception.
+
+This is generally useful if you need to print a string that should have 
+punctuation, but may not.
+
+.. code-block:: python
+
+    >>> from inform import Error, error, full_stop
+
+    >>> found = 0
+    >>> try:
+    ...     if found is False:
+    ...         raise Error('not found', culprit='marbles')
+    ...     elif found < 3:
+    ...         raise Error('insufficient number.', culprit='marbles')
+    ...     raise Error('not found', culprit='marbles')
+    ... except Error as e:
+    ...     error(full_stop(e))
+    myprog error: marbles: insufficient number.
+
+
+.. _indent desc:
+
+indent
+""""""
+
+.. py:function:: indent(text, leader='    ',  first=0, stops=1, sep='\\n')
+
+:func:`inform.indent` indents *text*. Multiples of *leader* are added to the 
+beginning of the lines to indent.  *first* is the number of indentations used 
+for the first line relative to the others (may be negative but (first + stops) 
+should not be.  *stops* is the default number of indentations to use. *sep* is 
+the string used to separate the lines.
+
+.. code-block:: python
+
+    >>> from inform import display, indent
+    >>> text = 'a b'.replace(' ', '\n')
+    >>> display(indent(text))
+        a
+        b
+
+    >>> display(indent(text, first=1, stops=0))
+        a
+    b
+
+    >>> display(indent(text, leader='.   ', first=-1, stops=2))
+    .   a
+    .   .   b
+
+
+.. _is_collection desc:
+
+is_collection
+"""""""""""""
+
+.. py:function:: is_collection(obj)
+
+:func:`inform.is_collection` returns *True* if its argument is a collection.  
+This includes objects such as lists, sets, dictionaries, etc.  It does not 
+include strings.
+
+.. code-block:: python
+
+    >>> from inform import is_collection
+
+    >>> is_collection('abc')
+    False
+
+    >>> is_collection(['a', 'b', 'c'])
+    True
+
+
+.. _is_iterable desc:
+
+is_iterable
+"""""""""""
+
+.. py:function:: is_iterable(obj)
+
+:func:`inform.is_iterable` returns *True* if its argument is a collection or 
+a string.
+
+.. code-block:: python
+
+    >>> from inform import is_iterable
+
+    >>> is_iterable('abc')
+    True
+
+    >>> is_iterable(['a', 'b', 'c'])
+    True
+
+
+.. _is_str desc:
+
+is_str
+""""""
+
+.. py:function:: is_str(obj)
+
+:func:`inform.is_str` returns *True* if its argument is a string-like object.
+
+.. code-block:: python
+
+    >>> from inform import is_str
+
+    >>> is_str('abc')
+    True
+
+    >>> is_str(['a', 'b', 'c'])
+    False
+
+
+.. _join desc:
+
+
+join
+""""
+
+.. py:function:: join(\*args, \**kwargs)
+
+:func:`inform.join` combines the arguments in a manner very similar to an 
+:ref:`informant <using informants>` and returns the result as a string.  Uses 
+the *sep*, *template* and *wrap* keyword arguments to combine the arguments.
+
+
+.. code-block:: python
+
+    >>> from inform import display, join
+
+    >>> accounts = dict(checking=1100.16, savings=13948.78, brokerage=0)
+    >>> lines = []
+    >>> for name, amount in accounts.items():
+    ...     lines.append(join(name, amount, template='{:>10s}: ${:,.2f}'))
+
+    display(lines, sep='\n')
+     brokerage: $0.00
+      checking: $1,100.16
+       savings: $13,948.78
+
+
+.. _os_error desc:
+
+os_error
+""""""""
+
+.. py:function:: os_error(exception)
+
+:func:`inform.os_error` generates clean messages for operating system errors.
+
+.. code-block:: python
+
+    >>> from inform import error, os_error
+
+    >>> try:
+    ...     with open('config') as f:
+    ...         contents = f.read()
+    ... except (OSError, IOError) as e:
+    ...     error(os_error(e))
+    myprog error: config: no such file or directory.
+
+
+.. _plural desc:
+
+plural
+""""""
+
+.. py:function:: plural(count, singular_form, plural_form=*None*)
+
+Produces either the singular or plural form of a word based on a count.
+The count may be an integer, or an iterable, in which case its length is used. 
+If the plural form is not given, the singular form is used with an 's' added to 
+the end.
+
+.. code-block:: python
+
+    >>> from inform import conjoin, display, plural
+
+    >>> filenames = ['a', 'b', 'c', 'd']
+    >>> display(
+    ...     files=plural(filenames, 'file'), names=conjoin(filenames),
+    ...     template='Reading {files}: {names}.'
+    ... )
+    Reading files: a, b, c and d.
+
+
+.. _render desc:
 
 render
 """"""
 
 .. py:function:: render(obj, sort=None, level=0, tab='    ')
 
-:func"`inform.render` recursively converts an object to a string with reasonable 
+:func:`inform.render` recursively converts an object to a string with reasonable 
 formatting.  Has built in support for the base Python types (*None*, *bool*, 
 *int*, *float*, *str*, *set*, *tuple*, *list*, and *dict*).  If you confine 
 yourself to these types, the output of :func:`inform.render` can be read by the 
@@ -854,170 +1103,6 @@ This example prints several Python data types:
     }
 
 
-.. _plural:
-
-plural
-""""""
-
-.. py:function:: plural(count, singular_form, plural_form=*None*)
-
-Produces either the singular or plural form of a word based on a count.
-The count may be an integer, or an iterable, in which case its length is 
-used. If the plural form is not give, the singular form is used with an 's' 
-added to the end.
-
-.. code-block:: python
-
-    >>> from inform import conjoin, display, plural
-
-    >>> filenames = ['a', 'b', 'c', 'd']
-    >>> display(
-    ...     files=plural(filenames, 'file'), names=conjoin(filenames),
-    ...     template='Reading {files}: {names}.'
-    ... )
-    Reading files: a, b, c and d.
-
-
-.. _full_stop:
-
-full_stop
-"""""""""
-
-.. py:function:: full_stop(string)
-
-:func:`inform.full_stop` adds a period to the end of the string if needed (if 
-the last character is not a period, question mark or exclamation mark). It 
-applies str() to its argument, so it is generally a suitable replacement for str 
-in str(exception) when trying extract an error message from an exception.
-
-This is generally useful if you need to print a string that should have 
-punctionation, but may not.
-
-.. code-block:: python
-
-    >>> from inform import Error, error, full_stop
-
-    >>> try:
-    ...     raise Error('not found', culprit='marbles')
-    ... except Error as e:
-    ...     error(full_stop(e))
-    myprog error: marbles: not found.
-
-
-.. _columns:
-
-columns
-"""""""
-
-.. py:function:: columns(array, pagewidth=79, alignment='<', leader='    ')
-
-:fund:`inform.columns` distributes the values of an array over enough columns to 
-fill the screen.
-
-This example uses prints out the phonetic alphabet:
-
-.. code-block:: python
-
-    >>> from inform import columns
-
-    >>> title = 'Display the NATO phonetic alphabet.'
-    >>> words = """
-    ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett Kilo
-    ...     Lima Mike November Oscar Papa Quebec Romeo Sierra Tango Uniform
-    ...     Victor Whiskey X-ray Yankee Zulu
-    ... """.split()
-
-    >>> display(title, columns(words), sep='\n')
-    Display the NATO phonetic alphabet.
-        Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
-        Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
-        Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
-        Delta     Hotel     Lima      Papa      Tango     X-ray
-
-.. _os_error:
-
-os_error
-""""""""
-
-.. py:function:: os_error(exception)
-
-:func:`inform.os_error` generates clean messages for operating system errors.
-
-.. code-block:: python
-
-    >>> from inform import error, os_error
-
-    >>> try:
-    ...     with open('config') as f:
-    ...         contents = f.read()
-    ... except (OSError, IOError) as e:
-    ...     error(os_error(e))
-    myprog error: config: no such file or directory.
-
-
-.. _is_str:
-
-is_str
-""""""
-
-.. py:function:: is_str(obj)
-
-:func:`inform.is_str` returns *True* if its argument is a string-like object.
-
-.. code-block:: python
-
-    >>> from inform import is_str
-
-    >>> is_str('abc')
-    True
-
-    >>> is_str(['a', 'b', 'c'])
-    False
-
-
-.. _is_iterable:
-
-is_iterable
-"""""""""""
-
-.. py:function:: is_iterable(obj)
-
-:func:`inform.is_iterable` returns *True* if its argument is a collection or 
-a string.
-
-.. code-block:: python
-
-    >>> from inform import is_iterable
-
-    >>> is_iterable('abc')
-    True
-
-    >>> is_iterable(['a', 'b', 'c'])
-    True
-
-
-.. _is_collection:
-
-is_collection
-"""""""""""""
-
-.. py:function:: is_collection(obj)
-
-:func:`inform.is_collection` returns *True* if its argument is a collection.  
-This includes objects such as lists, sets, dictionaries, etc.  It does not 
-include strings.
-
-.. code-block:: python
-
-    >>> from inform import is_collection
-
-    >>> is_collection('abc')
-    False
-
-    >>> is_collection(['a', 'b', 'c'])
-    True
-
-
 Debugging Functions
 """""""""""""""""""
 The debugging functions are intended to be used when you want to print something 
@@ -1028,34 +1113,7 @@ debug message and also makes it easy to find and remove the functions once you
 are done debugging.
 
 
-.. _ppp:
-
-ppp
-"""
-
-.. py:function:: ppp(\*args, \*\*kwargs)
-
-:func:`inform.ppp` is very similar to the normal Python print function in that 
-it prints out the values of the unnamed arguments under the control of the named 
-arguments. It also takes the same named arguments as ``print()``, such as 
-``sep`` and ``end``.
-
-If given without unnamed arguments, it will just print the header, which 
-good way of confirming that a line of code has been reached.
-
-.. code:: python
-
-    >>> from inform import ppp
-    >>> a = 1
-    >>> b = 'this is a test'
-    >>> c = (2, 3)
-    >>> d = {'a': a, 'b': b, 'c': c}
-    >>> ppp(a, b, c)
-    DEBUG: <doctest user.rst[122]>:1, __main__:
-        1 this is a test (2, 3)
-
-
-.. _ddd:
+.. _ddd desc:
 
 ddd
 """
@@ -1067,8 +1125,12 @@ ddd
 .. code:: python
 
     >>> from inform import ddd
+    >>> a = 1
+    >>> b = 'this is a test'
+    >>> c = (2, 3)
+    >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    DEBUG: <doctest user.rst[124]>:1, __main__:
+    DEBUG: <doctest user.rst[128]>:1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1084,7 +1146,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    DEBUG: <doctest user.rst[126]>:1, __main__:
+    DEBUG: <doctest user.rst[130]>:1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1108,53 +1170,41 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    DEBUG: <doctest user.rst[128]>:4, __main__.Info.__init__():
+    DEBUG: <doctest user.rst[132]>:4, __main__.Info.__init__():
         self = {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
         }
 
 
-.. _vvv:
+.. _ppp desc:
 
-vvv
+ppp
 """
 
-.. py:function:: vvv(\*args)
+.. py:function:: ppp(\*args, \*\*kwargs)
 
-:func:`inform.vvv` prints variables from the calling scope. If no arguments are 
-given, then all the variables are printed. You can optionally give specific 
-variables on the argument list and only those variables are printed.
+:func:`inform.ppp` is very similar to the normal Python print function in that 
+it prints out the values of the unnamed arguments under the control of the named 
+arguments. It also takes the same named arguments as ``print()``, such as 
+``sep`` and ``end``.
 
-.. code:: python
-
-    >>> from inform import vvv
-
-    >>> vvv(b, d)
-    DEBUG: <doctest user.rst[131]>:1, __main__:
-        b = 'this is a test'
-        d = {
-            'a': 1,
-            'b': 'this is a test',
-            'c': (2, 3),
-        }
-
-This last feature is not completely robust. The checking is done by value, 
-so if several variables share the value of one requested, they are all 
-shown.
+If given without unnamed arguments, it will just print the header, which 
+good way of confirming that a line of code has been reached.
 
 .. code:: python
 
-    >>> from inform import vvv
+    >>> from inform import ppp
+    >>> a = 1
+    >>> b = 'this is a test'
+    >>> c = (2, 3)
+    >>> d = {'a': a, 'b': b, 'c': c}
+    >>> ppp(a, b, c)
+    DEBUG: <doctest user.rst[139]>:1, __main__:
+        1 this is a test (2, 3)
 
-    >>> aa = 1
-    >>> vvv(a)
-    DEBUG: <doctest user.rst[134]>:1, __main__:
-        a = 1
-        aa = 1
 
-
-.. _sss:
+.. _sss desc:
 
 sss
 """
@@ -1179,115 +1229,40 @@ here?* question better than a simple print function.
         CONTINUING
 
 
-Color Class
-"""""""""""
+.. _vvv desc:
 
-The :class:`inform.Color` class creates colorizers, which are used to render 
-text in a particular color.  They are like the Python print function in that 
-they take any number of unnamed arguments that are converted to strings and then 
-joined into a single string. The string is then coded for the chosen color and 
-returned. For example:
+vvv
+"""
 
-.. code-block:: python
+.. py:function:: vvv(\*args)
 
-   >> from inform import Color, display
+:func:`inform.vvv` prints variables from the calling scope. If no arguments are 
+given, then all the variables are printed. You can optionally give specific 
+variables on the argument list and only those variables are printed.
 
-   >> green = Color('green')
-   >> red = Color('red')
-   >> success = green('pass:')
-   >> failure = red('FAIL:')
+.. code:: python
 
-   >> failures = {'outrigger': True, 'signalman': False}
-   >> for name, fails in failures.items():
-   ..     result = failure if fails else success
-   ..     display(result, name)
-   FAIL: outrigger
-   pass: signalman
+    >>> from inform import vvv
 
-When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
+    >>> vvv(b, d)
+    DEBUG: <doctest user.rst[141]>:1, __main__:
+        b = 'this is a test'
+        d = {
+            'a': 1,
+            'b': 'this is a test',
+            'c': (2, 3),
+        }
 
-The Color class has the concept of a colorscheme. There are three supported 
-schemes: *None*, 'light', and 'dark'. With *None* the text is not colored. In 
-general it is best to use the 'light' colorscheme on 'dark' backgrounds and the 
-dark colorscheme on light backgrounds.
+This last feature is not completely robust. The checking is done by value, 
+so if several variables share the value of one requested, they are all 
+shown.
 
-The Color class takes the following arguments when creating a colorizer:
+.. code:: python
 
-color:
-   Render the text in the specified color. Choose from *None*, 'black', 'red', 
-   'green', 'yellow', 'blue', 'magenta', 'cyan' or 'white'.
+    >>> from inform import vvv
 
-scheme = 'dark':
-   Use the specified colorscheme when rendering the text.
-   Choose from *None*, 'light' or 'dark'.
-
-enable = True:
-   If set to False, the colorizer does not render the text in color.
-
-A colorizer takes the following arguments:
-
-*args:
-   The unnamed arguments are converted to strings and joined to form the text to 
-   be colored.
-
-sep = ' ':
-   The join string, used when joining the unnamed arguments.
-
-template = None:
-   A template that if present interpolates the arguments to form the final 
-   message rather than simply joining the unnamed arguments with *sep*. The 
-   template is a string, and its *format* method is called with the unnamed and 
-   named arguments of the message passed as arguments.
-
-remove:
-   Specifies the argument values that are unavailable to the template.
-
-wrap = False:
-   Specifies whether message should be wrapped. *wrap* may be True, in which 
-   case the default width of 70 is used.  Alternately, you may specify the 
-   desired width. The wrapping occurs on the final message after the arguments 
-   have been joined.
-
-scheme = *False*:
-   Use to override the colorscheme when rendering the text.  Choose from *None*, 
-   *False*, 'light' or 'dark'.  If you specify *False* (the default), the 
-   colorscheme specified when creating the colorizer is used.
-
-**kwargs:
-   Any remaining keyword arguments are available to the template.
-
-Colorizers have one user settable attribute: *enable*. By default *enable* is 
-*True*. If you set it to *False* the colorizer no longer renders the text in 
-color:
-
-.. code-block:: python
-
-   >> warning = Color('yellow', enable=Color.isTTY(sys.stdout))
-   >> warning('Cannot find precusor, ignoring.')
-   Cannot find precusor, ignoring.
-
-The Color class has the following class methods:
-
-isTTY(stream):
-   Takes a stream as an argument (default is stdout) and returns true if it is 
-   a TTY.  A typical use is:
-
-.. code-block:: python
-
-   >>> from inform import Color, display
-   >>> import sys, re
-
-   >>> if Color.isTTY(sys.stdout):
-   ...     emphasize = Color('magenta')
-   ... else:
-   ...     emphasize = str.upper
-
-   >>> def highlight(matchobj):
-   ...     return emphasize(matchobj.group(0))
-
-   >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
-   Imagine YOUR city without cars.
-
-strip_colors(text):
-   Takes a string as its input and return that string stripped of any color 
-   codes.
+    >>> aa = 1
+    >>> vvv(a)
+    DEBUG: <doctest user.rst[144]>:1, __main__:
+        a = 1
+        aa = 1

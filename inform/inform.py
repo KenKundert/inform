@@ -272,6 +272,21 @@ class Color:
         """Takes a stream as an argument and returns true if it is a TTY.
 
         If not given, *stdout* is used as the stream.
+
+        >>> from inform import Color, display
+        >>> import sys, re
+
+        >>> if Color.isTTY(sys.stdout):
+        ...     emphasize = Color('magenta')
+        ... else:
+        ...     emphasize = str.upper
+
+        >>> def highlight(matchobj):
+        ...     return emphasize(matchobj.group(0))
+
+        >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
+        Imagine YOUR city without cars.
+
         """
         try:
             return os.isatty(stream.fileno())
