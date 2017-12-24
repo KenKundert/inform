@@ -52,12 +52,12 @@ In contrast, *Inform* is meant to used to provide information from command line
 utilities directly to the user in real time. It is not confined to only logging 
 events, but instead can be used anywhere the normal Python *print* function 
 would be used. In effect, *Inform* allows you to create and use multiple print 
-functions each of which is tailored for a specific situation. This of course is 
-something you could do yourself using the built-in *print* function, but with 
-*Inform* you will not have to embed your print functions in complex condition 
-statements, every message is formatted in a consistent manner that follows 
-normal Unix conventions, and you can control all of your print functions by 
-configuring a single object.
+functions each of which is tailored for a specific situation or task. This of 
+course is something you could do yourself using the built-in *print* function, 
+but with *Inform* you will not have to embed your print functions in complex 
+condition statements, every message is formatted in a consistent manner that 
+follows normal Unix conventions, and you can control all of your print functions 
+by configuring a single object.
 
 
 Installation
@@ -100,13 +100,13 @@ a header to the message that indicates the type of message.  For example:
     error: config: defective input file.
 
 Notice that in the error message the filename was explicitly added to the front 
-of the message. This is an extremely common idiom and it provided by *Inform* 
+of the message. This is an extremely common idiom and it is provided by *Inform* 
 using the *culprit* named argument as shown in the fatal message.
 *fatal* is similar to *error* but additionally terminates the program.  To make 
 the error messages stand out, the header is generally rendered in a color 
 appropriate to the message, so warnings use yellow and errors use red.  However, 
 they are not colored above because messages are only colored if they are being 
-written to a TTY.
+written to the console (a TTY).
 
 In a manner similar to Python3's built-in *print* function, unnamed arguments 
 are converted to strings and then joined using the separator, which by default 

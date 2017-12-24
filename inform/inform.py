@@ -1590,23 +1590,37 @@ class Error(Exception):
         self.args = args
         self.kwargs = kwargs
 
-    def get_message(self):
+    def get_message(self, template=None):
         """Get exception message.
 
-        If the *template* keyword argument was specified, it is treated as a
-        format string and is passed both the unnamed and named arguments. The
-        resulting string is treated as the message and returned.
+        Args:
+            template (str):
+                This argument is treated as a format string and is passed both
+                the unnamed and named arguments. The resulting string is treated
+                as the message and returned.
 
-        Otherwise the unnamed are joined using spaces to form the message.
+                If not specified, the *template* keyword argument passed to the
+                exception is used. If there was no *template* argument, then the
+                positional arguments of the exception are joined using *sep* and
+                that is returned.
+
+        Returned:
+            The formatted message without the culprits.
         """
-        return _join(self.args, self.kwargs)
+        if template:
+            kwargs = self.kwargs.copy()
+            kwargs.update(dict(template=template))
+        else:
+            kwargs = self.kwargs
+        return _join(self.args, kwargs)
 
     def get_culprit(self):
         """Get exception culprit.
 
         If the *culprit* keyword argument was specified as a string, it is
         returned. If it was specified as a collection, the members are converted
-        to strings and joined with commas. The resulting string is returned.
+        to strings and joined with *culprit_sep*. The resulting string is
+        returned.
         """
 
         culprit = self.kwargs.get('culprit')
@@ -1615,24 +1629,72 @@ class Error(Exception):
         elif culprit:
             return str(culprit)
 
-    def report(self):
+    def report(self, template=None):
         """Report exception.
 
         The :func:`inform.error` function is called with the exception arguments.
-        """
-        error(*self.args, **self.kwargs)
 
-    def terminate(self):
+        Args:
+            template (str):
+                This argument is treated as a format string and is passed both
+                the unnamed and named arguments. The resulting string is treated
+                as the message and returned.
+
+                If not specified, the *template* keyword argument passed to the
+                exception is used. If there was no *template* argument, then the
+                positional arguments of the exception are joined using *sep* and
+                that is returned.
+        """
+        if template:
+            kwargs = self.kwargs.copy()
+            kwargs.update(dict(template=template))
+        else:
+            kwargs = self.kwargs
+        error(*self.args, **kwargs)
+
+    def terminate(self, template=None):
         """Report exception and terminate.
 
         The :func:`inform.fatal` function is called with the exception arguments.
-        """
-        fatal(*self.args, **self.kwargs)
 
-    def __str__(self):
-        message = self.get_message()
+        Args:
+            template (str):
+                This argument is treated as a format string and is passed both
+                the unnamed and named arguments. The resulting string is treated
+                as the message and returned.
+
+                If not specified, the *template* keyword argument passed to the
+                exception is used. If there was no *template* argument, then the
+                positional arguments of the exception are joined using *sep* and
+                that is returned.
+        """
+        if template:
+            kwargs = self.kwargs.copy()
+            kwargs.update(dict(template=template))
+        else:
+            kwargs = self.kwargs
+        fatal(*self.args, **kwargs)
+
+    def render(self, template=None):
+        """Convert exception to a string for use in an error message.
+
+        Args:
+            template (str):
+                This argument is treated as a format string and is passed both
+                the unnamed and named arguments. The resulting string is treated
+                as the message and returned.
+
+                If not specified, the *template* keyword argument passed to the
+                exception is used. If there was no *template* argument, then the
+                positional arguments of the exception are joined using *sep* and
+                that is returned.
+        """
+        message = self.get_message(template)
         culprit = self.get_culprit()
         return "%s: %s" % (culprit, message) if culprit else message
+
+    def __str__(self):
+        return self.render()
 
     def __getattr__(self, name):
         # returns the value associated with name in kwargs if it exists,

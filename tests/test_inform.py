@@ -174,6 +174,10 @@ def test_pardon():
         assert err.get_culprit() == 'nutz, crunch'
         assert err.extra == 'foo'
         assert str(err) == 'nutz, crunch: hey now!'
+        assert err.get_message() == 'hey now!'
+        assert err.get_message('{extra}, {}') == 'foo, hey now!'
+        assert err.render() == 'nutz, crunch: hey now!'
+        assert err.render('{extra}, {}') == 'nutz, crunch: foo, hey now!'
         assert errors_accrued() == 0  # errors don't accrue until reported
         try:
             err.terminate()

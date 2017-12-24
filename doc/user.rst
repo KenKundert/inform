@@ -622,9 +622,9 @@ you find that you can do nothing else with the exception:
     myprog error: naught: must not be zero.
 
 *Error* also provides get_message() and get_culprit() methods, which return the 
-message and the culprit. You can also cast the exception to a string to get 
-a string that contains both the message and the culprit formatted so that it can 
-be shown to the user.
+message and the culprit. You can also cast the exception to a string or call the 
+:meth:`inform.Error.render` method to get a string that contains both the 
+message and the culprit formatted so that it can be shown to the user.
 
 All positional arguments are available in *e.args* and any keyword arguments 
 provided are available in *e.kwargs*.
@@ -656,6 +656,19 @@ handler if needed. For example:
 Notice that useful information (*choices*) is passed into the exception that may 
 be useful when processing the exception even though it is not incorporated into 
 the message.
+
+You can override the template by passing a new one to :meth:`get_message`, 
+:meth:`render`, :meth:`report`, or :meth:`terminate`. This can be helpful if you 
+need to translate a message or change it to make it more meaningful to the end 
+user:
+
+.. code-block:: python
+
+    >>> try:
+    ...     raise Error(name, template="name '{}' is not defined.")
+    ... except Error as e:
+    ...     e.report("'{}' ist nicht definiert.")
+    myprog error: 'alfa' ist nicht definiert.
 
 
 Utilities
@@ -1130,7 +1143,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    DEBUG: <doctest user.rst[128]>:1, __main__:
+    DEBUG: <doctest user.rst[129]>:1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1146,7 +1159,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    DEBUG: <doctest user.rst[130]>:1, __main__:
+    DEBUG: <doctest user.rst[131]>:1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1170,7 +1183,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    DEBUG: <doctest user.rst[132]>:4, __main__.Info.__init__():
+    DEBUG: <doctest user.rst[133]>:4, __main__.Info.__init__():
         self = {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1200,7 +1213,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    DEBUG: <doctest user.rst[139]>:1, __main__:
+    DEBUG: <doctest user.rst[140]>:1, __main__:
         1 this is a test (2, 3)
 
 
@@ -1245,7 +1258,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    DEBUG: <doctest user.rst[141]>:1, __main__:
+    DEBUG: <doctest user.rst[142]>:1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1263,6 +1276,6 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    DEBUG: <doctest user.rst[144]>:1, __main__:
+    DEBUG: <doctest user.rst[145]>:1, __main__:
         a = 1
         aa = 1
