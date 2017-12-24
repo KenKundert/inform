@@ -6,3 +6,4 @@ Releases
     | Released: 2017-12-23
 
     - Released the documentation.
+    - Added ability to override template in :class:`inform.Error`.
