@@ -1141,19 +1141,35 @@ class Inform:
                 'termination':
                     stderr is used for the final termination message.
                     stdout is used otherwise.
+                    This is generally used for programs are not filters (the
+                    output is largely status rather than data that might be fed
+                    into another program through a pipeline).
                 'header':
                     stderr is used for all messages with headers/severities.
                     stdout is used otherwise.
+                    This is generally used for programs are filters (the
+                    output is largely data that might be fed into another
+                    program through a pipeline). In this case stderr is used for
+                    error messages so they do not pollute the data stream.
 
             May also be a function that returns the stream and takes three
             arguments: the active informant, Inform's stdout, and Inform's
-            stderr. 
+            stderr.
 
             If no stream is specified, either explicitly on the informant when
             it is defined, or through the stream policy, then Inform's stdout
             is used.
 
-        \*\*kwargs:
+        notify_if_no_tty (bool):
+            If it appears that an error message is expecting to displayed on the
+            console but the standard output is not a TTY send it to the notifier
+            if this flag is True.
+
+        notifier (str):
+            Command used to run the notifier. The command will be called with
+            two arguments, the header and the body of the message.
+
+        \**kwargs:
             Any additional keyword arguments are made attributes that are
             ignored by *Inform*, but may be accessed by the informants.
     """
@@ -1177,6 +1193,8 @@ class Inform:
         length_thresh=80,
         culprit_sep=', ',
         stream_policy='termination',
+        notify_if_no_tty=False,
+        notifier=NOTIFIER,
         **kwargs
     ):
         self.errors = 0
@@ -1194,6 +1212,8 @@ class Inform:
             self.stream_policy = STREAM_POLICIES[stream_policy]
         else:
             self.stream_policy = stream_policy
+        self.notifier = notifier
+        self.notify_if_no_tty = notify_if_no_tty
 
         # make verbosity flags consistent
         self.mute = mute
@@ -1349,6 +1369,12 @@ class Inform:
                     multiline,
                     options
                 )
+            notify_override = (
+                options['file'] in [self.stdout, self.stderr] and
+                not Color.isTTY()                             and
+                self.notify_if_no_tty                         and
+                action.severity
+            )
             if action._write_logfile(self) and self.logfile:
                 options['file'] = self.logfile
                 self._show_msg(
@@ -1358,10 +1384,11 @@ class Inform:
                     multiline,
                     options
                 )
-            if action._notify_user(self):
+
+            if action._notify_user(self) or notify_override:
                 import subprocess
-                body = ': '.join(cull([header, culprit, message]))
-                subprocess.call(cull([NOTIFIER, self.prog_name, body]))
+                body = ': '.join(cull([culprit, message]))
+                subprocess.call(cull([self.notifier, header, body]))
         if action.terminate is not False:
             self.terminate(status=action.terminate)
         self.previous_action = action

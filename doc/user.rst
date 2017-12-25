@@ -544,6 +544,28 @@ access the normally printed output of your code:
     ('Invoked as', 'running test\n')
 
 
+Message Destination
+"""""""""""""""""""
+
+You can specify the output stream when creating an informant. If you do not, 
+then the stream uses is under the control of *Inform's* *stream_policy* 
+argument.
+
+If *stream_policy* is set to 'termination', then all messages are sent to the 
+standard output except the final termination message, which is set to standard 
+error.  This is suitable for programs whose output largely consists of status 
+messages rather than data, and so would be unlikely to be used in a pipeline. 
+
+If *stream_policy* is 'header'. then all messages with headers (those messages 
+produced from informants with *severity*) are sent to the standard error stream 
+and all other messages are sent to the standard output. This is more suitable 
+for programs whose output largely consists of data and so would likely be used 
+in a pipeline.
+
+If *True* is passed to the *notify_if_no_tty* *Inform* argument, then error 
+messages are sent to the notifier if the standard output is not a TTY.
+
+
 .. user define informants:
 
 User Defined Informants
@@ -678,7 +700,7 @@ Several utility functions are provided for your convenience. They are often
 helpful when creating messages.
 
 
-.. _color class desc:
+.. _color desc:
 
 Color Class
 """""""""""
@@ -1117,7 +1139,8 @@ This example prints several Python data types:
 
 
 Debugging Functions
-"""""""""""""""""""
+-------------------
+
 The debugging functions are intended to be used when you want to print something 
 out when debugging your program.  They are colorful to make it easier to find 
 them among the program's normal output, and a header is added that describes 

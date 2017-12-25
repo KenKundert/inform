@@ -233,59 +233,59 @@ constructing messages.
 
 .. list-table::
 
-   * - :class:`inform.Color`
+   * - :ref:`color desc`
      - Used to color messages sent to the console.
 
-   * - :func:`inform.columns`
+   * - :ref:`columns desc`
      - Distribute an array over enough columns to fill the screen.
 
-   * - :func:`inform.conjoin`
+   * - :ref:`conjoin desc`
      - Like join, but adds a conjunction between the last two items.
 
-   * - :func:`inform.cull`
+   * - :ref:`cull desc`
      - Strips uninteresting value from collections.
 
-   * - :func:`inform.ddd`
+   * - :ref:`ddd desc`
      - Pretty prints its arguments, used when debugging code.
 
-   * - :func:`inform.fmt`
+   * - :ref:`fmt desc`
      - Similar to format(), but can pull argument from the local scope.
 
-   * - :func:`inform.full_stop`
+   * - :ref:`full_stop desc`
      - Add a period to end of string if it has no other punctuation.
 
-   * - :func:`inform.indent`
+   * - :ref:`indent desc`
      - Adds indentation.
 
-   * - :func:`inform.is_collection`
+   * - :ref:`is_collection desc`
      - Is object a collection (i.e., is it iterable and not a string)?
 
-   * - :func:`inform.is_iterable`
+   * - :ref:`is_iterable desc`
      - Is object iterable (includes strings).
 
-   * - :func:`inform.is_str`
+   * - :ref:`is_str desc`
      - Is object a string?
 
-   * - :func:`inform.join`
+   * - :ref:`join desc`
      - Combines arguments into a string in the same way as informant.
 
-   * - :func:`inform.os_error`
+   * - :ref:`os_error desc`
      - Generates clean messages for operating system errors
 
-   * - :func:`inform.plural`
+   * - :ref:`plural desc`
      - Pluralizes a word if needed.
 
-   * - :func:`inform.ppp`
+   * - :ref:`ppp desc`
      - Print function, used when debugging code.
 
-   * - :func:`inform.render`
+   * - :ref:`render desc`
      - Converts many of the built-in Python data types into attractive, compact, 
        and easy to read strings.
 
-   * - :func:`inform.sss`
+   * - :ref:`sss desc`
      - Prints stack trace, used when debugging code.
 
-   * - :func:`inform.vvv`
+   * - :ref:`vvv desc`
      - Print all variables that have given value, used when debugging code.
 
 One of the most used is *os_error*.  It converts *OSError* exceptions into 
