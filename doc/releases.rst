@@ -2,7 +2,7 @@ Releases
 ========
 
 **1.11 (2017-12-25)**:
-    | Version: 1.10.11
+    | Version: 1.11.0
     | Released: 2017-12-25
 
     - Released the documentation.
