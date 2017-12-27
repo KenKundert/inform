@@ -45,7 +45,7 @@ Inform also provides logging and output control.
 
 Install with::
 
-    pip install inform
+    pip3 install --user --upgrade inform
 
 Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
 
@@ -53,8 +53,8 @@ Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
 Introduction
 ------------
 
-This package defines a collection of 'print' functions that have different 
-roles.  These functions are referred to as 'informants' and are described below 
+This package defines a collection of *print* functions that have different 
+roles.  These functions are referred to as *informants* and are described below 
 in the Informants section. They include include *log*, *comment*, *codicil*, 
 *narrate*, *display*, *output*, *notify*, *debug*, *warn*, *error*, *fatal* and 
 *panic*.
@@ -96,52 +96,6 @@ program, or return a count of the number of errors that have occurred.
     prog error: data.in: file not found.
     >>> informer.errors_accrued()
     1
-
-You can also use a *with* statement to invoke the informer. This closes the 
-informer when the *with* statement terminates (you must not use the informants 
-when no informer is present). This is useful when writing tests. In this case 
-you can provide your own output streams so that you can access the normally 
-printed output of your code:
-
-.. code-block:: python
-
-    >>> from inform import Inform, display
-    >>> import sys
-    >>> if sys.version[0] == '2':
-    ...     # io assumes unicode, which python2 does not provide by default
-    ...     # so use StringIO instead
-    ...     from StringIO import StringIO
-    ...     # Add support for with statement by monkeypatching
-    ...     StringIO.__enter__ = lambda self: self
-    ...     StringIO.__exit__ = lambda self, exc_type, exc_val, exc_tb: self.close()
-    ... else:
-    ...     from io import StringIO
-
-    >>> def run_test():
-    ...     display('running test')
-
-    >>> with StringIO() as stdout, \
-    ...      StringIO() as stderr, \
-    ...      StringIO() as logfile, \
-    ...      Inform(stdout=stdout, stderr=stderr, logfile=logfile) as msg:
-    ...         run_test()
-    ...
-    ...         num_errors = msg.errors_accrued()
-    ...         output_text = stdout.getvalue()
-    ...         error_text = stderr.getvalue()
-    ...         logfile_text = logfile.getvalue()
-
-    >>> num_errors
-    0
-
-    >>> str(output_text)
-    'running test\n'
-
-    >>> str(error_text)
-    ''
-
-    >>> str(logfile_text[:10]), str(logfile_text[-13:])
-    ('Invoked as', 'running test\n')
 
 You can create your own informants:
 
@@ -225,492 +179,16 @@ the handler if needed. For example:
         Did you mean alpha?
 
 
-Inform Class
-------------
-The Inform class controls the active informants. It takes the following 
-arguments as options (the value given for the argument is its default):
-
-Arguments
-"""""""""
-
-mute=False (bool)
-   With the provided informants all output is suppressed when set (it is still 
-   logged). This is generally used when the program being run is being run by 
-   another program that is generating its own messages and does not want the 
-   user confused by additional messages. In this case, the calling program is 
-   responsible for observing and reacting to the exit status of the called 
-   program.
-quiet=False (bool):
-   With the provided informants normal output is suppressed when set (it is 
-   still logged). This is used when the user has indicated that they are 
-   uninterested in any conversational messages and just want to see the 
-   essentials (generally error messages).
-verbose=False (bool):
-   With the provided informants comments are output to user when set; normally 
-   they are just logged. Comments are generally used to document unusual 
-   occurrences that might warrant the user's attention.
-narrate=False (bool):
-   With the provided informants narration is output to user when set, normally 
-   it is just logged.  Narration is generally used to inform the user as to what 
-   is going on. This can help place errors and warnings in context so that they 
-   are easier to understand.
-logfile=False (string or stream):
-   May be a string, in which case it is taken to be the path of the logfile.  
-   May be *True*, in which case ./.<prog_name>.log is used.  May be an open 
-   stream.  Or it may be *False*, in which case no log file is created.
-prog_name=True (string):
-   The program name. Is appended to the message headers and used to create the 
-   default logfile name. May be a string, in which case it is used as the name 
-   of the program.  May be *True*, in which case basename(argv[0]) is used.  May 
-   be *False* to indicate that program name should not be added to message 
-   headers.
-argv=None (list of strings):
-   System command line arguments (logged). By default, sys.argv is used. If 
-   False is passed in, argv is not logged and argv[0] is not available to be the 
-   program name.
-version=None (string):
-   Program version (logged if provided).
-termination_callback=None (func):
-   A function that is called at program termination.
-colorscheme='dark' (*None*, 'light', or 'dark'):
-   Color scheme to use. *None* indicates that messages should not be colorized.  
-   Colors are not used if output stream is not a TTY.
-flush=False (bool):
-   Flush the stream after each write. Is useful if you program is crashing, 
-   causing loss of the latest writes. Can cause programs to run considerably 
-   slower if they produce a lot of output. Not available with python2.
-stdout=None (stream):
-   Messages are sent here by default. Generally used for testing. If 
-   not given, sys.stdout is used.
-stderr=None (stream):
-   Termination messages are sent here by default. Generally used for 
-   testing.  If not given, sys.stderr is used.
-length_thresh=80
-   If length of line would be greater than this, split header from body.
-culprit_sep=', '
-   Join string used for culprit collections.
-\**kwargs:
-   Any additional keyword arguments are made attributes that are ignored by 
-   Inform, but may be accessed by the informants.
-
-Methods
-"""""""
-
-The Inform class provides the following user accessible methods. Most of these 
-methods are also available as functions, which act on the current informer.
-
-suppress_output():
-   Allows you to change the mute flag (only available as a method).
-
-set_logfile():
-   Allows you to change the logfile (only available as a method).
-
-done():
-   Terminates the program normally (exit status is 0).
-
-terminate(status = *None*):
-   Terminate the program with the given exit status. If specified, the exit 
-   status should be a positive integer less than 128. Usually, the following 
-   values are used:
-
-   | 0: success  
-   | 1: unexpected error 
-   | 2: invalid invocation
-   | 3: panic
-
-   If the exit status is not specified, then the exit status is set to 1 if an 
-   error occurred and 0 otherwise.
-
-   You may also pass a string for the status, in which case the program prints 
-   the string to stderr and terminates with an exit status of 1.
-
-terminate_if_errors(status=1):
-   Terminate the program with the given exit status if an error has occurred.  
-
-errors_accrued(reset = *False*):
-   Return the number of errors that have accrued.
-
-disconnect():
-   Deactivate the current informer, restoring the default.
-
-Functions
-"""""""""
-
-Several of the above methods are also available as stand-alone functions that 
-act on the currently active informer.  This make it easy to use their 
-functionality even if you do not have local access to the informer. They are:
-
-| done()
-| terminate()
-| terminate_if_errors()
-| errors_accrued()
-
-InformantFactory Class
-----------------------
-The InformantFactory class takes the following arguments:
-
-severity = *None*:
-   Messages with severities get headers. The header consists of the severity, 
-   the program name (if desired), and the culprit (if provided). If the message 
-   text does not contain a newline it is appended to the header.  Otherwise the 
-   message text is indented and placed on the next line.
-is_error = *False*:
-   Should message be counted as an error.
-log = *True*:
-   Send message to the log file. May be a boolean or a function that accepts the 
-   Inform object as an argument and returns a boolean.
-output = *True*:
-   Send to the output stream. May be a boolean or a function that accepts the 
-   Inform object as an argument and returns a boolean.
-notify = *False*:
-   Send message to the notifier.  The notifier will display the message that 
-   appears temporarily in a bubble at the top of the screen.  May be a boolean 
-   or a function that accepts the informer as an argument and returns a boolean.
-terminate = *False*:
-   Terminate the program, exit status is the value of the terminate unless 
-   *terminate* is *True*, in which case 1 is returned if an error occurred and 
-   0 otherwise.
-is_continuation = *False*:
-   This message is a continuation of the previous message.  It will use the 
-   properties of the previous message (output, log, message color, etc) and if 
-   the previous message had a header, that header is not output and instead the 
-   message is indented.
-message_color = *None*:
-   Color used to display the message. Choose from *black*, *red*, *green*, 
-   *yellow*, *blue*, *magenta*, *cyan*, *white*.
-header_color = *None*:
-   Color used to display the header, if one is produced.
-
-An object of InformantFactory is referred to as an informant. It is generally 
-treated as a function that is called to produce the desired output.
-
-.. code-block:: python
-
-    >>> from inform import InformantFactory
-
-    >>> succeed = InformantFactory(message_color='green')
-    >>> fail = InformantFactory(message_color='red')
-
-    >>> succeed('This message would be green.')
-    This message would be green.
-
-    >>> fail('This message would be red.')
-    This message would be red.
-
-
-Standard Informants
--------------------
-
-The following informants are provided. All of the informants except panic and 
-debug do not produce any output if *mute* is set.
-
-log
-"""
-
-.. code-block:: python
-
-   log = InformantFactory(
-       output=False,
-       log=True,
-   )
-
-Saves a message to the log file without displaying it.
-
-
-comment
-"""""""
-
-.. code-block:: python
-
-   comment = InformantFactory(
-       output=lambda informer: informer.verbose and not informer.mute,
-       log=True,
-       message_color='cyan',
-   )
-
-Displays a message only if *verbose* is set. Logs the message. The message is 
-displayed in cyan.
-
-Comments are generally used to document unusual occurrences that might warrant 
-the user's attention.
-
-codicil
-"""""""
-
-.. code-block:: python
-
-   codicil = InformantFactory(is_continuation=True)
-
-Continues a previous message. Continued messages inherit the properties (output, 
-log, message color, etc) of the previous message.  If the previous message had 
-a header, that header is not output and instead the message is indented.
-
-.. code-block:: python
-
-    >>> from inform import Inform, warn, codicil
-    >>> informer = Inform(prog_name="myprog")
-    >>> warn('file not found.', culprit='ghost')
-    myprog warning: ghost: file not found.
-
-    >>> codicil('skipping')
-        skipping
-
-
-narrate
-"""""""
-
-.. code-block:: python
-
-   narrate = InformantFactory(
-       output=lambda informer: informer.narrate and not informer.mute,
-       log=True,
-       message_color='blue',
-   )
-
-Displays a message only if *narrate* is set. Logs the message. The message is 
-displayed in blue.
-
-Narration is generally used to inform the user as to what is going on. This can 
-help place errors and warnings in context so that they are easier to understand.
-Distinguishing narration from comments allows them to colored differently and 
-controlled separately.
-
-
-display
-"""""""
-
-.. code-block:: python
-
-   display = InformantFactory(
-       output=lambda informer: not informer.quiet and not informer.mute,
-       log=True,
-   )
-
-Displays a message if *quiet* is not set. Logs the message.
-
-.. code-block:: python
-
-    >>> from inform import display
-    >>> display('We the people ...')
-    We the people ...
-
-
-output
-""""""
-
-.. code-block:: python
-
-   output = InformantFactory(
-       output=lambda informer: not informer.mute,
-       log=True,
-   )
-
-Displays and logs a message. This is used for messages that are not errors that 
-are noteworthy enough that they need to get through even though the user has 
-asked for quiet.
-
-.. code-block:: python
-
-    >>> from inform import output
-    >>> output('We the people ...')
-    We the people ...
-
-
-notify
-""""""
-
-.. code-block:: python
-
-   notify = InformantFactory(
-       notify=True,
-       log=True,
-   )
-
-Temporarily display the message in a bubble at the top of the screen.  Also 
-prints the message on the standard output and sends it to the log file.  This is 
-used for messages that the user is otherwise unlikely to see because they have 
-no access to the standard output.
-
-.. code-block:: python
-
-    >>> from inform import output
-    >>> output('We the people ...')
-    We the people ...
-
-
-debug
-"""""
-
-.. code-block:: python
-
-   debug = InformantFactory(
-       severity='DEBUG',
-       output=True,
-       log=True,
-       header_color='magenta',
-   )
-
-Displays and logs a debugging message. A header with the label *DEBUG* is added 
-to the message and the header is colored magenta.
-
-.. code-block:: python
-
-    >>> from inform import Inform, debug
-    >>> informer = Inform(prog_name="myprog")
-    >>> debug('HERE!')
-    myprog DEBUG: HERE!
-
-The *debug* informant is being deprecated in favor of the debugging functions 
-``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
-
-
-warn
-""""
-
-.. code-block:: python
-
-   warn = InformantFactory(
-       severity='warning',
-       header_color='yellow',
-       output=lambda informer: not informer.quiet and not informer.mute,
-       log=True,
-   )
-
-Displays and logs a warning message. A header with the label *warning* is added 
-to the message and the header is colored yellow.
-
-.. code-block:: python
-
-    >>> from inform import Inform, warn
-    >>> informer = Inform(prog_name="myprog")
-    >>> warn('file not found, skipping.', culprit='ghost')
-    myprog warning: ghost: file not found, skipping.
-
-
-error
-"""""
-
-.. code-block:: python
-
-   error = InformantFactory(
-       severity='error',
-       is_error=True,
-       header_color='red',
-       output=lambda informer: not informer.mute,
-       log=True,
-   )
-
-Displays and logs an error message. A header with the label *error* is added to 
-the message and the header is colored red.
-
-.. code-block:: python
-
-    >>> from inform import Inform, error
-    >>> informer = Inform(prog_name="myprog")
-    >>> error('invalid value specified, expected number.', culprit='count')
-    myprog error: count: invalid value specified, expected number.
-
-fatal
-"""""
-
-.. code-block:: python
-
-   fatal = InformantFactory(
-       severity='error',
-       is_error=True,
-       terminate=1,
-       header_color='red',
-       output=lambda informer: not informer.mute,
-       log=True,
-   )
-
-Displays and logs an error message. A header with the label *error* is added to 
-the message and the header is colored red. The program is terminated with an 
-exit status of 1.
-
-
-panic
-"""""
-
-.. code-block:: python
-
-   panic = InformantFactory(
-       severity='internal error (please report)',
-       is_error=True,
-       terminate=3,
-       header_color='red',
-       output=True,
-       log=True,
-   )
-
-Displays and logs a panic message. A header with the label *internal error* is 
-added to the message and the header is colored red. The program is terminated 
-with an exit status of 3.
-
-
-Informant Control
------------------
-
-The exception (Error) and all informants take arguments very much like the 
-standard print function: unnamed arguments are converted to strings and joined 
-together to produce the output, the named arguments act to control the process.  
-The available controls (named arguments) are:
-
-sep = ' ':
-   Specifies the string used to join the unnamed arguments.
-template = None:
-   A template that if present interpolates the arguments to form the final 
-   message rather than simply joining the unnamed arguments with *sep*. The 
-   template is a string, and its *format* method is called with the unnamed and 
-   named arguments of the message passed as arguments.
-end = '\\n':
-   Specifies a string to append to the message.
-wrap = False:
-   Specifies whether message should be wrapped. *wrap* may be True, in which 
-   case the default width of 70 is used.  Alternately, you may specify the 
-   desired width. The wrapping occurs on the final message after the arguments 
-   have been joined.
-culprit = *None*:
-   A string that is added to the beginning of the message that identifies the 
-   culprit (the object for which the problem being reported was found). May also 
-   be a collection of strings, in which case they are joined with *culprit_sep* 
-   (default is ', ').
-file = stdout:
-   The destination stream (a file pointer).
-flush = *False*:
-   Whether the message should flush the destination stream (not available in 
-   python2).
-
-Here is an example that demonstrates the wrap and composite culprit features.
-
-..  code-block:: python
-
-   >>> value = -1
-   >>> error(
-   ...     'Encountered illegal value',
-   ...     value,
-   ...     'when filtering. Consider regenerating data again.',
-   ...     culprit=('input.data', 32), wrap=True,
-   ... )
-   myprog error: input.data, 32:
-       Encountered illegal value -1 when filtering. Consider regenerating
-       data again.
-
-
 Utilities
 ---------
 
 Several utility functions are provided for your convenience. They are often 
 helpful when creating messages.
 
-indent(text, leader='    ',  first=0, stops=1, sep='\\n'):
-    Indents the text. Multiples of *leader* are added to the beginning of the 
-    lines to indent.  *first* is the number of indentations used for the first 
-    line relative to the others (may be negative but (first + stops) should not 
-    be. *stops* is the default number of indentations to use. *sep* is the 
-    string used to separate the lines.
+indent:
+    Indents the text.
 
-conjoin(iterable, conj=' and ', sep=', '):
+conjoin:
     Like ''.join(), but allows you to specify a conjunction that is placed 
     between the last two elements, ex:
 
@@ -723,57 +201,43 @@ conjoin(iterable, conj=' and ', sep=', '):
         >>> conjoin(['a', 'b', 'c'], conj=' or ')
         'a, b or c'
 
-cull(collection, [remove]):
-    Strips items from a list that have a particular value. By default, it strips 
-    a list of values that would be False when cast to a boolean (0, False, None, 
-    '', (), [], etc.).  A particular value may be specified using the 'remove' 
-    as a keyword argument.  The value of remove may be a collection, in which 
-    case any value in the collection is removed, or it may be a function, in 
-    which case it takes a single item as an argument and returns *True* if that 
-    item should be removed from the list.
+cull:
+    Strips items from a collection that have a particular value.
 
-join(\*args, \**kwargs):
+join:
     Combines the arguments in a manner very similar to an informant and returns 
-    the result as a string.  Uses the *sep*, *template* and *wrap* keyword 
-    arguments to combine the arguments.
+    the result as a string.
 
-fmt(msg, \*args, \**kwargs):
+fmt:
     Similar to ''.format(), but it can pull arguments from the local scope.
 
-render(obj, sort=None, level=0, tab='    '):
+render:
     Recursively convert an object to a string with reasonable formatting.  Has 
     built in support for the base Python types (None, bool, int, float, str, 
     set, tuple, list, and dict).  If you confine yourself to these types, the 
     output of render() can be read by the Python interpreter. Other types are 
-    converted to string with repr(). The dictionary keys and set values are 
-    sorted if sort is True. Sometimes this is not possible because the values 
-    are not comparable, in which case render reverts to the natural order.
+    converted to string with repr().
 
-plural(count, singular_form, plural_form = *None*):
+plural:
     Produces either the singular or plural form of a word based on a count.
-    The count may be an integer, or an iterable, in which case its length is 
-    used. If the plural form is not give, the singular form is used with an 's' 
-    added to the end.
 
-full_stop(string):
+full_stop:
     Adds a period to the end of the string if needed (if the last character is 
-    not a period, question mark or exclamation mark). It applies str() to its 
-    argument, so it is generally a suitable replacement for str in 
-    str(exception) when trying extract an error message from an exception.
+    not a period, question mark or exclamation mark).
 
-columns(array, pagewidth=79, alignment='<', leader='    ')
+columns:
     Distribute array over enough columns to fill the screen.
 
-os_error(exception):
+os_error:
     Generates clean messages for operating system errors.
 
-is_str(obj):
+is_str:
     Returns *True* if its argument is a string-like object.
 
-is_iterable(obj):
+is_iterable:
     Returns *True* if its argument is iterable.
 
-is_collection(obj):
+is_collection:
     Returns *True* if its argument is iterable but is not a string.
 
 For example:
@@ -836,31 +300,6 @@ Here is an example of render():
         's': 'alpha string',
     }
 
-    >>> E={'s': s1, 'n': n, 'S': S, 'L': L, 'd':d, 'D':D}
-    >>> display('E', '=', render(E, True))
-    E = {
-        'D': {
-            'L': [
-                'alpha string',
-                42,
-                {'alpha string', 'beta string'},
-            ],
-            'S': {'alpha string', 'beta string'},
-            'd': {1: 'alpha string', 2: 'beta string'},
-            'n': 42,
-            's': 'alpha string',
-        },
-        'L': [
-            'alpha string',
-            42,
-            {'alpha string', 'beta string'},
-        ],
-        'S': {'alpha string', 'beta string'},
-        'd': {1: 'alpha string', 2: 'beta string'},
-        'n': 42,
-        's': 'alpha string',
-    }
-
 Finally, here is an example of full_stop and columns. It prints out the phonetic 
 alphabet.
 
@@ -889,14 +328,8 @@ the location they were called from. This makes it easier to distinguish several
 debug message and also makes it easy to find and remove the functions once you 
 are done debugging.
 
-ppp(\*args, \*\*kwargs):
-    This function is very similar to the normal Python print function in that it 
-    prints out the values of the unnamed arguments under the control of the 
-    named arguments. It also takes the same named arguments as ``print()``, such 
-    as ``sep`` and ``end``.
-
-    If given without unnamed arguments, it will just print the header, which 
-    good way of confirming that a line of code has been reached.
+ppp:
+    This function is very similar to the normal Python print function.
 
     .. code:: python
 
@@ -906,59 +339,29 @@ ppp(\*args, \*\*kwargs):
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[89]>:1, __main__:
+        DEBUG: <doctest README.rst[52]>:1, __main__:
             1 this is a test (2, 3)
 
-ddd(\*args, \*\*kwyargs):
+ddd:
     This function is pretty prints all of both the unnamed and named arguments.
 
     .. code:: python
 
-        >>> ddd(a, b, c, d)
-        DEBUG: <doctest README.rst[90]>:1, __main__:
+        >>> ddd(a, b, c=c, d=d)
+        DEBUG: <doctest README.rst[53]>:1, __main__:
             1
             'this is a test'
-            (2, 3)
-            {
-                'a': 1,
-                'b': 'this is a test',
-                'c': (2, 3),
-            }
-
-    If you give named arguments, the name is prepended to its value:
-
-    .. code:: python
-
-        >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-        DEBUG: <doctest README.rst[91]>:1, __main__:
-            a = 1
-            b = 'this is a test'
             c = (2, 3)
             d = {
                 'a': 1,
                 'b': 'this is a test',
                 'c': (2, 3),
             }
-            s = 'hey now!'
 
-    If an arguments has a __dict__ attribute, it is printed rather than the 
-    argument itself.
+    If you give named arguments, the name is prepended to its value.
 
-    .. code:: python
 
-        >>> class Info:
-        ...     def __init__(self, **kwargs):
-        ...         self.__dict__.update(kwargs)
-        ...         ddd(self=self)
-
-        >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-        DEBUG: <doctest README.rst[92]>:4, __main__.Info.__init__():
-            self = {
-                'email': 'ted@ledbelly.com',
-                'name': 'Ted Ledbelly',
-            }
-
-vvv(\*args):
+vvv:
     This function prints variables from the calling scope. If no arguments are 
     given, then all the variables are printed. You can optionally give specific 
     variables on the argument list and only those variables are printed.
@@ -966,7 +369,7 @@ vvv(\*args):
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest README.rst[94]>:1, __main__:
+        DEBUG: <doctest README.rst[54]>:1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,
@@ -974,19 +377,8 @@ vvv(\*args):
                 'c': (2, 3),
             }
 
-    This last feature is not completely robust. The checking is done by value, 
-    so if several variables share the value of one requested, they are all 
-    shown.
 
-    .. code:: python
-
-        >>> aa = 1
-        >>> vvv(a)
-        DEBUG: <doctest README.rst[96]>:1, __main__:
-            a = 1
-            aa = 1
-
-sss(\*args):
+sss:
     This function prints a stack trace, which can answer the *How did I get 
     here?* question better than a simple print function.
 
@@ -1029,84 +421,3 @@ returned. For example:
    pass: signalman
 
 When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
-
-The Color class has the concept of a colorscheme. There are three supported 
-schemes: *None*, light, and dark. With *None* the text is not colored. In 
-general it is best to use the light colorscheme on dark backgrounds and the dark 
-colorscheme on light backgrounds.
-
-The Color class takes the following arguments when creating a colorizer:
-
-color:
-   Render the text in the specified color. Choose from *None*, 'black', 'red', 
-   'green', 'yellow', 'blue', 'magenta', 'cyan' or 'white'.
-
-scheme = 'dark':
-   Use the specified colorscheme when rendering the text.
-   Choose from *None*, 'light' or 'dark'.
-
-enable = True:
-   If set to False, the colorizer does not render the text in color.
-
-A colorizer takes the following arguments:
-
-unnamed arguments:
-   The unnamed arguments are converted to strings and joined to form the text to 
-   be colored.
-
-sep = ' ':
-   The join string, used when joining the unnamed arguments.
-
-template = None:
-   A template that if present interpolates the arguments to form the final 
-   message rather than simply joining the unnamed arguments with *sep*. The 
-   template is a string, and its *format* method is called with the unnamed and 
-   named arguments of the message passed as arguments.
-
-wrap = False:
-   Specifies whether message should be wrapped. *wrap* may be True, in which 
-   case the default width of 70 is used.  Alternately, you may specify the 
-   desired width. The wrapping occurs on the final message after the arguments 
-   have been joined.
-
-scheme = *False*:
-   Use to override the colorscheme when rendering the text.  Choose from *None*, 
-   *False*, 'light' or 'dark'.  If you specify *False* (the default), the 
-   colorscheme specified when creating the colorizer is used.
-
-
-Colorizers have one user settable attribute: *enable*. By default *enable* is 
-True. If you set it to *False* the colorizer no longer renders the text in 
-color:
-
-.. code-block:: python
-
-   >> warning = Color('yellow', enable=Color.isTTY(sys.stdout))
-   >> warning('Cannot find precusor, ignoring.')
-   Cannot find precusor, ignoring.
-
-The Color class has the following class methods:
-
-isTTY(stream):
-   Takes a stream as an argument (default is stdout) and returns true if it is 
-   a TTY.  A typical use is:
-
-.. code-block:: python
-
-   >>> from inform import Color, display
-   >>> import sys, re
-
-   >>> if Color.isTTY(sys.stdout):
-   ...     emphasize = Color('magenta')
-   ... else:
-   ...     emphasize = str.upper
-
-   >>> def highlight(matchobj):
-   ...     return emphasize(matchobj.group(0))
-
-   >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
-   Imagine YOUR city without cars.
-
-strip_colors(text):
-   Takes a string as its input and return that string stripped of any color 
-   codes.
