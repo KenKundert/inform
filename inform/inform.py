@@ -1370,9 +1370,9 @@ class Inform:
                     options
                 )
             notify_override = (
-                options['file'] in [self.stdout, self.stderr] and
-                not Color.isTTY()                             and
-                self.notify_if_no_tty                         and
+                options['file'] in [self.stdout, self.stderr]   and
+                not Color.isTTY()                               and
+                (self.notify_if_no_tty and not is_continuation) and
                 action.severity
             )
             if action._write_logfile(self) and self.logfile:
