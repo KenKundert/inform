@@ -7,8 +7,8 @@
 Inform: Print & Logging Utilities
 =================================
 
-| Version: 1.11.0
-| Released: 2017-12-25
+| Version: 1.11.1
+| Released: 2018-01-04
 | Please post all bugs and suggestions at
   `Github <https://github.com/KenKundert/inform/issues>`_
   (or contact me directly at
