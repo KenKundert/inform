@@ -182,9 +182,9 @@ including :ref:`log`, :ref:`codicil`, :ref:`comment`, :ref:`narrate`,
 general can write to the log file, to the standard output, or to a notifier.  
 They can add headers and specify the color of the header and the message. They 
 can also continue the previous message or they can terminate the program.  Each 
-informant each embody a predefined set of these choices. In addition, they are 
-affected by options passed to the active informer, which is often used to enable 
-or disable informants based on various verbosity options.
+informant embodies a predefined set of these choices. In addition, they are 
+affected by options passed to the active informer (described next), which is 
+often used to enable or disable informants based on various verbosity options.
 
 
 Controlling Informants
@@ -249,7 +249,7 @@ constructing messages.
      - Pretty prints its arguments, used when debugging code.
 
    * - :ref:`fmt desc`
-     - Similar to format(), but can pull argument from the local scope.
+     - Similar to format(), but can pull arguments from the local scope.
 
    * - :ref:`full_stop desc`
      - Add a period to end of string if it has no other punctuation.
