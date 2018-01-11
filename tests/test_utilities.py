@@ -235,7 +235,7 @@ def test_render():
         'e': 'x',
         None: 'z',
     }
-    if sys.version_info > (3, 3):
+    if sys.version_info >= (3, 6):
         assert render(n, sort=True) == "{'c': 'y', 'e': 'x', None: 'z'}"
 
 def test_plural():
