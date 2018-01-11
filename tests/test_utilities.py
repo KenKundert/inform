@@ -2,7 +2,8 @@
 
 from inform import (
     Color, columns, conjoin, cull, fmt, full_stop, indent,
-    is_collection, is_iterable, is_str, join, os_error, plural, render
+    is_collection, is_iterable, is_str, join, os_error, plural, render,
+    ddd, ppp, sss, vvv
 )
 from textwrap import dedent
 import sys
@@ -17,6 +18,48 @@ if sys.version_info < (3, 6):
 else:
     def X(arg):
         return arg
+
+def test_debug(capsys):
+    a='a'
+    b='b'
+    c='c'
+    ddd(a, b, c)
+    captured = capsys.readouterr()
+    assert captured[0] == dedent("""
+        DEBUG: test_utilities.py:26, test_utilities.test_debug():
+            'a'
+            'b'
+            'c'
+    """).lstrip()
+
+    ddd(a=a, b=b, c=c)
+    captured = capsys.readouterr()
+    assert captured[0] == dedent("""
+        DEBUG: test_utilities.py:35, test_utilities.test_debug():
+            a = 'a'
+            b = 'b'
+            c = 'c'
+    """).lstrip()
+
+    ppp(a, b, c)
+    captured = capsys.readouterr()
+    assert captured[0] == dedent("""
+        DEBUG: test_utilities.py:44, test_utilities.test_debug():
+            a b c
+    """).lstrip()
+
+    vvv(a, b, c)
+    captured = capsys.readouterr()
+    assert captured[0] == dedent("""
+        DEBUG: test_utilities.py:51, test_utilities.test_debug():
+            a = 'a'
+            b = 'b'
+            c = 'c'
+    """).lstrip()
+
+    sss()
+    captured = capsys.readouterr()
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py:60, test_utilities.test_debug():"
 
 def test_indent():
     text=dedent('''
@@ -349,3 +392,4 @@ def test_columns():
         Delta     Hotel     Lima      Papa      Tango     X-ray
     ''').strip())
     assert columns(phonetic) == expected
+
