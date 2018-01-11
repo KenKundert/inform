@@ -1250,6 +1250,9 @@ class Inform:
 
     # __getattr__ {{{2
     def __getattr__(self, name):
+        # returns the attribute value if provided otherwise returns None
+        # This is generally used by informants to determine whether an extra
+        # value was passed to informer.
         if name.startswith('__'):
             raise AttributeError(name)
         return self.__dict__.get(name)
@@ -1517,15 +1520,9 @@ class Inform:
         return count
 
     # get_prog_name {{{2
-    def get_prog_name(self, default=None):
-        """Returns the program name.
-
-        Args:
-            default (string):
-                Returns the program name if available otherwise it returns the
-                default.
-        """
-        return self.prog_name if self.prog_name else default
+    def get_prog_name(self):
+        """Returns the program name."""
+        return self.prog_name
 
     # disconnect {{{2
     def disconnect(self):
@@ -1585,12 +1582,12 @@ def errors_accrued(reset=False):
 
 
 # get_prog_name {{{3
-def get_prog_name(default=None):
-    """Returns the program name."
+def get_prog_name():
+    """Returns the program name.
 
     Calls :meth:`inform.Inform.get_prog_name` for the active informer.
     """
-    return INFORMER.get_prog_name(default)
+    return INFORMER.get_prog_name()
 
 
 # get_informer {{{3

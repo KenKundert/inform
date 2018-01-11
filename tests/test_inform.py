@@ -241,3 +241,11 @@ def test_unbuckle():
         assert errors_accrued(True) == 0
         assert strip(stdout) == ' '.join(out)
         assert strip(stderr) == 'warning: ' + ', '.join(err)
+
+def test_franc():
+    with messenger() as (msg, stdout, stderr, logfile):
+        display('fuzzy', file=stdout)
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == 'fuzzy'
+        assert strip(stderr) == ''

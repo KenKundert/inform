@@ -562,6 +562,10 @@ and all other messages are sent to the standard output. This is more suitable
 for programs whose output largely consists of data and so would likely be used 
 in a pipeline.
 
+It is also possible for *stream_policy* to be a function that takes three 
+arguments, the informant and the standard output and error streams. It should 
+return the desired stream.
+
 If *True* is passed to the *notify_if_no_tty* *Inform* argument, then error 
 messages are sent to the notifier if the standard output is not a TTY.
 

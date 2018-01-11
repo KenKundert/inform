@@ -1,7 +1,8 @@
 .. Initialize Inform and suppress outputting of program name
 
-    >>> from inform import Inform
+    >>> from inform import Inform, error
     >>> inform = Inform(prog_name=False)
+    >>> fatal = error
 
 
 Inform: Print & Logging Utilities
@@ -21,7 +22,7 @@ simply and cleanly print different types of messages.  For example:
 
 .. code-block:: python
 
-    >>> from inform import display, warn, error, fatal
+    >>> from inform import display, warn, error
     >>> display('This is a plain message.')
     This is a plain message.
 
@@ -85,7 +86,6 @@ a header to the message that indicates the type of message.  For example:
 
 .. code-block:: python
 
-    >>> from inform import display, warn, error, fatal
     >>> display('ice', 9)
     ice 9
 
@@ -96,7 +96,7 @@ a header to the message that indicates the type of message.  For example:
     >>> error('%s: file not found.' % filename)
     error: config: file not found.
 
-    >>  fatal('defective input file.', culprit=filename)
+    >>> fatal('defective input file.', culprit=filename)
     error: config: defective input file.
 
 Notice that in the error message the filename was explicitly added to the front 

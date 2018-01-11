@@ -1,9 +1,10 @@
 # encoding: utf8
 
 from inform import (
-    Color, columns, conjoin, cull, fmt, full_stop, indent,
-    is_collection, is_iterable, is_str, join, os_error, plural, render,
-    ddd, ppp, sss, vvv
+    Color, columns, conjoin, comment, cull, display, done, error, Error, fatal,
+    fmt, full_stop, indent, Inform, is_collection, is_iterable, is_str, join,
+    get_prog_name, get_informer, narrate, os_error, output, plural, render,
+    terminate, warn, ddd, ppp, sss, vvv
 )
 from textwrap import dedent
 import sys
@@ -26,7 +27,7 @@ def test_debug(capsys):
     ddd(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py:26, test_utilities.test_debug():
+        DEBUG: test_utilities.py:27, test_utilities.test_debug():
             'a'
             'b'
             'c'
@@ -35,7 +36,7 @@ def test_debug(capsys):
     ddd(a=a, b=b, c=c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py:35, test_utilities.test_debug():
+        DEBUG: test_utilities.py:36, test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -44,14 +45,14 @@ def test_debug(capsys):
     ppp(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py:44, test_utilities.test_debug():
+        DEBUG: test_utilities.py:45, test_utilities.test_debug():
             a b c
     """).lstrip()
 
     vvv(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py:51, test_utilities.test_debug():
+        DEBUG: test_utilities.py:52, test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -59,7 +60,7 @@ def test_debug(capsys):
 
     sss()
     captured = capsys.readouterr()
-    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py:60, test_utilities.test_debug():"
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py:61, test_utilities.test_debug():"
 
 def test_indent():
     text=dedent('''
@@ -392,4 +393,344 @@ def test_columns():
         Delta     Hotel     Lima      Papa      Tango     X-ray
     ''').strip())
     assert columns(phonetic) == expected
+
+def test_stream_policy(capsys):
+    with Inform(stream_policy='termination', prog_name=False):
+        warn('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'warning: hey now!\n'
+        assert captured[1] == ''
+        error('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hey now!\n'
+        assert captured[1] == ''
+
+    with Inform(stream_policy='header', prog_name=False):
+        warn('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'warning: hey now!\n'
+        error('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+    def policy(i, so, se):
+        return se if i.severity == 'error' else so
+
+    with Inform(stream_policy=policy, prog_name=False):
+        warn('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'warning: hey now!\n'
+        assert captured[1] == ''
+        error('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+    with Inform(prog_name=False) as informer:
+        informer.set_stream_policy('header')
+        warn('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'warning: hey now!\n'
+        error('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+def test_exits(capsys):
+    status = {}
+    def callback():
+        status['called'] = True
+
+    with Inform(prog_name=False, termination_callback=callback):
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            done()
+        assert exception.value.args == ()
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            terminate()
+        assert exception.value.args == (0,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            error('hey now!')
+            terminate()
+        assert exception.value.args == (1,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hey now!\n'
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            terminate('hey now!')
+        assert exception.value.args == ('hey now!',)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            terminate(3)
+        assert exception.value.args == (3,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            fatal('hey now!')
+        assert exception.value.args == (1,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            try:
+                raise Error('hey', when='now!')
+            except Error as e:
+                e.terminate()
+        assert exception.value.args == (1,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey\n'
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            try:
+                raise Error('hey', when='now!')
+            except Error as e:
+                e.terminate(template='{} {when}')
+        assert exception.value.args == (1,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+def test_error(capsys):
+    with Inform(prog_name=False):
+        try:
+            raise Error('hey', when='now!')
+        except Error as e:
+            assert e.render() == 'hey'
+            assert e.render(template='{} {when}') == 'hey now!'
+            assert e.when == 'now!'
+            assert e.args == ('hey',)
+            assert e.kwargs == dict(when='now!')
+
+            e.report()
+            captured = capsys.readouterr()
+            assert captured[0] == 'error: hey\n'
+            assert captured[1] == ''
+
+            e.report(template='{} {when}')
+            captured = capsys.readouterr()
+            assert captured[0] == 'error: hey now!\n'
+            assert captured[1] == ''
+
+            with pytest.raises(SystemExit) as exception:
+                e.terminate()
+            assert exception.value.args == (1,)
+            captured = capsys.readouterr()
+            assert captured[0] == ''
+            assert captured[1] == 'error: hey\n'
+
+            with pytest.raises(SystemExit) as exception:
+                e.terminate(template='{} {when}')
+            assert exception.value.args == (1,)
+            captured = capsys.readouterr()
+            assert captured[0] == ''
+            assert captured[1] == 'error: hey now!\n'
+
+            with pytest.raises(AttributeError) as exception:
+                e.__xxx
+
+def test_prog_name(capsys):
+    prev_informer = get_informer()
+    with Inform(prog_name='curly') as informer:
+        assert informer.get_prog_name() == 'curly'
+        assert informer.prog_name == 'curly'
+        assert get_prog_name() == 'curly'
+        assert get_informer() == informer
+    assert get_informer() == prev_informer
+
+    with Inform(argv=['curly']) as informer:
+        assert informer.get_prog_name() == 'curly'
+        assert informer.prog_name == 'curly'
+        assert get_prog_name() == 'curly'
+        assert get_informer() == informer
+    assert get_informer() == prev_informer
+
+def test_informer_attributes(capsys):
+    with Inform(prog_name='curly', pizza=True) as informer:
+        with pytest.raises(AttributeError) as exception:
+            informer.__xxx
+        assert informer.yep == None
+        assert informer.prog_name == 'curly'
+        assert informer.pizza == True
+
+def test_logging(capsys):
+    if sys.version[0] == '2':
+        # io assumes unicode, which python2 does not provide by default
+        # so use StringIO instead
+        from StringIO import StringIO
+        # Add support for with statement by monkeypatching
+        StringIO.__enter__ = lambda self: self
+        StringIO.__exit__ = lambda self, exc_type, exc_val, exc_tb: self.close()
+    else:
+        from io import StringIO
+
+    with StringIO() as stdout, \
+         StringIO() as stderr, \
+         StringIO() as logfile, \
+         Inform(stdout=stdout, stderr=stderr, logfile=logfile, prog_name='dog', version='3v14') as msg:
+            display('running test')
+
+            assert msg.errors_accrued() == 0
+            assert str(stdout.getvalue()) == 'running test\n'
+            assert str(stderr.getvalue()) == ''
+            logfile_text = logfile.getvalue()
+            logfile_text_sum = str(logfile_text[:10]), str(logfile_text[-13:])
+            assert logfile_text_sum == ('dog - vers', 'running test\n')
+            assert '3v14' in logfile_text
+
+            msg.set_logfile(False)
+            error('oh no!')
+            assert msg.errors_accrued() == 1
+            assert str(stdout.getvalue()) == 'running test\ndog error: oh no!\n'
+            assert str(stderr.getvalue()) == ''
+            with pytest.raises(ValueError) as exception:
+                logfile.getvalue()
+            assert full_stop(exception.value) == 'I/O operation on closed file.'
+
+def test_muting(capsys):
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        narrate('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        comment('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        display('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        output('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        error('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hello\n'
+
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=True):
+        narrate('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        comment('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        display('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        output('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        error('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False) as informer:
+        informer.suppress_output(True)
+        narrate('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        comment('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        display('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        output('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        error('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=True) as informer:
+        informer.suppress_output(False)
+        narrate('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        comment('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        display('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        output('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        error('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hello\n'
+
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=True):
+        narrate('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        comment('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        display('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        output('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        error('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hello\n'
+
+
+    with Inform(prog_name=False, narrate=True):
+        narrate('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        comment('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        display('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        output('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hello\n'
+        error('hello')
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hello\n'
+
+
+
+
+
+
+
+
 
