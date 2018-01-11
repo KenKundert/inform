@@ -1,11 +1,12 @@
 # encoding: utf8
 
 from inform import (
-    conjoin, cull, fmt, full_stop, indent, is_collection, is_iterable, is_str,
-    os_error, plural, render
+    Color, columns, conjoin, cull, fmt, full_stop, indent,
+    is_collection, is_iterable, is_str, join, os_error, plural, render
 )
 from textwrap import dedent
 import sys
+import pytest
 
 # Before Python3.5 the dictionaries were ordered randomly, which confuses the
 # test. This is a crude fix, just sort the output, that way we will likely catch
@@ -88,6 +89,11 @@ def test_cull():
     assert cull([None, 1, 2], remove=False) == [None, 1, 2]
     assert cull([False, 1, 2], remove=False) == [1, 2]
     assert cull([False, 1, 2], remove=lambda x: x==2) == [False, 1]
+    assert cull([None, 0, 1, 2]) == [1, 2]
+    assert cull([None, 0, 1, 2], remove=None) == [0, 1, 2]
+    assert cull([None, 0, 1, 2], remove=0) == [None, 1, 2]
+    assert cull([None, 0, 1, 2], remove=(1, 2)) == [None, 0]
+    assert cull({1:0, 2:1, 0:2}, ) == {2:1, 0:2}
 
 def test_fmt():
     a = 'a'
@@ -218,6 +224,19 @@ def test_render():
             'g': [1, 2, 3],
         },
     }'''))
+    n={
+        'c': 'y',
+        'e': 'x',
+        'a': 'z',
+    }
+    assert render(n, sort=True) == "{'a': 'z', 'c': 'y', 'e': 'x'}"
+    n={
+        'c': 'y',
+        'e': 'x',
+        None: 'z',
+    }
+    if sys.version_info > (3, 3):
+        assert render(n, sort=True) == "{'c': 'y', 'e': 'x', None: 'z'}"
 
 def test_plural():
     assert plural(0, 'baby', 'babies') == 'babies'
@@ -260,3 +279,73 @@ def test_is_collection():
     assert is_collection([]) == True
     assert is_collection(()) == True
     assert is_collection({}) == True
+
+def test_color():
+    assert Color('black')('black') == '\x1b[0;30mblack\x1b[0m'
+    assert Color('red')('red') == '\x1b[0;31mred\x1b[0m'
+    assert Color('green')('green') == '\x1b[0;32mgreen\x1b[0m'
+    assert Color('yellow')('yellow') == '\x1b[0;33myellow\x1b[0m'
+    assert Color('blue')('blue') == '\x1b[0;34mblue\x1b[0m'
+    assert Color('magenta')('magenta') == '\x1b[0;35mmagenta\x1b[0m'
+    assert Color('cyan')('cyan') == '\x1b[0;36mcyan\x1b[0m'
+    assert Color('white')('white') == '\x1b[0;37mwhite\x1b[0m'
+    assert Color.strip_colors(Color('red')('red')) == 'red'
+
+def test_join():
+    assert join('a', 'b', 'c') == 'a b c'
+    assert join('a', 'b', 'c', sep='-') == 'a-b-c'
+    assert join('a', 'b', 'c', x='x', y='y', template='{}, x={x}') == 'a, x=x'
+    assert join('Lorem\nipsum\ndolor', wrap=100) == 'Lorem ipsum dolor'
+    c=dedent('''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        aliquip ex ea commodo consequat. Duis aute irure dolor in
+        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+        culpa qui officia deserunt mollit anim id est laborum.
+    ''').strip()
+    d=dedent('''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+        culpa qui officia deserunt mollit anim id est laborum.
+    ''').strip()
+    assert join(c, wrap=100) == d
+    assert join(d, wrap=True) == c
+    disappointments = [
+        dict(key='abby', name='Abby Normal', desc='team captain'),
+        dict(key='dizzy', name='Dizzy Functional'),
+        dict(key='trump'),
+    ]
+    assert join(
+        key='abby', name='Abby Normal', desc='team captain',
+        template=('{key}: {name} -- {desc}', '{key}: {name}')
+    ) == 'abby: Abby Normal -- team captain'
+
+    assert join(
+        key='dizzy', name='Dizzy Functional',
+        template=('{key}: {name} -- {desc}', '{key}: {name}')
+    ) == 'dizzy: Dizzy Functional'
+
+    with pytest.raises(KeyError) as exception:
+        assert join(
+            key='trump',
+            template=('{key}: {name} -- {desc}', '{key}: {name}')
+        )
+    assert str(exception.value) == "'no template match.'"
+
+def test_columns():
+    phonetic = sorted('''
+        Alfa Echo India Mike Quebec Uniform Yankee Bravo Foxtrot Juliett
+        November Romeo Victor Zulu Charlie Golf Kilo Oscar Sierra Whiskey Delta
+        Hotel Lima Papa Tango X-ray
+    '''.split())
+    expected = indent(dedent('''
+        Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
+        Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
+        Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
+        Delta     Hotel     Lima      Papa      Tango     X-ray
+    ''').strip())
+    assert columns(phonetic) == expected

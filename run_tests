@@ -3,11 +3,14 @@
 echo "#########"
 echo Python 2:
 echo "#########"
-python2 test
+python2 test.doctests.py
+python2 test.inform.py
 py.test-2
+
 echo
 echo "#########"
 echo Python 3:
 echo "#########"
-python3 test
+python3 test.doctests.py
+python3 test.inform.py
 py.test-3

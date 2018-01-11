@@ -379,7 +379,7 @@ def _join(args, kwargs):
                 except (KeyError, IndexError):
                     pass
             else:
-               raise KeyError()
+               raise KeyError('no template match.')
 
     wrap = kwargs.get('wrap')
     if wrap:
