@@ -19,7 +19,7 @@ setup(
     long_description=readme,
     author="Ken Kundert",
     author_email='inform@nurdletech.com',
-    url='http://nurdletech.com/linux-utilities/inform',
+    url='https://inform.readthedocs.io',
     download_url='https://github.com/kenkundert/inform/tarball/master',
     license='GPLv3+',
     zip_safe=True,

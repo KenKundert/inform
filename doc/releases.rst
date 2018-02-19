@@ -2,7 +2,6 @@ Releases
 ========
 
 **1.11 (2017-12-25)**:
-    | Version: 1.11.3
     | Released: 2018-01-11
 
     - Released the documentation.
@@ -11,6 +10,12 @@ Releases
     - Added *notify_if_no_tty* option.
     - Informers now stack, so disconnecting from an existing informer reinstates 
       the previous informer.
-    - Generallize cull.
+    - Generalize cull.
     - Add support for multiple templates.
     - Add *join* function.
+
+**1.12 (2018-02-18)**:
+    | Version: 1.11.3
+
+    - do not use notify override on continuations.
+    - tidied up a bit.
