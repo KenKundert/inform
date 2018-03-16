@@ -267,7 +267,7 @@ constructing messages.
      - Is object a string?
 
    * - :ref:`join desc`
-     - Combines arguments into a string in the same way as informant.
+     - Combines arguments into a string in the same way as an informant.
 
    * - :ref:`os_error desc`
      - Generates clean messages for operating system errors
