@@ -1226,12 +1226,12 @@ class Inform:
 
         # determine program name
         if argv is None:
-            argv = sys.argv
+            argv = getattr(sys, 'argv', None)
         self.output_prog_name = bool(prog_name)
-        if not is_str(prog_name):
+        if argv and not is_str(prog_name):
             if argv[0]:
                 prog_name = os.path.basename(argv[0])
-            else:
+            elif argv:
                 prog_name = os.path.basename(sys.argv[0])
         self.prog_name = prog_name
         self.argv = argv
@@ -1316,6 +1316,11 @@ class Inform:
             now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p")
         except:
             now = ""
+        if self.argv is None:
+            # self.argv may be None, False or a list. None implies that argv was
+            # not available when inform was first loaded (as when loaded from
+            # sitecustomize.py). False implies it should not be logged.
+            self.argv = sys.argv
         if self.argv:
             log("Invoked as '%s'%s." % (' '.join(self.argv), now))
         elif now:
