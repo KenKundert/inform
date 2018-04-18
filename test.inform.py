@@ -86,6 +86,7 @@ class Case():
     __repr__ = __str__
 
     def run(self):
+        sys.argv[0] = case.name
         try:
             with StringIO() as stdout, \
                  StringIO() as stderr, \
@@ -138,6 +139,12 @@ noProg = ', '.join([
     'stdout=stdout',
     'stderr=stderr',
     'prog_name=False',
+])
+yesProg = ', '.join([
+    'logfile=logfile',
+    'stdout=stdout',
+    'stderr=stderr',
+    'prog_name=True',
 ])
 noHang = ', '.join([
     'logfile=logfile',
@@ -881,6 +888,18 @@ testCases = [
         logfile=dedent('''
             Invoked as <exe> on <date>.
             error: This is a test.
+        '''),
+    ),
+    Case(
+        name='olver',
+        stimulus=dedent('''
+            Inform({stdargs})
+            error('This is a test.')
+        '''.format(stdargs=yesProg)),
+        stdout="olver error: This is a test.",
+        logfile=dedent('''
+            Invoked as <exe> on <date>.
+            olver error: This is a test.
         '''),
     ),
     Case(

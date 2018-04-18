@@ -1229,10 +1229,9 @@ class Inform:
             argv = getattr(sys, 'argv', None)
         self.output_prog_name = bool(prog_name)
         if argv and not is_str(prog_name):
-            if argv[0]:
-                prog_name = os.path.basename(argv[0])
-            elif argv:
-                prog_name = os.path.basename(sys.argv[0])
+            prog_name = os.path.basename(argv[0])
+        if prog_name is True:
+            prog_name = None
         self.prog_name = prog_name
         self.argv = argv
 
