@@ -1163,22 +1163,40 @@ aaa
 :func:`inform.aaa` prints and then returns its argument.  The argument may be 
 name or unnamed.  If named, the name is used as a label when printing the value 
 of the argument.  It can be used to print the value of a term within an 
-expression. For example, if you had *c* = *a* + *b* where *c* ended up with an 
-unexpected value, you might want to debug it by printing the values of *a* and 
-*b* while computing the value of *c*. To do so, you could use the following:
+expression without being forced to replicate that term.
+
+In the following example, a critical statement is instrumented to show the 
+intermediate values in the computation.  In this case it would be difficult to 
+see these intermediate values by replicating code, as calls to the *update* 
+method has the side effect of updating the state of the integrator.
 
 .. code:: python
 
-    >>> from inform import aaa
-    >>> a = 1
-    >>> b = 3
-    >>> c = aaa(a) + aaa(b=b)
-    DEBUG: <doctest user.rst[127]>:1, __main__:
-        1
-    DEBUG: <doctest user.rst[127]>:1, __main__:
-        b: 3
-    >>> print(c)
-    4
+    >>> from inform import aaa, display
+    >>> class Integrator:
+    ...    def __init__(self, ic=0):
+    ...        self.state = ic
+    ...    def update(self, vin):
+    ...        self.state += vin
+    ...        return self.state
+
+    >>> int1 = Integrator(1)
+    >>> int2 = Integrator()
+    >>> vin = 1
+    >>> vout = 0
+    >>> for t in range(1, 3):
+    ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
+    ...    display('vout = {}'.format(vout))
+    DEBUG: <doctest user.rst[130]>:2, __main__:
+        int1: 2
+    DEBUG: <doctest user.rst[130]>:2, __main__:
+        int2: 2
+    vout = 1.4
+    DEBUG: <doctest user.rst[130]>:2, __main__:
+        int1: 1.6
+    DEBUG: <doctest user.rst[130]>:2, __main__:
+        int2: 3.6
+    vout = 2.52
 
 
 .. _ddd desc:
@@ -1198,7 +1216,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    DEBUG: <doctest user.rst[134]>:1, __main__:
+    DEBUG: <doctest user.rst[136]>:1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1214,7 +1232,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    DEBUG: <doctest user.rst[136]>:1, __main__:
+    DEBUG: <doctest user.rst[138]>:1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1238,7 +1256,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    DEBUG: <doctest user.rst[138]>:4, __main__.Info.__init__():
+    DEBUG: <doctest user.rst[140]>:4, __main__.Info.__init__():
         self = {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1268,7 +1286,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    DEBUG: <doctest user.rst[145]>:1, __main__:
+    DEBUG: <doctest user.rst[147]>:1, __main__:
         1 this is a test (2, 3)
 
 
@@ -1313,7 +1331,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    DEBUG: <doctest user.rst[147]>:1, __main__:
+    DEBUG: <doctest user.rst[149]>:1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1331,9 +1349,10 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    DEBUG: <doctest user.rst[150]>:1, __main__:
+    DEBUG: <doctest user.rst[152]>:1, __main__:
         a = 1
         aa = 1
+        vin = 1
 
 
 .. _site customization:
