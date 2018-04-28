@@ -9,7 +9,7 @@ from .inform import (
     Color, fmt, render, os_error, conjoin, plural, full_stop, columns,
 
     # debug functions
-    ppp, ddd, vvv, sss,
+    aaa, ppp, ddd, vvv, sss,
 
     # inform classes
     InformantFactory, Inform, Error,

@@ -80,6 +80,8 @@ User Utilities
 Debug Utilities
 ===============
 
+.. autofunction:: inform.aaa
+
 .. autofunction:: inform.ddd
 
 .. autofunction:: inform.ppp

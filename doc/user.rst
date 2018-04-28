@@ -359,7 +359,7 @@ to the message and the header is colored magenta.
     myprog DEBUG: HERE!
 
 The *debug* informant is being deprecated in favor of the debugging functions 
-``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
+``aaa()``, ``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
 
 
 .. _warn:
@@ -1153,6 +1153,34 @@ debug message and also makes it easy to find and remove the functions once you
 are done debugging.
 
 
+.. _aaa desc:
+
+aaa
+"""
+
+.. py:function:: aaa(arg)
+
+:func:`inform.aaa` prints and then returns its argument.  The argument may be 
+name or unnamed.  If named, the name is used as a label when printing the value 
+of the argument.  It can be used to print the value of a term within an 
+expression. For example, if you had *c* = *a* + *b* where *c* ended up with an 
+unexpected value, you might want to debug it by printing the values of *a* and 
+*b* while computing the value of *c*. To do so, you could use the following:
+
+.. code:: python
+
+    >>> from inform import aaa
+    >>> a = 1
+    >>> b = 3
+    >>> c = aaa(a) + aaa(b=b)
+    DEBUG: <doctest user.rst[127]>:1, __main__:
+        1
+    DEBUG: <doctest user.rst[127]>:1, __main__:
+        b: 3
+    >>> print(c)
+    4
+
+
 .. _ddd desc:
 
 ddd
@@ -1170,7 +1198,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    DEBUG: <doctest user.rst[129]>:1, __main__:
+    DEBUG: <doctest user.rst[134]>:1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1186,7 +1214,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    DEBUG: <doctest user.rst[131]>:1, __main__:
+    DEBUG: <doctest user.rst[136]>:1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1210,7 +1238,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    DEBUG: <doctest user.rst[133]>:4, __main__.Info.__init__():
+    DEBUG: <doctest user.rst[138]>:4, __main__.Info.__init__():
         self = {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1240,7 +1268,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    DEBUG: <doctest user.rst[140]>:1, __main__:
+    DEBUG: <doctest user.rst[145]>:1, __main__:
         1 this is a test (2, 3)
 
 
@@ -1263,7 +1291,7 @@ here?* question better than a simple print function.
         ..     print('CONTINUING')
 
         >> foo()
-        DEBUG: <doctest user.rst[137]>:2, __main__.foo():
+        DEBUG: <doctest user.rst[142]>:2, __main__.foo():
             Traceback (most recent call last):
                 ...
         CONTINUING
@@ -1285,7 +1313,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    DEBUG: <doctest user.rst[142]>:1, __main__:
+    DEBUG: <doctest user.rst[147]>:1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1303,6 +1331,34 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    DEBUG: <doctest user.rst[145]>:1, __main__:
+    DEBUG: <doctest user.rst[150]>:1, __main__:
         a = 1
         aa = 1
+
+
+.. _site customization:
+
+Site Customization
+""""""""""""""""""
+
+Many people choose to add the importing of the debugging function to their 
+usercustomize.py file. In this way, the debugging functions are always available 
+without the need to explicitly import them. To accomplish this, create 
+a *usercustomize.py* files that contains the following and place it in your 
+site-packages directory:
+
+.. code:: python
+
+    # Include Inform debugging routines
+    try:                 # python3
+        import builtins
+    except ImportError:  # python2
+        import __builtin__ as builtins
+
+    from inform import aaa, ddd, ppp, sss, vvv
+    builtins.aaa = aaa
+    builtins.ddd = ddd
+    builtins.ppp = ppp
+    builtins.sss = sss
+    builtins.vvv = vvv
+

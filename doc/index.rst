@@ -233,6 +233,9 @@ constructing messages.
 
 .. list-table::
 
+   * - :ref:`aaa desc`
+     - Pretty prints, then returns, its argument; used when debugging code.
+
    * - :ref:`color desc`
      - Used to color messages sent to the console.
 

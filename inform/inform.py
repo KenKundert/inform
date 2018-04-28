@@ -2,7 +2,7 @@
 # Utilities for communicating directly with the user.
 
 # License {{{1
-# Copyright (C) 2014-2017 Kenneth S. Kundert
+# Copyright (C) 2014-2018 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -792,6 +792,23 @@ def vvv(*args):
         if not args or v in args
     ]
     _debug(frame_depth, args, kwargs=dict(sep='\n'))
+
+
+def aaa(*args, **kwargs):
+    '''Print argument, then return it.
+
+    Pretty-prints its argument. Argument may be named or unnamed.
+    '''
+    assert len(args) + len(kwargs) == 1
+    if args:
+        arg = args[0]
+        args = [render(arg)]
+    else:
+        key, arg = kwargs.popitem()
+        args = [key, render(arg)]
+    frame_depth = 1
+    _debug(frame_depth, args, {'sep': ': '})
+    return arg
 
 
 def sss():
