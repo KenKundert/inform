@@ -17,6 +17,6 @@ Releases
     - tidied up a bit.
 
 **Latest development release**:
-    | Version: 1.12.2
-    | Released: 2018-04-18
+    | Version: 1.12.3
+    | Released: 2018-04-28
 
