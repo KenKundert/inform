@@ -757,7 +757,14 @@ def ddd(*args, **kwargs):
     # if an argument has __dict__ attribute, render that rather than arg itself
     def expand(arg):
         try:
-            return render(arg.__dict__)
+            try:
+                name = arg.__class__.__name__ + ' object'
+            except AttributeError:
+                try:
+                    name = arg.__name__
+                except AttributeError:
+                    return render(arg.__dict__)
+            return name + ' containing ' + render(arg.__dict__)
         except AttributeError:
             return render(arg)
 

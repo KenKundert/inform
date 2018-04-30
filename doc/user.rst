@@ -1257,7 +1257,7 @@ argument itself.
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
     DEBUG: <doctest user.rst[140]>:4, __main__.Info.__init__():
-        self = {
+        self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
         }
