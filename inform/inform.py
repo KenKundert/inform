@@ -342,7 +342,7 @@ def join(*args, **kwargs):
             if its value would be False when cast to a boolean (0, False, None,
             '', (), [], {}, etc.)
 
-        wrap = False:
+        wrap (bool or int):
             If true the string is wrapped using a width of 70. If an integer value
             is passed, is used as the width of the wrap.
 
