@@ -156,52 +156,53 @@ def test_cartwheel():
         ''').strip().format(expected=expected)
 
 def test_pardon():
-    try:
-        raise Error('hey now!', culprit='nutz', extra='foo')
-        assert False
-    except Error as err:
-        assert err.get_message() == 'hey now!'
-        assert err.get_culprit() == 'nutz'
-        assert err.extra == 'foo'
-        assert str(err) == 'nutz: hey now!'
-        assert errors_accrued() == 0  # errors don't accrue until reported
-
-    try:
-        raise Error('hey now!', culprit=('nutz',  'crunch'), extra='foo')
-        assert False
-    except Error as err:
-        assert err.get_message() == 'hey now!'
-        assert err.get_culprit() == 'nutz, crunch'
-        assert err.extra == 'foo'
-        assert str(err) == 'nutz, crunch: hey now!'
-        assert err.get_message() == 'hey now!'
-        assert err.get_message('{extra}, {}') == 'foo, hey now!'
-        assert err.render() == 'nutz, crunch: hey now!'
-        assert err.render('{extra}, {}') == 'nutz, crunch: foo, hey now!'
-        assert errors_accrued() == 0  # errors don't accrue until reported
+    with messenger() as (msg, stdout, stderr, logfile):
         try:
-            err.terminate()
+            raise Error('hey now!', culprit='nutz', extra='foo')
             assert False
-        except SystemExit:
-            assert True
+        except Error as err:
+            assert err.get_message() == 'hey now!'
+            assert err.get_culprit() == 'nutz'
+            assert err.extra == 'foo'
+            assert str(err) == 'nutz: hey now!'
+            assert errors_accrued() == 0  # errors don't accrue until reported
 
         try:
-            done()
+            raise Error('hey now!', culprit=('nutz',  'crunch'), extra='foo')
             assert False
-        except SystemExit:
-            assert True
+        except Error as err:
+            assert err.get_message() == 'hey now!'
+            assert err.get_culprit() == 'nutz, crunch'
+            assert err.extra == 'foo'
+            assert str(err) == 'nutz, crunch: hey now!'
+            assert err.get_message() == 'hey now!'
+            assert err.get_message('{extra}, {}') == 'foo, hey now!'
+            assert err.render() == 'nutz, crunch: hey now!'
+            assert err.render('{extra}, {}') == 'nutz, crunch: foo, hey now!'
+            assert errors_accrued() == 0  # errors don't accrue until reported
+            try:
+                err.terminate()
+                assert False
+            except SystemExit:
+                assert True
 
-        try:
-            terminate()
-            assert False
-        except SystemExit:
-            assert True
+            try:
+                done()
+                assert False
+            except SystemExit:
+                assert True
 
-        try:
-            terminate_if_errors()
-            assert False
-        except SystemExit:
-            assert True
+            try:
+                terminate()
+                assert False
+            except SystemExit:
+                assert True
+
+            try:
+                terminate_if_errors()
+                assert False
+            except SystemExit:
+                assert True
 
 def test_possess():
     with messenger(stream_policy='header') as (msg, stdout, stderr, logfile):

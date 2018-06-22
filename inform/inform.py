@@ -731,7 +731,7 @@ def _debug(frame_depth, args, kwargs):
         body = _join(args, kwargs)
         header += ':\n' if body else '.'
         message = highlight_header(header) + highlight_body(indent(body))
-        print(message, **kwargs)
+        debug(body, culprit=(fname, lineno, name))
 
     finally:
         # Failing to explicitly delete the frame can lead to long-lived
@@ -1031,6 +1031,7 @@ debug = InformantFactory(
     output=True,
     log=True,
     header_color='magenta',
+    message_color='blue',
 )
 warn = InformantFactory(
     severity='warning',
@@ -1106,11 +1107,11 @@ class Inform:
             the user as to what is going on. This can help place errors and
             warnings in context so that they are easier to understand.
 
-        logfile (string or stream or bool):
-            May be a string, in which case it is taken to be the path of the
-            logfile.  May be *True*, in which case ./.<prog_name>.log is used.
-            May be an open stream.  Or it may be *False*, in which case no log
-            file is created.
+        logfile (path, string, stream, bool):
+            May be a pathlib path or a string, in which case it is taken to be
+            the path of the logfile.  May be *True*, in which case
+            ./.<prog_name>.log is used.  May be an open stream.  Or it may be
+            *False*, in which case no log file is created.
 
         prog_name (string):
             The program name. Is appended to the message headers and used to
@@ -1296,10 +1297,10 @@ class Inform:
 
         Args:
             logfile:
-                May be a string, in which case it is taken to be the path of the
-                logfile.  May be *True*, in which case ./.<prog_name>.log is
-                used.  May be an open stream.  Or it may be *False*, in which
-                case no log file is created.
+                May be a pathlib path. May be a string, in which case it is
+                taken to be the path of the logfile.  May be *True*, in which
+                case ./.<prog_name>.log is used.  May be an open stream.  Or it
+                may be *False*, in which case no log file is created.
             encoding (string):
                 The encoding to use when writing the file.
         """
@@ -1476,8 +1477,14 @@ class Inform:
             print(': '.join(cull([header, culprit, message])), **options)
 
     # done {{{2
-    def done(self):
-        "Terminate the program with normal exit status."
+    def done(self, exit=True):
+        """Terminate the program with normal exit status.
+
+        Args:
+            exit (bool):
+                If False, all preparations for termination are done, but
+                sys.exit() is not called.
+        """
         if self.termination_callback:
             self.termination_callback()
         if self.prog_name:
@@ -1487,7 +1494,10 @@ class Inform:
         if self.logfile:
             self.logfile.close()
             self.logfile = None
-        sys.exit()
+        if exit:
+            sys.exit()
+        else:
+            return
 
     # terminate {{{2
     def terminate(self, status=None):

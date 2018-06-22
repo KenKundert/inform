@@ -184,6 +184,18 @@ informants using :class:`inform.InformantFactory`.
 All of the informants except :ref:`panic` and :ref:`debug` do not produce any 
 output if *mute* is set.
 
+If you do not care for the default behavior for the predefined informants, you 
+can customize them by overriding their attributes. For example, in many cases 
+you might prefer that normal program output is not logged, either because it is 
+voluminous or because it is sensitive. In that case you can simple override the 
+*log* attributes for the *display* and *output* informants like so:
+
+.. code-block:: python
+
+   from inform import display, output
+   display.log = False
+   output.log = False
+
 
 .. _log:
 
@@ -1187,15 +1199,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    DEBUG: <doctest user.rst[130]>:2, __main__:
-        int1: 2
-    DEBUG: <doctest user.rst[130]>:2, __main__:
-        int2: 2
+    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int2: 2
     vout = 1.4
-    DEBUG: <doctest user.rst[130]>:2, __main__:
-        int1: 1.6
-    DEBUG: <doctest user.rst[130]>:2, __main__:
-        int2: 3.6
+    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1216,7 +1224,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    DEBUG: <doctest user.rst[136]>:1, __main__:
+    myprog DEBUG: <doctest user.rst[136]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1232,7 +1240,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    DEBUG: <doctest user.rst[138]>:1, __main__:
+    myprog DEBUG: <doctest user.rst[138]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1256,7 +1264,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    DEBUG: <doctest user.rst[140]>:4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[140]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1286,8 +1294,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    DEBUG: <doctest user.rst[147]>:1, __main__:
-        1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[147]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1331,7 +1338,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    DEBUG: <doctest user.rst[149]>:1, __main__:
+    myprog DEBUG: <doctest user.rst[149]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1349,7 +1356,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    DEBUG: <doctest user.rst[152]>:1, __main__:
+    myprog DEBUG: <doctest user.rst[152]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1

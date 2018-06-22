@@ -344,8 +344,7 @@ ppp:
         >>> c = (2, 3)
         >>> d = {'a': a, 'b': b, 'c': c}
         >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[52]>:1, __main__:
-            1 this is a test (2, 3)
+        DEBUG: <doctest README.rst[52]>, 1, __main__: 1 this is a test (2, 3)
 
 ddd:
     This function is pretty prints all of both the unnamed and named arguments.
@@ -353,7 +352,7 @@ ddd:
     .. code:: python
 
         >>> ddd(a, b, c=c, d=d)
-        DEBUG: <doctest README.rst[53]>:1, __main__:
+        DEBUG: <doctest README.rst[53]>, 1, __main__:
             1
             'this is a test'
             c = (2, 3)
@@ -374,7 +373,7 @@ vvv:
     .. code:: python
 
         >>> vvv(b, d)
-        DEBUG: <doctest README.rst[54]>:1, __main__:
+        DEBUG: <doctest README.rst[54]>, 1, __main__:
             b = 'this is a test'
             d = {
                 'a': 1,

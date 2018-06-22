@@ -20,3 +20,5 @@ Releases
     | Version: 1.12.4
     | Released: 2018-04-29
 
+    - Added aaa() debug function
+    - Added exit argument to done()
