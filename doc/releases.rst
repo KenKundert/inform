@@ -17,8 +17,8 @@ Releases
     - tidied up a bit.
 
 **Latest development release**:
-    | Version: 1.12.4
-    | Released: 2018-04-29
+    | Version: 1.12.5
+    | Released: 2018-06-21
 
     - Added aaa() debug function
     - Added exit argument to done()
