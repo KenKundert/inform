@@ -1584,12 +1584,12 @@ class Inform:
 
 # Direct access to class methods {{{1
 # done {{{3
-def done():
+def done(exit=True):
     """Terminate the program with normal exit status.
 
     Calls :meth:`inform.Inform.done` for the active informer.
     """
-    INFORMER.done()
+    INFORMER.done(exit)
 
 
 # terminate {{{3
