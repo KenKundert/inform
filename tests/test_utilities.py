@@ -448,7 +448,7 @@ def test_exits(capsys):
         status = {}
         with pytest.raises(SystemExit) as exception:
             done()
-        assert exception.value.args == ()
+        assert exception.value.args == (0,)
         assert status.get('called') == True
         captured = capsys.readouterr()
         assert captured[0] == ''

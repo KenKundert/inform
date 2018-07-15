@@ -1495,7 +1495,7 @@ class Inform:
             self.logfile.close()
             self.logfile = None
         if exit:
-            sys.exit()
+            sys.exit(0)
         else:
             return
 

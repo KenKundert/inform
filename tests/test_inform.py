@@ -158,6 +158,12 @@ def test_cartwheel():
 def test_pardon():
     with messenger() as (msg, stdout, stderr, logfile):
         try:
+            terminate()
+            assert False
+        except SystemExit as e:
+            assert e.args == (0,)
+
+        try:
             raise Error('hey now!', culprit='nutz', extra='foo')
             assert False
         except Error as err:
@@ -183,25 +189,26 @@ def test_pardon():
             try:
                 err.terminate()
                 assert False
-            except SystemExit:
-                assert True
+            except SystemExit as e:
+                assert e.args == (1,)
 
             try:
                 done()
                 assert False
-            except SystemExit:
-                assert True
+            except SystemExit as e:
+                assert e.args == (0,)
 
             try:
                 terminate()
                 assert False
-            except SystemExit:
-                assert True
+            except SystemExit as e:
+                assert e.args == (1,)
 
             try:
                 terminate_if_errors()
                 assert False
-            except SystemExit:
+            except SystemExit as e:
+                assert e.args == (1,)
                 assert True
 
 def test_possess():
