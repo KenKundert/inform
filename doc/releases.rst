@@ -22,3 +22,6 @@ Releases
 
     - Added aaa() debug function
     - Added exit argument to done()
+    - terminate() now produces an exit status of 0 if there was no errors 
+      reported
+
