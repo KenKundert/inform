@@ -17,8 +17,8 @@ Inform - Print & Logging Utilities
     .. image:: https://img.shields.io/pypi/dd/inform.svg
         :target: https://pypi.python.org/pypi/inform/
 
-| Version: 1.12.6
-| Released: 2018-06-25
+| Version: 1.12.7
+| Released: 2018-07-15
 |
 
 A light-weight package with few dependencies that provides various print-like 
