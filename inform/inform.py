@@ -1504,11 +1504,12 @@ class Inform:
         """Terminate the program with specified exit status.
 
         Args:
-            status (int or string):
+            status (int, bool, string, or None):
                 The desired exit status or exit message.
+                Exit status is 1 if True is passed in.
+                When None return 1 if errors occurred and 0 otherwise
 
         Recommended status codes:
-            | None: return 1 if errors occurred and 0 otherwise
             | 0: success
             | 1: unexpected error
             | 2: invalid invocation
@@ -1517,8 +1518,10 @@ class Inform:
         Status may also be a string, in which case it is printed to stderr and
         the exit status is 1.
         """
-        if status is None or status is True:
+        if status is None:
             status = 1 if self.errors_accrued() else 0
+        elif status is True:
+            status = 1
         prog_name = self.prog_name if self.prog_name else sys.argv[0]
         if self.termination_callback:
             self.termination_callback()
@@ -1583,7 +1586,7 @@ class Inform:
 
 
 # Direct access to class methods {{{1
-# done {{{3
+# done {{{2
 def done(exit=True):
     """Terminate the program with normal exit status.
 
@@ -1592,8 +1595,8 @@ def done(exit=True):
     INFORMER.done(exit)
 
 
-# terminate {{{3
-def terminate(status=True):
+# terminate {{{2
+def terminate(status=None):
     """Terminate the program with specified exit status."
 
     Calls :meth:`inform.Inform.terminate` for the active informer.
@@ -1601,7 +1604,7 @@ def terminate(status=True):
     INFORMER.terminate(status)
 
 
-# terminate_if_errors {{{3
+# terminate_if_errors {{{2
 def terminate_if_errors(status=1):
     """Terminate the program if error count is nonzero."
 
@@ -1610,7 +1613,7 @@ def terminate_if_errors(status=1):
     INFORMER.terminate_if_errors(status)
 
 
-# errors_accrued {{{3
+# errors_accrued {{{2
 def errors_accrued(reset=False):
     """Returns number of errors that have accrued."
 
@@ -1619,7 +1622,7 @@ def errors_accrued(reset=False):
     return INFORMER.errors_accrued(reset)
 
 
-# get_prog_name {{{3
+# get_prog_name {{{2
 def get_prog_name():
     """Returns the program name.
 
@@ -1628,7 +1631,7 @@ def get_prog_name():
     return INFORMER.get_prog_name()
 
 
-# get_informer {{{3
+# get_informer {{{2
 def get_informer():
     """Returns the active informer."""
     return INFORMER
