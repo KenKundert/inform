@@ -33,6 +33,13 @@ STREAM_POLICIES = {
         # stderr is used on all messages that include headers
 }
 
+"""
+These are used to configure inform for doctests:
+
+>>> from inform import Inform
+>>> inform = Inform(prog_name=False, logfile=False)
+
+"""
 
 # Inform Utilities {{{1
 # indent {{{2
@@ -900,7 +907,7 @@ class InformantFactory:
         messages in green, and *fail*, which prints its messages in red.  Output
         to the standard output for both is suppressed if *quiet* is *True*::
 
-            >>> from inform import InformantFactory, Inform
+            >>> from inform import InformantFactory
 
             >>> passes = InformantFactory(
             ...     output=lambda inform: not inform.quiet,
@@ -1239,6 +1246,7 @@ class Inform:
             self.stream_policy = stream_policy
         self.notifier = notifier
         self.notify_if_no_tty = notify_if_no_tty
+        self.culprit = ()
 
         # make verbosity flags consistent
         self.mute = mute
@@ -1584,6 +1592,112 @@ class Inform:
     def __exit__(self, type, value, traceback):
         self.disconnect()
 
+    # culprit {{{2
+    # first create a context manager
+    class CulpritContextManager:
+        def __init__(self, informer, culprit, append=True):
+            self.informer = informer
+            self.culprit = culprit if is_collection(culprit) else (culprit,)
+            self.append = append
+
+        def __enter__(self):
+            self.saved_culprit = self.informer.culprit
+            if self.append:
+                self.informer.culprit += self.culprit
+            else:
+                self.informer.culprit = self.culprit
+
+        def __exit__(self, *args):
+            self.informer.culprit = self.saved_culprit
+
+    # set/replace the culprit
+    def set_culprit(self, culprit):
+        """Set the culprit while displacing current culprit.
+
+        Squirrels away a culprit for later use. Any existing culprit is moved
+        out of the way.
+
+        Args:
+            culprit (string, number or tuple of strings and numbers):
+                A culprit or collection of culprits that are cached with the
+                intent that they are available to be included in a message. They
+                generally are used to indicate what a message refers to.
+
+        This function is designed to work as a context manager, meaning that it
+        meant to be used with Python's *with* statement. It temporarily replaces
+        any existing culprit, but that culprit in reinstated upon exiting the
+        *with* statement. This is used with :meth:`inform.Inform.get_culprit`
+        when the message that needs the culprit is printed from a remote
+        location where the culprit would not normally be known.  For example::
+
+            >>> from inform import get_culprit, set_culprit, warn
+
+            >>> def count_lines(lines):
+            ...    empty = 0
+            ...    for lineno, line in enumerate(lines):
+            ...        if not line:
+            ...            warn('empty line.', culprit=get_culprit(lineno))
+
+            >>> filename = 'setup.py'
+            >>> with open(filename) as f, set_culprit(filename):
+            ...    lines = f.read().splitlines()
+            ...    num_lines = count_lines(lines)
+            warning: setup.py, 5: empty line.
+            warning: setup.py, 8: empty line.
+            warning: setup.py, 13: empty line.
+
+        """
+        return self.CulpritContextManager(self, culprit, append=False)
+
+    # add to the culprit
+    def add_culprit(self, culprit):
+        """Add to the current culprit.
+
+        Similar to :meth:`Inform.set_culprit` except that this method appends
+        the given culprit to the cached culprit rather than simply replacing it.
+
+        Args:
+            culprit (string, number or tuple of strings and numbers):
+                A culprit or collection of culprits that are cached with the
+                intent that they are available to be included in a message. They
+                generally are used to indicate what a message refers to.
+
+        This function is designed to work as a context manager, meaning that it
+        meant to be used with Python's *with* statement. It temporarily replaces
+        any existing culprit, but that culprit in reinstated upon exiting the
+        *with* statement. This is used with :meth:`inform.Inform.get_culprit`
+        when the message that needs the culprit is printed from a remote
+        location where the culprit would not normally be known.
+
+        See :meth:`Inform.set_culprit` for an example of a closely related
+        method.
+        """
+        return self.CulpritContextManager(self, culprit, append=True)
+
+    # get the culprit
+    def get_culprit(self, culprit=None):
+        """Get the current culprit.
+
+        Return the currently cached culprit as a tuple. If a culprit is specified as an
+        argument, it is appended to the cached culprit without modifying it.
+
+        Args:
+            culprit (string, number or tuple of strings and numbers):
+                A culprit or collection of culprits that is appended to the
+                return value without modifying the cached culprit.
+
+        Returns:
+            The culprit argument is appended to the cached culprit and the
+            combination is returned. The return value is always in the form of a
+            tuple even if there is only one component.
+
+        See :meth:`Inform.set_culprit` for an example use of this method.
+        """
+        if culprit:
+            culprit = culprit if is_collection(culprit) else (culprit,)
+            return self.culprit + culprit
+        return self.culprit
+
 
 # Direct access to class methods {{{1
 # done {{{2
@@ -1635,6 +1749,31 @@ def get_prog_name():
 def get_informer():
     """Returns the active informer."""
     return INFORMER
+
+
+# set/replace the culprit {{{2
+def set_culprit(culprit):
+    """Set the culprit while displacing current culprit.
+
+    Calls :meth:`inform.Inform.set_culprit` for the active informer.
+    """
+    return INFORMER.set_culprit(culprit)
+
+# add to the culprit {{{2
+def add_culprit(culprit):
+    """Append to the end of the current culprit.
+
+    Calls :meth:`inform.Inform.add_culprit` for the active informer.
+    """
+    return INFORMER.add_culprit(culprit)
+
+# get the culprit {{{2
+def get_culprit(culprit=None):
+    """Get the current culprit.
+
+    Calls :meth:`inform.Inform.get_culprit` for the active informer.
+    """
+    return INFORMER.get_culprit(culprit)
 
 
 # Instantiate default informer {{{1

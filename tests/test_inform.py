@@ -112,12 +112,12 @@ def test_fabricate():
     with messenger(hanging_indent=False) as (msg, stdout, stderr, logfile):
         error('hey now!')
         codicil('baby', 'bird', sep='\n')
-        error('uh-huh\nuh-huh', culprit='yep yep yep yep yep yep yep yep yep yep yep')
+        error('uh-huh\nuh-huh', culprit='yep yep yep yep yep yep yep yep yep yep yep'.split())
         expected = dedent('''
             error: hey now!
                 baby
                 bird
-            error: yep yep yep yep yep yep yep yep yep yep yep:
+            error: yep, yep, yep, yep, yep, yep, yep, yep, yep, yep, yep:
                 uh-huh
                 uh-huh
         ''').strip()

@@ -8,9 +8,9 @@ Releases
     - Added *notify_if_no_tty* option.
     - Informers now stack, so disconnecting from an existing informer reinstates 
       the previous informer.
-    - Generalize cull.
+    - Generalize :func:`inform.cull()`.
     - Add support for multiple templates.
-    - Add *join* function.
+    - Added :func:`inform.join()` function.
 
 **1.12 (2018-02-18)**:
     - do not use notify override on continuations.
@@ -20,8 +20,10 @@ Releases
     | Version: 1.12.7
     | Released: 2018-07-15
 
-    - Added aaa() debug function
-    - Added exit argument to done()
-    - terminate() now produces an exit status of 0 if there was no errors 
-      reported
+    - Added :func:`inform.aaa()` debug function.
+    - Added exit argument to :func:`inform.done()`.
+    - :func:`inform.terminate()` now produces an exit status of 0 if there was 
+      no errors reported.
+    - Added :func:`inform.set_culprit()`, :func:`inform.add_culprit()`
+      and :func:`inform.get_culprit()`.
 

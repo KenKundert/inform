@@ -22,5 +22,8 @@ from .inform import (
     notify, debug, warn, error, fatal, panic,
 
     # the currently active informer
-    get_informer
+    get_informer,
+
+    # culprit functions
+    set_culprit, add_culprit, get_culprit
 )

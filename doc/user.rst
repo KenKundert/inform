@@ -54,8 +54,9 @@ flush = *False*:
 culprit = *None*:
    A string that is added to the beginning of the message that identifies the 
    culprit (the object for which the problem being reported was found). May also 
-   be a collection of strings, in which case they are joined with *culprit_sep* 
-   (default is ', ').
+   number or a tuple that contains strings and numbers. If *culprit* is a tuple, 
+   the members are converted to strings and joined with *culprit_sep* (default 
+   is ', ').
 
 wrap = False:
    Specifies whether message should be wrapped. *wrap* may be True, in which 
@@ -109,6 +110,37 @@ Here is an example that demonstrates the wrap and composite culprit features:
    error: input.data, 32:
        Encountered illegal value -1 when filtering.  Consider regenerating
        the dataset.
+
+Occasionally the actual culprits are not available where the messages are 
+printed.  In this case you can use culprit caching.  Simply cache the culprits 
+in you informer using :func:`inform.set_culprit` or :func:`inform.add_culprit` 
+and then recall them when needed using :func:`inform.get_culprit`.  For example:
+
+..  code-block:: python
+
+   >>> from inform import add_culprit, get_culprit, set_culprit, error
+
+   >>> def read_param(line, parameters):
+   ...    name, value = line.split(' = ')
+   ...    try:
+   ...        parameters[name] = float(value)
+   ...    except ValueError:
+   ...        error(
+   ...            'expected a number, found:', value,
+   ...            culprit=get_culprit(name)
+   ...        )
+
+   >>> def read_params(lines):
+   ...    parameters = {}
+   ...    for lineno, line in enumerate(lines):
+   ...        with add_culprit(lineno+1):
+   ...            read_param(line, parameters)
+
+   >>> filename = 'parameters'
+   >>> with open(filename) as f, set_culprit(filename):
+   ...    lines = f.read().splitlines()
+   ...    parameters = read_params(lines)
+   error: parameters, 3, c: expected a number, found: ack
 
 The *template* strings are the same as one would use with Python's built-in 
 format function and string method (as described in `Format String Syntax 
@@ -1199,11 +1231,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int1: 2
-    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int2: 2
+    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int2: 2
     vout = 1.4
-    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int1: 1.6
-    myprog DEBUG: <doctest user.rst[130]>, 2, __main__: int2: 3.6
+    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1224,7 +1256,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    myprog DEBUG: <doctest user.rst[136]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[141]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1240,7 +1272,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    myprog DEBUG: <doctest user.rst[138]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[143]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1264,7 +1296,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    myprog DEBUG: <doctest user.rst[140]>, 4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[145]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1294,7 +1326,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    myprog DEBUG: <doctest user.rst[147]>, 1, __main__: 1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[152]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1338,7 +1370,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    myprog DEBUG: <doctest user.rst[149]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[154]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1356,7 +1388,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    myprog DEBUG: <doctest user.rst[152]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[157]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1

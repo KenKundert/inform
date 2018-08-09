@@ -28,6 +28,12 @@ functionality even if you do not have local access to the informer.
 
 .. autofunction:: inform.get_prog_name
 
+.. autofunction:: inform.set_culprit
+
+.. autofunction:: inform.add_culprit
+
+.. autofunction:: inform.get_culprit
+
 You can also request the active informer:
 
 .. autofunction:: inform.get_informer
