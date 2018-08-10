@@ -209,7 +209,7 @@ class Color:
         scheme (string):
             Use the specified colorscheme when rendering the text.
             Choose from *None*, 'light' or 'dark', default is 'dark'.
-        enalbe (bool):
+        enable (bool):
             If set to False, the colorizer does not render the text in color.
 
     Example:
@@ -1491,7 +1491,11 @@ class Inform:
         Args:
             exit (bool):
                 If False, all preparations for termination are done, but
-                sys.exit() is not called.
+                sys.exit() is not called. Instead, the exit status is returned.
+
+        Returns:
+            The desired exit status is returned if exit is False (the function
+            does not return if exit is True).
         """
         if self.termination_callback:
             self.termination_callback()
@@ -1505,10 +1509,10 @@ class Inform:
         if exit:
             sys.exit(0)
         else:
-            return
+            return 0
 
     # terminate {{{2
-    def terminate(self, status=None):
+    def terminate(self, status=None, exit=True):
         """Terminate the program with specified exit status.
 
         Args:
@@ -1516,6 +1520,13 @@ class Inform:
                 The desired exit status or exit message.
                 Exit status is 1 if True is passed in.
                 When None return 1 if errors occurred and 0 otherwise
+            exit (bool):
+                If False, all preparations for termination are done, but
+                sys.exit() is not called. Instead, the exit status is returned.
+
+        Returns:
+            The desired exit status is returned if exit is False (the function
+            does not return if exit is True).
 
         Recommended status codes:
             | 0: success
@@ -1541,19 +1552,30 @@ class Inform:
         if self.logfile:
             self.logfile.close()
             self.logfile = None
-        sys.exit(status)
+        if exit:
+            sys.exit(status)
+        else:
+            return status
 
     # terminate_if_errors {{{2
-    def terminate_if_errors(self, status=1):
+    def terminate_if_errors(self, status=1, exit=True):
         """Terminate the program if error count is nonzero.
 
         Args:
-            status (int or string):
+            status (int, bool or string):
                 The desired exit status or exit message.
+            exit (bool):
+                If False, all preparations for termination are done, but
+                sys.exit() is not called. Instead, the exit status is returned.
+
+        Returns:
+            None is returned if there is no errors, otherwise the desired exit
+            status is returned if exit is False (the function does not return if
+            there is an error and exit is True).
         """
 
         if self.errors:
-            self.terminate(status)
+            return self.terminate(status, exit)
 
     # errors_accrued {{{2
     def errors_accrued(self, reset=False):

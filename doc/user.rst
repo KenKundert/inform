@@ -33,6 +33,9 @@ as unnamed arguments:
     >>> display('ice', 9)
     ice 9
 
+Informant Arguments
+"""""""""""""""""""
+
 By default, all of the unnamed arguments converted to strings and then joined 
 together using a space between each argument.  However, you can use named 
 arguments to change this behavior.  The following named arguments are used to 
@@ -91,6 +94,11 @@ This example makes use of the *sep* and *end* named arguments:
        p: play/pause,
        f: fast forward.
 
+.. _culprits:
+
+Culprits
+""""""""
+
 *culprit* is used to identify the target of the message. If the message is 
 pointing out a problem the *culprit* is generally the source of the problem.
 
@@ -114,7 +122,15 @@ Here is an example that demonstrates the wrap and composite culprit features:
 Occasionally the actual culprits are not available where the messages are 
 printed.  In this case you can use culprit caching.  Simply cache the culprits 
 in you informer using :func:`inform.set_culprit` or :func:`inform.add_culprit` 
-and then recall them when needed using :func:`inform.get_culprit`.  For example:
+and then recall them when needed using :func:`inform.get_culprit`.  Both 
+*set_culprit* and *add_culprit* are designed to be used with Python's *with* 
+statement.
+
+The following example illustrates the used of culprit caching. Here, the code is 
+spread over several functions, and the various culprits are known locally but 
+are not passed directly into the function that may report the error. Rather than 
+explicitly passing the culprits into the various functions, which would clutter 
+up their argument lists, the culprits are cached in case they are needed.
 
 ..  code-block:: python
 
@@ -142,9 +158,12 @@ and then recall them when needed using :func:`inform.get_culprit`.  For example:
    ...    parameters = read_params(lines)
    error: parameters, 3, c: expected a number, found: ack
 
+Templates
+"""""""""
+
 The *template* strings are the same as one would use with Python's built-in 
 format function and string method (as described in `Format String Syntax 
-<https://docs.python.org/3/library/string.html#format-string-syntax>`_.  The 
+<https://docs.python.org/3/library/string.html#format-string-syntax>`_).  The 
 *template* string can interpolate either named or unnamed arguments.  In this 
 example, named arguments are interpolated:
 
@@ -219,7 +238,7 @@ output if *mute* is set.
 If you do not care for the default behavior for the predefined informants, you 
 can customize them by overriding their attributes. For example, in many cases 
 you might prefer that normal program output is not logged, either because it is 
-voluminous or because it is sensitive. In that case you can simple override the 
+voluminous or because it is sensitive. In that case you can simply override the 
 *log* attributes for the *display* and *output* informants like so:
 
 .. code-block:: python
@@ -350,8 +369,8 @@ has asked for quiet.
 .. code-block:: python
 
     >>> from inform import output
-    >>> output('We the people ...')
-    We the people ...
+    >>> output('The sky is falling!')
+    The sky is falling!
 
 
 .. _notify:
@@ -370,12 +389,6 @@ Temporarily display the message in a bubble at the top of the screen.  Also
 prints the message on the standard output and sends it to the log file.  This is 
 used for messages that the user is otherwise unlikely to see because they have 
 no access to the standard output.
-
-.. code-block:: python
-
-    >>> from inform import output
-    >>> output('We the people ...')
-    We the people ...
 
 
 .. _debug:
@@ -402,8 +415,9 @@ to the message and the header is colored magenta.
     >>> debug('HERE!')
     myprog DEBUG: HERE!
 
-The *debug* informant is being deprecated in favor of the debugging functions 
-``aaa()``, ``ddd()``, ``ppp()``, ``sss()`` and ``vvv()``.
+Generally one does not use the *debug* informant directly. Instead one uses the 
+available debugging functions: ``aaa()``, ``ddd()``, ``ppp()``, ``sss()`` and 
+``vvv()``.
 
 
 .. _warn:
@@ -447,7 +461,7 @@ error
    )
 
 Displays and logs an error message. A header with the label *error* is added to 
-the message. The the header is colored red when writing to the console.
+the message. The header is colored red when writing to the console.
 
 .. code-block:: python
 
@@ -675,9 +689,10 @@ Exceptions
 An exception, :class:`inform.Error`, is provided that takes the same arguments 
 as an informant.  This allows you to catch the exception and handle it if you 
 like.  Any arguments you pass into the exception are retained and are available 
-when processing the exception.  The exception provides the *report* and 
-*terminate* methods that processes the exception as an error or fatal error if 
-you find that you can do nothing else with the exception:
+when processing the exception.  The exception provides the 
+:meth:`inform.Error.report` and :meth:`inform.Error.terminate` methods that 
+processes the exception as an error or fatal error if you find that you can do 
+nothing else with the exception.
 
 .. code-block:: python
 
@@ -691,18 +706,19 @@ you find that you can do nothing else with the exception:
     ...     e.report()
     myprog error: naught: must not be zero.
 
-*Error* also provides get_message() and get_culprit() methods, which return the 
-message and the culprit. You can also cast the exception to a string or call the 
-:meth:`inform.Error.render` method to get a string that contains both the 
+:class:`inform.Error` also provides :meth:`inform.Error.get_message()` and 
+:meth:`inform.Error.get_culprit()` methods, which return the message and the 
+culprit.  You can also cast the exception to a string or call the 
+:meth:`inform.Error.render()` method to get a string that contains both the 
 message and the culprit formatted so that it can be shown to the user.
 
 All positional arguments are available in *e.args* and any keyword arguments 
 provided are available in *e.kwargs*.
 
-One common approach to using *Error* is to pass all the arguments that make up 
-the error message as arguments and then assemble them into the message by 
-providing a template.  In that way the arguments are directly available to the 
-handler if needed. For example:
+One common approach to using :class:`inform.Error` is to pass all the arguments 
+that make up the error message as arguments and then assemble them into the 
+message by providing a template.  In that way the arguments are directly 
+available to the handler if needed. For example:
 
 .. code-block:: python
 
@@ -727,10 +743,11 @@ Notice that useful information (*choices*) is passed into the exception that may
 be useful when processing the exception even though it is not incorporated into 
 the message.
 
-You can override the template by passing a new one to :meth:`get_message`, 
-:meth:`render`, :meth:`report`, or :meth:`terminate`. This can be helpful if you 
-need to translate a message or change it to make it more meaningful to the end 
-user:
+You can override the template by passing a new one to 
+:meth:`inform.Error.get_message()`, :meth:`inform.Error.render()`, 
+:meth:`inform.Error.report()`, or :meth:`inform.Error.terminate()`. This can be 
+helpful if you need to translate a message or change it to make it more 
+meaningful to the end user:
 
 .. code-block:: python
 
@@ -754,10 +771,10 @@ Color Class
 """""""""""
 
 The :class:`inform.Color` class creates colorizers, which are functions used to 
-render text in a particular color.  They are like the Python print function in 
-that they take any number of unnamed arguments that are converted to strings and 
-then joined into a single string. The string is then coded for the chosen color 
-and returned. For example:
+render text in a particular color.  They are like the informants in that they 
+take any number of unnamed arguments that are converted to strings and then 
+joined into a single string, though the result is not printed.  Instead, the 
+string is then coded for the chosen color and returned.  For example:
 
 .. code-block:: python
 
@@ -797,7 +814,7 @@ color:
    This will not be yellow.
 
 Alternatively, you can enable or disable the colorizer when creating it. This 
-example uses the :meth:`inform.Color.isTTY` method to determine whether the 
+example uses the :meth:`inform.Color.isTTY()` method to determine whether the 
 output stream, the standard output by default, is a console.
 
 .. code-block:: python
@@ -881,7 +898,7 @@ a function, in which case it takes a single item as an argument and returns
 .. code-block:: python
 
     >>> from inform import cull, display
-    >>> display(*cull(['a', 'b', None, 'd']), sep=', ')
+    >>> display(*cull(['a', 'b', '', 'd']), sep=', ')
     a, b, d
 
     >>> accounts = dict(checking=1100.16, savings=13948.78, brokerage=0)
@@ -991,8 +1008,8 @@ is_collection
 .. py:function:: is_collection(obj)
 
 :func:`inform.is_collection` returns *True* if its argument is a collection.  
-This includes objects such as lists, sets, dictionaries, etc.  It does not 
-include strings.
+This includes objects such as lists, tuples, sets, dictionaries, etc.  It does 
+not include strings.
 
 .. code-block:: python
 
@@ -1088,11 +1105,11 @@ os_error
     >>> from inform import error, os_error
 
     >>> try:
-    ...     with open('config') as f:
+    ...     with open('temperatures.csv') as f:
     ...         contents = f.read()
     ... except (OSError, IOError) as e:
     ...     error(os_error(e))
-    myprog error: config: no such file or directory.
+    myprog error: temperatures.csv: no such file or directory.
 
 
 .. _plural desc:
@@ -1231,11 +1248,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int1: 2
-    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int2: 2
+    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int2: 2
     vout = 1.4
-    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int1: 1.6
-    myprog DEBUG: <doctest user.rst[135]>, 2, __main__: int2: 3.6
+    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1256,7 +1273,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    myprog DEBUG: <doctest user.rst[141]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[139]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1272,7 +1289,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    myprog DEBUG: <doctest user.rst[143]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[141]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1296,7 +1313,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    myprog DEBUG: <doctest user.rst[145]>, 4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[143]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1326,7 +1343,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    myprog DEBUG: <doctest user.rst[152]>, 1, __main__: 1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[150]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1370,7 +1387,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    myprog DEBUG: <doctest user.rst[154]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[152]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1388,7 +1405,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    myprog DEBUG: <doctest user.rst[157]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[155]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1
@@ -1420,3 +1437,144 @@ site-packages directory:
     builtins.sss = sss
     builtins.vvv = vvv
 
+The path of this file is typically 
+*.../lib/pythonN.M/site-packages/usercustomize.py* where *M.N* is the version 
+number of your python.
+
+
+Inform Helper Functions
+-----------------------
+
+An informer (an :class:`inform.Inform` object) provides a number of useful 
+methods. However, it is common that the informer is not locally available.  To 
+avoid the clutter that would be created by passing the informer around to where 
+ever  it is needed, *Inform* gives you several ways of accessing these methods 
+without using the informer.  Firstly is :func:`inform.get_informer()`, which 
+simply returns the currently active informer.  Secondly, *Inform* provides 
+a collection of functions that provide direct access to the corresponding 
+methods on the currently active informer. They are:
+
+
+done
+""""
+
+.. py:function:: done(exit=True)
+
+
+:func:`inform.done` terminates the program with the normal exit status. It calls 
+:meth:`inform.Inform.done` for the active informer.
+
+If the *exit* argument is False, preparations are made for exiting, but 
+*sys.exit* is not called. Instead, the desired exit status is returned.
+
+
+terminate
+"""""""""
+
+.. py:function:: terminate(status=None, exit=True)
+
+:func:`inform.terminate` terminates the program with specified exit status or 
+message.  It calls :meth:`inform.Inform.terminate` for the active informer.  
+
+*status* may be an integer, boolean, string, or None. An exit status of 1 is 
+used if True or a string is passed in. If None is passed in then 1 is used for 
+the exit status if an error was reported and 0 otherwise.
+
+If the *exit* argument is False, preparations are made for exiting, but 
+*sys.exit* is not called. Instead, the desired exit status is returned.
+
+
+terminate_if_errors
+"""""""""""""""""""
+
+.. py:function:: terminate_if_errors(status=None, exit=True)
+
+:func:`inform.terminate_if_errors` terminates the program with specified exit 
+status or message if an error was previously reported.  It calls 
+:meth:`inform.Inform.terminate_if_errors` for the active informer.
+
+*status* may be an integer, boolean, or string. An exit status of 1 is used if 
+True or a string is passed in.
+
+If the *exit* argument is False, preparations are made for exiting, but 
+*sys.exit* is not called. Instead, the desired exit status is returned.
+
+
+errors_accrued
+""""""""""""""
+
+.. py:function:: errors_accrued(reset=False)
+
+
+:func:`inform.errors_accrued` returns the number of errors that have been 
+reported.  It calls :meth:`inform.Inform.errors_accrued` for the active 
+informer.
+
+If the *reset* argument is True, the error count is reset to 0.
+
+
+get_prog_name
+"""""""""""""
+
+.. py:function:: get_prog_name()
+
+
+:func:`inform.get_prog_name` returns the name of the program.
+It calls :meth:`inform.Inform.get_prog_name` for the active informer.
+
+
+get_informer
+""""""""""""
+
+.. py:function:: get_informer()
+
+
+:func:`inform.get_informer` returns the currently active informer.
+
+
+set_culprit
+"""""""""""
+
+.. py:function:: set_culprit(culprit)
+
+:func:`inform.set_culprit` saves a culprit in the informer for later use. Any 
+existing saved culprit is temporarily moved out of the way.  It calls 
+:meth:`inform.Inform.set_culprit` for the active informer.
+
+A culprit is a string, number, or tuple of strings or numbers that would be 
+prepended to a message to indicate the object of the message.
+
+:meth:`inform.Inform.set_culprit` is used with Python's *with* statement. The 
+original saved culprit is restored when the *with* statement exits.
+
+See :ref:`culprits` for an example of :func:`inform.set_culprit` use.
+
+add_culprit
+"""""""""""
+
+.. py:function:: add_culprit(culprit)
+
+:func:`inform.add_culprit` appends a culprit to any existing saved culprit. It 
+calls :meth:`inform.Inform.add_culprit` for the active informer.
+
+A culprit is a string, number, or tuple of strings or numbers that would be 
+prepended to a message to indicate the object of the message.
+
+:meth:`inform.Inform.add_culprit` is used with Python's *with* statement. The 
+original saved culprit is restored when the *with* statement exits.
+
+See :ref:`culprits` for an example of :func:`inform.add_culprit` use.
+
+get_culprit
+"""""""""""
+
+.. py:function:: get_culprit(culprit=None)
+
+:func:`inform.get_culprit` returns the specified culprit, if any, appended to 
+the end of the current culprit that is saved in the informer.  It calls 
+:meth:`inform.Inform.get_culprit` for the active informer.
+
+A culprit is a string, number, or tuple of strings or numbers that would be 
+prepended to a message to indicate the object of the message.
+
+See :ref:`culprits` for an example of :func:`inform.get_culprit` use.
