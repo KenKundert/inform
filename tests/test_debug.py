@@ -127,7 +127,8 @@ def test_prostrate(capsys):
     out, err = capsys.readouterr()
     out = out.strip().split('\n')
     assert out[0] == 'DEBUG: test_debug.py, 126, test_debug.test_prostrate():'
-    assert out[-2] == "    File '/home/ken/src/inform/tests/test_debug.py', line 126, in test_prostrate,"
+    #assert out[-2] == "    File '/home/ken/src/inform/tests/test_debug.py', line 126, in test_prostrate,"
+    assert out[-2][-57:] == "inform/tests/test_debug.py', line 126, in test_prostrate,"
     assert out[-1] == '        sss()'
 
 def test_rubber(capsys):
@@ -135,15 +136,14 @@ def test_rubber(capsys):
     a = aaa('a')
     out, err = capsys.readouterr()
     assert out == dedent('''
-        DEBUG: test_debug.py, 135, test_debug.test_rubber(): 'a'
+        DEBUG: test_debug.py, 136, test_debug.test_rubber(): 'a'
     ''').lstrip()
     assert a == 'a'
 
     b = aaa(b = 'b')
     out, err = capsys.readouterr()
     assert out == dedent('''
-        DEBUG: test_debug.py, 142, test_debug.test_rubber(): b: 'b'
+        DEBUG: test_debug.py, 143, test_debug.test_rubber(): b: 'b'
     ''').lstrip()
     assert b == 'b'
-
 
