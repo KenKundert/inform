@@ -5,7 +5,7 @@
 # Imports {{{1
 from inform import (
     Inform, Error, codicil, display, done, error, errors_accrued, log, output,
-    terminate, terminate_if_errors, warn
+    terminate, terminate_if_errors, warn, set_culprit, add_culprit, get_culprit
 )
 from contextlib import contextmanager
 from textwrap import dedent
@@ -84,7 +84,7 @@ def test_billfold():
 
 def test_wring():
     with messenger() as (msg, stdout, stderr, logfile):
-        output('hey now!')
+        output('hey now!', flush=True)
         codicil('baby', 'bird', sep='\n')
         msg.flush_logfile()
         expected = dedent('''
@@ -199,10 +199,40 @@ def test_pardon():
                 assert e.args == (0,)
 
             try:
+                rv = done(exit=False)
+                assert rv == 0
+            except SystemExit as e:
+                assert False
+
+            try:
                 terminate()
                 assert False
             except SystemExit as e:
                 assert e.args == (1,)
+
+            try:
+                rv = terminate(exit=False)
+                assert rv == 1
+            except SystemExit as e:
+                assert False
+
+            try:
+                rv = terminate(True, exit=False)
+                assert rv == 1
+            except SystemExit as e:
+                assert False
+
+            try:
+                rv = terminate('fuxit', exit=False)
+                assert rv == 'fuxit'
+            except SystemExit as e:
+                assert False
+
+            try:
+                rv = terminate(6, exit=False)
+                assert rv == 6
+            except SystemExit as e:
+                assert False
 
             try:
                 terminate_if_errors()
@@ -210,6 +240,12 @@ def test_pardon():
             except SystemExit as e:
                 assert e.args == (1,)
                 assert True
+
+            try:
+                rv = terminate_if_errors(exit=False)
+                assert rv == 1
+            except SystemExit as e:
+                assert False
 
 def test_possess():
     with messenger(stream_policy='header') as (msg, stdout, stderr, logfile):
@@ -252,8 +288,40 @@ def test_unbuckle():
 
 def test_franc():
     with messenger() as (msg, stdout, stderr, logfile):
-        display('fuzzy', file=stdout)
+        display('fuzzy', file=stdout, flush=True)
         assert msg.errors_accrued() == 0
         assert errors_accrued(True) == 0
         assert strip(stdout) == 'fuzzy'
         assert strip(stderr) == ''
+
+def test_carbuncle():
+    with messenger() as (msg, stdout, stderr, logfile):
+        display('fuzzy', file=stdout)
+        assert get_culprit() == ()
+        assert get_culprit('x') == ('x',)
+        assert get_culprit(('x', 'y')) == ('x', 'y')
+        assert get_culprit(('x', 'y', 1)) == ('x', 'y', 1)
+        with set_culprit('a'):
+            assert get_culprit() == ('a',)
+            assert get_culprit('x') == ('a', 'x')
+            assert get_culprit(('x', 'y')) == ('a', 'x', 'y')
+            with set_culprit('b'):
+                assert get_culprit() == ('b',)
+                assert get_culprit('x') == ('b', 'x')
+                assert get_culprit(('x', 'y')) == ('b', 'x', 'y')
+                with set_culprit('c'):
+                    assert get_culprit() == ('c',)
+                    assert get_culprit('x') == ('c', 'x')
+                    assert get_culprit(('x', 'y')) == ('c', 'x', 'y')
+        with add_culprit('a'):
+            assert get_culprit() == ('a',)
+            assert get_culprit('x') == ('a', 'x')
+            assert get_culprit(('x', 'y')) == ('a', 'x', 'y')
+            with add_culprit('b'):
+                assert get_culprit() == ('a', 'b',)
+                assert get_culprit('x') == ('a', 'b', 'x')
+                assert get_culprit(('x', 'y')) == ('a', 'b', 'x', 'y')
+                with add_culprit('c'):
+                    assert get_culprit() == ('a', 'b', 'c',)
+                    assert get_culprit('x') == ('a', 'b', 'c', 'x')
+                    assert get_culprit(('x', 'y')) == ('a', 'b', 'c', 'x', 'y')

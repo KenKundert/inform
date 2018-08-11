@@ -1572,7 +1572,9 @@ class Inform:
         if self.termination_callback:
             self.termination_callback()
         if is_str(status):
-            log("%s: terminates with status '%s'." % (prog_name, status))
+            log("%s: terminates with status 1 and with message '%s'." % (
+                prog_name, status
+            ))
         else:
             log('%s: terminates with status %s.' % (prog_name, status))
             assert 0 <= status and status < 128
@@ -1755,25 +1757,25 @@ def done(exit=True):
 
     Calls :meth:`inform.Inform.done` for the active informer.
     """
-    INFORMER.done(exit)
+    return INFORMER.done(exit)
 
 
 # terminate {{{2
-def terminate(status=None):
+def terminate(status=None, exit=True):
     """Terminate the program with specified exit status."
 
     Calls :meth:`inform.Inform.terminate` for the active informer.
     """
-    INFORMER.terminate(status)
+    return INFORMER.terminate(status, exit)
 
 
 # terminate_if_errors {{{2
-def terminate_if_errors(status=1):
+def terminate_if_errors(status=1, exit=True):
     """Terminate the program if error count is nonzero."
 
     Calls :meth:`inform.Inform.terminate_if_errors` for the active informer.
     """
-    INFORMER.terminate_if_errors(status)
+    return INFORMER.terminate_if_errors(status, exit)
 
 
 # errors_accrued {{{2
