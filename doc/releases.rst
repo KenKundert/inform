@@ -21,7 +21,8 @@ Releases
     | Released: 2018-08-10
 
     - Added :func:`inform.aaa()` debug function.
-    - Added exit argument to :func:`inform.done()`.
+    - Added exit argument to :func:`inform.done()`, :func:`inform.terminate()`, 
+      and :func:`inform.terminate_if_errors()`.
     - :func:`inform.terminate()` now produces an exit status of 0 if there was 
       no errors reported.
     - Added :func:`inform.set_culprit()`, :func:`inform.add_culprit()`

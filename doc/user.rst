@@ -1448,11 +1448,11 @@ Inform Helper Functions
 An informer (an :class:`inform.Inform` object) provides a number of useful 
 methods. However, it is common that the informer is not locally available.  To 
 avoid the clutter that would be created by passing the informer around to where 
-ever  it is needed, *Inform* gives you several ways of accessing these methods 
-without using the informer.  Firstly is :func:`inform.get_informer()`, which 
-simply returns the currently active informer.  Secondly, *Inform* provides 
-a collection of functions that provide direct access to the corresponding 
-methods on the currently active informer. They are:
+ever  it is needed, *Inform* gives you several alternate ways of accessing these 
+methods.  Firstly is :func:`inform.get_informer()`, which simply returns the 
+currently active informer.  Secondly, *Inform* provides a collection of 
+functions that provide direct access to the corresponding methods on the 
+currently active informer. They are:
 
 
 done
@@ -1571,7 +1571,8 @@ get_culprit
 .. py:function:: get_culprit(culprit=None)
 
 :func:`inform.get_culprit` returns the specified culprit, if any, appended to 
-the end of the current culprit that is saved in the informer.  It calls 
+the end of the current culprit that is saved in the informer.  The resulting 
+culprit is always returned as a tuple. It calls 
 :meth:`inform.Inform.get_culprit` for the active informer.
 
 A culprit is a string, number, or tuple of strings or numbers that would be 

@@ -56,7 +56,8 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
             negative but (first + stops) should not be).
 
         stops (integer):
-            number of indentations (number of leaders to add to beginning lines).
+            number of indentations (number of leaders to add to the beginning of
+            each line).
 
         sep (string):
             the string used to separate the lines
@@ -278,7 +279,9 @@ class Color:
     def isTTY(stream=sys.stdout):
         """Takes a stream as an argument and returns true if it is a TTY.
 
-        If not given, *stdout* is used as the stream.
+        Args:
+            stream (stream):
+                Stream to test.  If not given, *stdout* is used as the stream.
 
         >>> from inform import Color, display
         >>> import sys, re
@@ -401,15 +404,23 @@ def _join(args, kwargs):
 # render {{{2
 def render(obj, sort=None, level=0, tab='    '):
     """
-    Recursively convert object to string with reasonable formatting.  Has built
-    in support for the base Python types (*None*, *bool*, *int*, *float*, *str*,
-    *set*, *tuple*, *list*, and *dict*).  If you confine yourself to these
-    types, the output of render can be read by the Python interpreter.  Other
-    types are converted to string with *repr()*.
+    Recursively convert object to string with reasonable formatting.
 
-    The dictionary keys and set values are sorted if sort is *True*. Sometimes
-    this is not possible because the values are not comparable, in which case
-    render reverts to the natural order.
+    Args:
+        obj:
+            The object to render
+        sort (bool):
+            Dictionary keys and set values are sorted if *sort* is *True*.
+            Sometimes this is not possible because the values are not
+            comparable, in which case *render* reverts to using the natural
+            order.
+        tab (string):
+            The string used when indenting.
+
+    *render* has built in support for the base Python types (*None*, *bool*,
+    *int*, *float*, *str*, *set*, *tuple*, *list*, and *dict*).  If you confine
+    yourself to these types, the output of render can be read by the Python
+    interpreter.  Other types are converted to string with *repr()*.
 
     Example::
 
@@ -540,6 +551,11 @@ def fmt(message, *args, **kwargs):
 def os_error(err):
     """Generates clean messages for operating system errors.
 
+    Args:
+        err (exception):
+            The value of an *OSError* or *IOError* exception (in Python3 *IOError*
+            is a subclass of *OSError*, so you only need to catch *OSError*).
+
     Example::
 
         >>> from inform import display, os_error
@@ -563,7 +579,15 @@ def os_error(err):
 # conjoin {{{2
 # Like string join method, but supports conjunction
 def conjoin(iterable, conj=' and ', sep=', '):
-    """Conjunction join
+    """Conjunction join.
+
+    Args:
+        iterable (exception):
+            The collection of strings to be joined.
+        conj (string):
+            The separator used between the next to last and last values.
+        sep (string):
+            The separator to use when joining the strings in *iterable*.
 
     Return the items of the *iterable* joined into a string, where *conj* is
     used to join the last two items in the list, and *sep* is used to join the
@@ -593,7 +617,7 @@ def conjoin(iterable, conj=' and ', sep=', '):
 
 # plural {{{2
 def plural(count, singular, plural=None):
-    '''Pluralize a word
+    '''Pluralize a word.
 
     If *count* is 1 or has length 1, the *singular* argument is returned,
     otherwise the *plural* argument is returned. If *plural* is None, then it is
@@ -747,7 +771,7 @@ def _debug(frame_depth, args, kwargs):
 
 
 def ppp(*args, **kwargs):
-    '''Print function tailored for debugging.
+    '''Print function.
 
     Mimics the normal print function, but colors printed output to make it
     easier to see and labels it with the location of the call.
@@ -757,7 +781,7 @@ def ppp(*args, **kwargs):
 
 
 def ddd(*args, **kwargs):
-    '''Print arguments function tailored for debugging.
+    '''Print arguments function.
 
     Pretty-prints its arguments. Arguments may be named or unnamed.
     '''
@@ -786,7 +810,7 @@ def ddd(*args, **kwargs):
 
 
 def vvv(*args):
-    '''Print variables function tailored for debugging.
+    '''Print variables function.
 
     Pretty-prints variables from the calling scope. If no arguments are given,
     all variables are printed. If arguments are given, only the variables whose
@@ -811,7 +835,8 @@ def vvv(*args):
 def aaa(*args, **kwargs):
     '''Print argument, then return it.
 
-    Pretty-prints its argument. Argument may be named or unnamed.
+    Pretty-prints its argument. Argument may be named or unnamed.  Allows you to
+    display the value that is only contained within an expression.
     '''
     assert len(args) + len(kwargs) == 1
     if args:
@@ -903,8 +928,8 @@ class InformantFactory:
 
     Example:
 
-        The following generates two informants, *pass*, which prints its
-        messages in green, and *fail*, which prints its messages in red.  Output
+        The following generates two informants, *passes*, which prints its
+        messages in green, and *fails*, which prints its messages in red.  Output
         to the standard output for both is suppressed if *quiet* is *True*::
 
             >>> from inform import InformantFactory
@@ -941,7 +966,7 @@ class InformantFactory:
             Pass: measured = 0.512V, expected = 0.500V, diff = 0.012V
             FAIL: measured = 0.875V, expected = 1.000V, diff = -0.125V
 
-        The passes are rendered in green and the failures in red.
+        In the console the passes are rendered in green and the failures in red.
     """
 
     def __init__(
@@ -1076,7 +1101,7 @@ class Inform:
     """Inform
 
     Manages all informants, which in turn handle user messaging.  Generally
-    informant copy messages to the logfile while most also send to the standard
+    informants copy messages to the logfile while most also send to the standard
     output as well, however all is controllable.
 
     Args:
@@ -1144,7 +1169,7 @@ class Inform:
             a TTY.
 
         flush (bool):
-            Flush the stream after each write. Is useful if you program is
+            Flush the stream after each write. Is useful if your program is
             crashing, causing loss of the latest writes. Can cause programs to
             run considerably slower if they produce a lot of output. Not
             available with python2.
@@ -1154,11 +1179,13 @@ class Inform:
             not given, *sys.stdout* is used.
 
         stderr (stream):
-            Termination messages are sent here by default. Generally used for
-            testing.  If not given, *sys.stderr* is used.
+            Exceptional messages are sent here by default. Exceptional message
+            include termination messages and possibly error messages (depends on
+            stream_policy). Generally used for testing.  If not given,
+            *sys.stderr* is used.
 
         length_thresh (integer):
-            Split header from body if line length would be greater than
+            Split header from body if line length would be greater than this
             threshold.
 
         culprit_sep (string):
@@ -1519,7 +1546,7 @@ class Inform:
             status (int, bool, string, or None):
                 The desired exit status or exit message.
                 Exit status is 1 if True is passed in.
-                When None return 1 if errors occurred and 0 otherwise
+                When None, return 1 if errors occurred and 0 otherwise
             exit (bool):
                 If False, all preparations for termination are done, but
                 sys.exit() is not called. Instead, the exit status is returned.
@@ -1634,7 +1661,7 @@ class Inform:
 
     # set/replace the culprit
     def set_culprit(self, culprit):
-        """Set the culprit while displacing current culprit.
+        """Set the culprit while temporarily displacing current culprit.
 
         Squirrels away a culprit for later use. Any existing culprit is moved
         out of the way.
@@ -1642,15 +1669,15 @@ class Inform:
         Args:
             culprit (string, number or tuple of strings and numbers):
                 A culprit or collection of culprits that are cached with the
-                intent that they are available to be included in a message. They
-                generally are used to indicate what a message refers to.
+                intent that they be available to be included in a message upon
+                demand. They generally are used to indicate what a message
+                refers to.
 
         This function is designed to work as a context manager, meaning that it
         meant to be used with Python's *with* statement. It temporarily replaces
-        any existing culprit, but that culprit in reinstated upon exiting the
-        *with* statement. This is used with :meth:`inform.Inform.get_culprit`
-        when the message that needs the culprit is printed from a remote
-        location where the culprit would not normally be known.  For example::
+        any existing saved culprit, but that culprit in reinstated upon exiting the
+        *with* statement. Once a culprit is saved, :meth:`inform.Inform.get_culprit`
+        is used to access it.  For example::
 
             >>> from inform import get_culprit, set_culprit, warn
 
@@ -1673,7 +1700,7 @@ class Inform:
 
     # add to the culprit
     def add_culprit(self, culprit):
-        """Add to the current culprit.
+        """Add to the currently saved culprit.
 
         Similar to :meth:`Inform.set_culprit` except that this method appends
         the given culprit to the cached culprit rather than simply replacing it.
@@ -1681,15 +1708,15 @@ class Inform:
         Args:
             culprit (string, number or tuple of strings and numbers):
                 A culprit or collection of culprits that are cached with the
-                intent that they are available to be included in a message. They
-                generally are used to indicate what a message refers to.
+                intent that they be available to be included in a message upon
+                demand. They generally are used to indicate what a message
+                refers to.
 
         This function is designed to work as a context manager, meaning that it
         meant to be used with Python's *with* statement. It temporarily replaces
         any existing culprit, but that culprit in reinstated upon exiting the
-        *with* statement. This is used with :meth:`inform.Inform.get_culprit`
-        when the message that needs the culprit is printed from a remote
-        location where the culprit would not normally be known.
+        *with* statement. Once a culprit is saved, :meth:`inform.Inform.get_culprit`
+        is used to access it.
 
         See :meth:`Inform.set_culprit` for an example of a closely related
         method.
