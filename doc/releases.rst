@@ -16,10 +16,7 @@ Releases
     - do not use notify override on continuations.
     - tidied up a bit.
 
-**Latest development release**:
-    | Version: 1.13.0
-    | Released: 2018-08-11
-
+**1.13 (2018-08-11)**:
     - Added :func:`inform.aaa()` debug function.
     - Added exit argument to :func:`inform.done()`, :func:`inform.terminate()`, 
       and :func:`inform.terminate_if_errors()`.
@@ -27,4 +24,8 @@ Releases
       no errors reported.
     - Added :func:`inform.set_culprit()`, :func:`inform.add_culprit()`
       and :func:`inform.get_culprit()`.
+
+**Latest development release**:
+    | Version: 1.13.0
+    | Released: 2018-08-11
 
