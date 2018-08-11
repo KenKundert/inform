@@ -17,8 +17,8 @@ Releases
     - tidied up a bit.
 
 **Latest development release**:
-    | Version: 1.12.8
-    | Released: 2018-08-08
+    | Version: 1.12.9
+    | Released: 2018-08-10
 
     - Added :func:`inform.aaa()` debug function.
     - Added exit argument to :func:`inform.done()`.
