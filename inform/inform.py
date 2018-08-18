@@ -1,5 +1,7 @@
 # Inform
 # Utilities for communicating directly with the user.
+#
+# Documentation can be found at inform.readthedocs.io.
 
 # License {{{1
 # Copyright (C) 2014-2018 Kenneth S. Kundert
@@ -719,6 +721,175 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
     return '\n'.join(table)
 
 
+# ProgressBar class {{{2
+class ProgressBar:
+    """Draw a progress bar.
+
+    Args:
+        stop (float):
+            The last expected value.
+
+        start (float):
+            The first expected value. May be greater than or less than stop, but
+            it must not equal stop. Must be specified and must be nonzero and
+            the same sign as stop if log is True.
+
+        log (bool):
+            Report the logarithmic progress (start must be nonzero).
+
+        prefix (str):
+            A string that is output before the progress bar on the same line.
+
+        width (int):
+            The maximum width of the bar, the largest factor of 10 that
+            is less than or equal to this value is used.
+
+        informant (informant):
+            Which informant to use when outputting the progress bar.  By
+            default, :inform:`inform.display()` is used.
+
+    There are three typical use cases.
+    First, use to illustrate the progress through an iterator:
+
+        for item in ProgressBar(items):
+            process(item)
+
+    Second, use to illustrate the progress through a fixed number of items:
+
+        for i in ProgressBar(50):
+            process(i)
+
+    Lastly, to illustrate the progress through a continuous range:
+        stop = 1e-6
+        step = 1e-9
+        with ProgressBar(stop) as progress:
+            value = 0
+            while value <= stop:
+                progress.draw(value)
+                value += step
+
+    It produces a bar that grows in order to indicate progress.  After progress
+    is complete, it will have produced the following:
+        ......9......8......7......6......5......4......3......2......1......0
+
+    It coordinates with the informants so that interruptions are handled cleanly:
+
+        ......9......8......7....
+        warning: the sky is falling.
+        ......9......8......7......6......5......4......3......2......1......0
+    """
+
+    def __init__(self, stop, start=0, log=False, prefix=None, width=79, informant=None):
+        self.major = width//10
+        self.width = 10*self.major
+
+        # override start, stop, log if argument is an iterator
+        try:
+            self.iterator = stop
+            stop = len(stop) - 1
+            start = 0
+            log = False
+        except TypeError:
+            self.iterator = None
+
+        if log:
+            from math import log10
+            start = log10(start)
+            stop = log10(stop)
+        self.reversed = start > stop
+        if self.reversed:
+            start = -start
+            stop = -stop
+        self.start = start
+        self.stop = stop
+        self.log = log
+        self.prev_index = 0
+        self.informant = informant if informant else display
+        self.finished = False
+        if prefix:
+            self.informant(prefix, end='', continuing=True)
+
+        def interrupted():
+            self.prev_index = 0
+
+        informer = get_informer()
+        informer.set_interrupted_callback(self.informant, interrupted)
+
+    def draw(self, abscissa, interrupted=False):
+        """Draw the progress bar.
+
+        Normally only those characters that are new since the last call to
+        draw() are output, however if *interrupted* is true all previous
+        characters are output as well.
+        """
+        if self.finished:
+            return ''
+        if interrupted:
+            self.prev_index = 0
+        if self.log:
+            from math import log10
+            abscissa = log10(abscissa)
+        if self.reversed:
+            abscissa = -abscissa
+        index = int(self.width*(abscissa - self.start)/(self.stop - self.start))
+        self._draw(index)
+        self.prev_index = index
+
+        # Must actually print the bar rather than returning a string because
+        # done() also needs to contribute to the output, and it is generally
+        # called through __exit__() and so cannot return anything.
+
+    def done(self):
+        """Complete the progress bar.
+
+        Not needed if *ProgressBar* is used with the Python *with* statement.
+        """
+        if self.finished:
+            return
+        self._draw(self.width)
+        self.informant(0, continuing=True)
+        informer = get_informer()
+        informer.set_interrupted_callback(self.informant, None)
+        self.finished = True
+
+    def escape(self):
+        """Terminate the progress bar without completing it."""
+        self.informant(continuing=True)
+        self.finished = True
+
+    def _draw(self, index):
+        for i in range(self.prev_index, index):
+            if i % self.major == self.major-1:
+                K = 9 - i // self.major
+                if K:
+                    self.informant(K, end='', continuing=True)
+            else:
+                self.informant('.', end='', continuing=True)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception, value, traceback):
+        if exception:
+            self.escape()
+        else:
+            self.done()
+
+    def __iter__(self):
+        if self.iterator is not None:
+            iterator = self.iterator
+        elif type(self.stop) is int:
+            iterator = range(self.start, self.stop+1)
+            self.start = 0
+            self.log = False
+        else:
+            raise NotImplementedError('no iterator available')
+
+        for i, each in enumerate(iterator):
+            self.draw(i)
+            yield each
+        self.done()
+
 # debug functions {{{2
 def _debug(frame_depth, args, kwargs):
     import inspect
@@ -1274,6 +1445,8 @@ class Inform:
         self.notifier = notifier
         self.notify_if_no_tty = notify_if_no_tty
         self.culprit = ()
+        self.continuing_message = {}
+        self.interrupted_callbacks = {}
 
         # make verbosity flags consistent
         self.mute = mute
@@ -1463,8 +1636,9 @@ class Inform:
     # _get_print_options {{{2
     def _get_print_options(self, kwargs, action):
         opts = dict(
-            end=kwargs.get('end', '\n'),
-            flush=kwargs.get('flush', self.flush),
+            end = kwargs.get('end', '\n'),
+            flush = kwargs.get('flush', self.flush),
+            continuing = kwargs.get('continuing'),
         )
             # sep is handled in _render_message
         if sys.version[0] == '2':
@@ -1502,6 +1676,24 @@ class Inform:
 
     # _show_msg {{{2
     def _show_msg(self, header, culprit, message, multiline, options):
+        stream = options.get('file')
+        continuing = options.pop('continuing', False)
+        end = options.get('end', '\n')
+        terminated = end.endswith('\n')
+        if not continuing and self.continuing_message.get(id(stream)):
+            # A continuing message is one where one line of output is built
+            # using repeated calls to an informant. An example is the progress
+            # bar. This clause is executed if a continuing message is
+            # interrupted by a regular message before it has completed, such as
+            # when a progress bar is interrupted with an informational message.
+            print()  # start the informational message on a new line
+            callback = self.interrupted_callbacks.get(id(stream))
+            if callback:
+                # inform the code that is generating the continuing message that
+                # it has been interrupted.
+                callback()
+        self.continuing_message[id(stream)] = continuing and not terminated
+
         if multiline:
             head = ': '.join(cull([header, culprit]))
             if head:
@@ -1510,6 +1702,15 @@ class Inform:
                 print(indent(message), **options)
         else:
             print(': '.join(cull([header, culprit, message])), **options)
+
+    # set_interrupted_callbac {{{2
+    def set_interrupted_callback(self, informant, callback):
+        options = self._get_print_options({}, informant)
+        if callback:
+            self.interrupted_callbacks[id(options['file'])] = callback
+        else:
+            del self.interrupted_callbacks[id(options['file'])]
+
 
     # done {{{2
     def done(self, exit=True):

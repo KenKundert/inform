@@ -4,7 +4,7 @@ from inform import (
     Color, columns, conjoin, comment, cull, display, done, error, Error, fatal,
     fmt, full_stop, indent, Inform, is_collection, is_iterable, is_str, join,
     get_prog_name, get_informer, narrate, os_error, output, plural, render,
-    terminate, warn, ddd, ppp, sss, vvv
+    terminate, warn, ddd, ppp, sss, vvv, ProgressBar,
 )
 from textwrap import dedent
 import sys
@@ -726,11 +726,201 @@ def test_muting(capsys):
         captured = capsys.readouterr()
         assert captured[0] == 'error: hello\n'
 
+def test_rattle(capsys):
+    # ProgressBar: real abscissa
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 1e-6
+        step = 1e-9
+        display('before')
+        with ProgressBar(stop) as progress:
+            value = 0
+            while value <= stop:
+                progress.draw(value)
+                value += step
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()
 
+def test_company(capsys):
+    # ProgressBar: real abscissa, reversed
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = -1e-6
+        step = -1e-9
+        display('before')
+        with ProgressBar(stop) as progress:
+            value = 0
+            while value >= stop:
+                progress.draw(value)
+                value += step
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()
 
+def test_filling(capsys):
+    # ProgressBar: real abscissa, interrupted
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 1e-6
+        step = 1e-9
+        display('before')
+        with ProgressBar(stop) as progress:
+            value = 0
+            while value <= stop/2:
+                progress.draw(value)
+                value += step
+            display('Hey now!')
+            progress.draw(value)
+            while value <= stop:
+                progress.draw(value)
+                value += step
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......
+            Hey now!
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()
 
+def test_being(capsys):
+    # ProgressBar: real abscissa, interrupted by error
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 1e-6
+        step = 1e-9
+        display('before')
+        try:
+            with ProgressBar(stop) as progress:
+                value = 0
+                while value <= stop/2:
+                    progress.draw(value)
+                    value += step
+                raise Error('Hey now!')
+        except Error as e:
+            e.report()
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......
+            error: Hey now!
+            after
+        """).lstrip()
 
+def test_deadbeat(capsys):
+    # ProgressBar: log abscissa
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 1e-6
+        start = 100e-9
+        step = 1e-9
+        display('before')
+        with ProgressBar(stop, start=start, log=True) as progress:
+            value = start
+            while value <= stop:
+                progress.draw(value)
+                value += step
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()
 
+def test_lipstick(capsys):
+    # ProgressBar: log abscissa, interrupted
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 1e-6
+        start = 100e-9
+        step = 1e-9
+        display('before')
+        with ProgressBar(stop, start=start, log=True) as progress:
+            value = start
+            while value <= stop/2:
+                progress.draw(value)
+                value += step
+            progress.escape()
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......5......4......
+            after
+        """).lstrip()
 
+def test_stomp(capsys):
+    # ProgressBar: log abscissa, reversed
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 100e-9
+        start = 1e-6
+        step = -1e-9
+        display('before')
+        with ProgressBar(stop=stop, start=start, log=True) as progress:
+            value = start
+            while value >= stop:
+                progress.draw(value)
+                value += step
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()
 
+def test_sherbet(capsys):
+    # ProgressBar: iterator
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        display('before')
+        for i in ProgressBar(range(50)):
+            if i % 10 == 0:
+                display('hello', i)
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            hello 0
+            ......9.....
+            hello 10
+            ......9......8......7......
+            hello 20
+            ......9......8......7......6......5......
+            hello 30
+            ......9......8......7......6......5......4......3......
+            hello 40
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()
 
+def test_sherbet(capsys):
+    # ProgressBar: integer
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        display('before')
+        for i in ProgressBar(50):
+            if i % 10 == 0:
+                display('hello', i)
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            hello 0
+            ......9......8
+            hello 10
+            ......9......8......7......6
+            hello 20
+            ......9......8......7......6......5......4
+            hello 30
+            ......9......8......7......6......5......4......3......2
+            hello 40
+            ......9......8......7......6......5......4......3......2......1......
+            hello 50
+            ......9......8......7......6......5......4......3......2......1......0
+            after
+        """).lstrip()

@@ -824,7 +824,6 @@ output stream, the standard output by default, is a console.
    Cannot find precursor, ignoring.
 
 
-
 .. _columns desc:
 
 columns
@@ -1112,6 +1111,105 @@ os_error
     myprog error: temperatures.csv: no such file or directory.
 
 
+.. _progressbar desc:
+
+ProgressBar Class
+"""""""""""""""""
+
+The :class:`inform.ProgressBar` class is used to draw a progress bar as a single 
+text line. The line counts down as progress is made and reaches 0 as the task 
+completes.  Interruptions are handled with grace.
+
+There are three typical ways to use the progress bar. The first is used to 
+illustrate the progress of an iterator. The iterator must have a length.  For 
+example:
+
+.. code-block:: python
+
+    >>> from inform import ProgressBar
+
+    >>> processed = []
+    >>> def process(item):
+    ...     # this function would implement some expensive operation
+    ...     processed.append(item)
+    >>> items = ['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10']
+
+    >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
+    ...     process(item)
+    Progress: ......9......8......7......6......5......4......3......2......1......0
+
+    >>> display('Processed:', conjoin(processed), end='.\n')
+    Processed: i1, i2, i3, i4, i5, i6, i7, i8, i9 and i10.
+
+
+The second is similar to the first, except you just give an integer to indicate 
+how many iterations you wish:
+
+.. code-block:: python
+
+    >>> for i in ProgressBar(50, prefix='Progress: '):
+    ...     process(item)
+    Progress: ......9......8......7......6......5......4......3......2......1......0
+
+Finally, with the third illustrates progress through a continuous range:
+
+.. code-block:: python
+
+    >>> stop = 1e-6
+    >>> step = 1e-9
+    >>> with ProgressBar(stop) as progress:
+    ...     display('Progress:')
+    ...     value = 0
+    ...     while value <= stop:
+    ...         progress.draw(value)
+    ...         value += step
+    Progress:
+    ......9......8......7......6......5......4......3......2......1......0
+
+In this case, you need to notify the progress bar if you decide to exit the loop 
+before its complete unless an exception is raised that cause the *with* block to 
+exit:
+
+.. code-block:: python
+
+    >>> stop = 1e-6
+    >>> step = 1e-9
+    >>> with ProgressBar(stop) as progress:
+    ...     display('Progress:')
+    ...     value = 0
+    ...     while value <= stop:
+    ...         progress.draw(value)
+    ...         value += step
+    ...         if value > stop/2:
+    ...             progress.escape()
+    ...             break
+    Progress:
+    ......9......8......7......6......
+
+Without calling escape, the bar would have been terminated with a 0 upon exiting 
+the *with* block. Using *escape()* is not necessary if the *with* block is 
+exited via an exception:
+
+.. code-block:: python
+
+    >>> stop = 1e-6
+    >>> step = 1e-9
+    >>> try:
+    ...     with ProgressBar(stop) as progress:
+    ...         display('Progress:')
+    ...         value = 0
+    ...         while value <= stop:
+    ...             progress.draw(value)
+    ...             value += step
+    ...             if value > stop/2:
+    ...                 raise Error('early exit.')
+    ... except Error as e:
+    ...     e.report()
+    Progress:
+    ......9......8......7......6......
+    myprog error: early exit.
+
+
 .. _plural desc:
 
 plural
@@ -1248,11 +1346,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int1: 2
-    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int2: 2
+    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int2: 2
     vout = 1.4
-    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int1: 1.6
-    myprog DEBUG: <doctest user.rst[133]>, 2, __main__: int2: 3.6
+    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1273,7 +1371,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    myprog DEBUG: <doctest user.rst[139]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[155]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1289,7 +1387,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    myprog DEBUG: <doctest user.rst[141]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[157]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1313,7 +1411,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    myprog DEBUG: <doctest user.rst[143]>, 4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[159]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1343,7 +1441,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    myprog DEBUG: <doctest user.rst[150]>, 1, __main__: 1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[166]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1365,7 +1463,7 @@ here?* question better than a simple print function.
         ..     print('CONTINUING')
 
         >> foo()
-        DEBUG: <doctest user.rst[142]>:2, __main__.foo():
+        DEBUG: <doctest user.rst[143]>:2, __main__.foo():
             Traceback (most recent call last):
                 ...
         CONTINUING
@@ -1387,7 +1485,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    myprog DEBUG: <doctest user.rst[152]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[168]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1405,7 +1503,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    myprog DEBUG: <doctest user.rst[155]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[171]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1
