@@ -3,10 +3,10 @@ __released__ = '2018-08-11'
 
 from .inform import (
     # inform utility functions
-    cull, indent, is_collection, is_iterable, is_str, join,
+    cull, indent, is_collection, is_iterable, is_str, join, Color, Info,
 
     # user utility functions and classes
-    Color, columns, conjoin, fmt, full_stop, os_error, plural, ProgressBar,
+    columns, conjoin, fmt, full_stop, os_error, plural, ProgressBar,
     render,
 
     # debug functions

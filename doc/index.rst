@@ -260,6 +260,9 @@ constructing messages.
    * - :ref:`indent desc`
      - Adds indentation.
 
+   * - :ref:`info desc`
+     - A base class that can be used to create helper classes.
+
    * - :ref:`is_collection desc`
      - Is object a collection (i.e., is it iterable and not a string)?
 
@@ -280,6 +283,9 @@ constructing messages.
 
    * - :ref:`ppp desc`
      - Print function, used when debugging code.
+
+   * - :ref:`progressbar desc`
+     - Used to generate progress bars.
 
    * - :ref:`render desc`
      - Converts many of the built-in Python data types into attractive, compact, 

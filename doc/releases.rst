@@ -29,3 +29,6 @@ Releases
     | Version: 1.13.0
     | Released: 2018-08-11
 
+    - Added :class:`inform.ProgressBar` class.
+    - Added :class:`inform.Info` class.
+

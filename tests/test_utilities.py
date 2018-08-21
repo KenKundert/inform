@@ -770,7 +770,7 @@ def test_filling(capsys):
         stop = 1e-6
         step = 1e-9
         display('before')
-        with ProgressBar(stop) as progress:
+        with ProgressBar(stop, prefix='Progress: ', width=60) as progress:
             value = 0
             while value <= stop/2:
                 progress.draw(value)
@@ -784,9 +784,9 @@ def test_filling(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......
+            Progress: .....9.....8.....7.....6.....
             Hey now!
-            ......9......8......7......6......5......4......3......2......1......0
+            Progress: .....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
             after
         """).lstrip()
 
@@ -924,3 +924,49 @@ def test_sherbet(capsys):
             ......9......8......7......6......5......4......3......2......1......0
             after
         """).lstrip()
+
+def test_prompter(capsys):
+    # ProgressBar: empty iterator
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        display('before')
+        for i in ProgressBar(range(0)):
+            pass
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            after
+        """).lstrip()
+
+def test_paramedic(capsys):
+    # ProgressBar: empty context manager
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        display('before')
+        stop = 1e-6
+        step = 1e-9
+        value = 0
+        with ProgressBar(stop, prefix='Progress: ') as progress:
+            while value <= stop:
+                # progress.draw(value)
+                value += step
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            after
+        """).lstrip()
+
+def test_orwell():
+    # Info:
+    from inform import Info
+
+    class Orwell(Info):
+        pass
+
+    george = Orwell(peace='war', truth='lies')
+
+    assert str(george) == 'Orwell(peace=war, truth=lies)'
+    assert george.peace == 'war'
+    assert george.truth == 'lies'
+    assert george.happiness is None
+

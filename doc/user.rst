@@ -999,6 +999,32 @@ the string used to separate the lines.
     .   .   b
 
 
+.. _info desc:
+
+Info Class
+""""""""""
+
+The :class:`inform.Info` class is intended to be used as a helper class.  When 
+instantiated, it converts provided keyword arguments to attributes. Unknown 
+attributes evaluate to None. *Info* can be used directly, or it can be used as 
+a base class.
+
+.. code-block:: python
+
+    >>> from inform import Info
+    >>> class Orwell(Info):
+    ...     pass
+
+    >>> george = Orwell(peace='war', truth='lies')
+    >>> print(str(george))
+    Orwell(peace=war, truth=lies)
+
+    >>> george.peace
+    'war'
+
+    >>> george.happiness
+
+
 .. _is_collection desc:
 
 is_collection
@@ -1157,6 +1183,7 @@ Finally, with the third illustrates progress through a continuous range:
 
     >>> stop = 1e-6
     >>> step = 1e-9
+
     >>> with ProgressBar(stop) as progress:
     ...     display('Progress:')
     ...     value = 0
@@ -1172,8 +1199,6 @@ exit:
 
 .. code-block:: python
 
-    >>> stop = 1e-6
-    >>> step = 1e-9
     >>> with ProgressBar(stop) as progress:
     ...     display('Progress:')
     ...     value = 0
@@ -1192,8 +1217,6 @@ exited via an exception:
 
 .. code-block:: python
 
-    >>> stop = 1e-6
-    >>> step = 1e-9
     >>> try:
     ...     with ProgressBar(stop) as progress:
     ...         display('Progress:')
@@ -1209,6 +1232,36 @@ exited via an exception:
     ......9......8......7......6......
     myprog error: early exit.
 
+The progress bar generally handles interruptions with grace. For example:
+
+.. code-block:: python
+
+    >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
+    ...     if item == 'i4':
+    ...         warn('bad value.', culprit=item)
+    Progress: .....9.....8.....7..
+    myprog warning: i4: bad value.
+    Progress: .....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+
+Notice that the warning started on a new line and the progress bar was restarted 
+from the beginning after the warning.
+
+Generally the progress bar is not printed if no tasks were performed. In some 
+cases you would like to associate a progress bar with an iterator, and then 
+decide later whether they are a task that requires processing. That could be 
+handled as follows:
+
+.. code-block:: python
+
+    >>> with ProgressBar(items, prefix='Progress: ') as progress:
+    ...     for i, item in enumerate(items):
+    ...         if item.startswith('i'):
+    ...             continue
+    ...         progress.draw(i)
+    ...         process(item)
+
+In this example, every item starts with 'i' and so is skipped. The result is 
+that no items are processed and so the progress bar is not printed.
 
 .. _plural desc:
 
@@ -1346,11 +1399,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int1: 2
-    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int2: 2
+    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int2: 2
     vout = 1.4
-    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int1: 1.6
-    myprog DEBUG: <doctest user.rst[149]>, 2, __main__: int2: 3.6
+    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1371,7 +1424,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    myprog DEBUG: <doctest user.rst[155]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[159]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1387,7 +1440,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    myprog DEBUG: <doctest user.rst[157]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[161]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1411,7 +1464,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    myprog DEBUG: <doctest user.rst[159]>, 4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[163]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1441,7 +1494,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    myprog DEBUG: <doctest user.rst[166]>, 1, __main__: 1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[170]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1454,20 +1507,19 @@ sss
 :func:`inform.sss` prints a stack trace, which can answer the *How did I get 
 here?* question better than a simple print function.
 
-    .. code:: python
+.. code:: python
 
-        >> from inform import sss
+    >> from inform import sss
 
-        >> def foo():
-        ..     sss()
-        ..     print('CONTINUING')
+    >> def foo():
+    ..     sss()
+    ..     print('CONTINUING')
 
-        >> foo()
-        DEBUG: <doctest user.rst[143]>:2, __main__.foo():
-            Traceback (most recent call last):
-                ...
-        CONTINUING
-
+    >> foo()
+    DEBUG: <doctest user.rst[171]>:2, __main__.foo():
+        Traceback (most recent call last):
+            ...
+    CONTINUING
 
 .. _vvv desc:
 
@@ -1485,7 +1537,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    myprog DEBUG: <doctest user.rst[168]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[172]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1503,7 +1555,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    myprog DEBUG: <doctest user.rst[171]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[175]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1

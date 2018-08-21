@@ -7,6 +7,6 @@ rm -f *.pyc *.pyo .test*.sum expected result install.out
 rm -rf build *.egg-info dist __pycache__ .coverage .coverage-html htmlcov .eggs
 rm -f .*.log
 rm -rf .eggs .pytest_cache .cache dist .build inform.egg.info
-rm -rf **/{__pycache__,*.pyc}
+rm -rf **/{__pycache__,*.pyc,*.pyo}
 rm -rf tests/{htmlcov,.cache,.coverage,.pytest_cache}
 rm -rf doc/.build

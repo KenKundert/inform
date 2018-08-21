@@ -38,7 +38,7 @@ STREAM_POLICIES = {
 """
 These are used to configure inform for doctests:
 
->>> from inform import Inform
+>>> from inform import Inform, Info
 >>> inform = Inform(prog_name=False, logfile=False)
 
 """
@@ -200,6 +200,7 @@ def is_collection(obj):
 
 # Color class {{{2
 class Color:
+    # description {{{3
     """Color
 
     Used to create colorizers, which are used to render text in a particular
@@ -253,16 +254,20 @@ class Color:
             (the default), the colorscheme specified when creating the colorizer
             is used.
     """
+
+    # constants {{{3
     COLORS = 'black red green yellow blue magenta cyan white'.split()
         # The order of the above colors must match order
         # of the standard terminal
     COLOR_CODE_REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
+    # constructor {{{3
     def __init__(self, color, scheme=True, enable=True):
         self.color = color
         self.scheme = 'dark' if scheme is True else scheme
         self.enable = enable
 
+    # __call__ {{{3
     def __call__(self, *args, **kwargs):
         text = _join(args, kwargs)
 
@@ -277,6 +282,7 @@ class Color:
         else:
             return text
 
+    # isTTY {{{3
     @staticmethod
     def isTTY(stream=sys.stdout):
         """Takes a stream as an argument and returns true if it is a TTY.
@@ -305,6 +311,7 @@ class Color:
         except Exception:
             return False
 
+    # strip_colors {{{3
     @classmethod
     def strip_colors(cls, text):
         """Takes a string as its input and return that string stripped of any color codes."""
@@ -312,6 +319,39 @@ class Color:
             return cls.COLOR_CODE_REGEX.sub('', text)
         else:
             return text
+
+
+# Info class {{{2
+class Info(object):
+    """Generic Class
+
+    When instantiated, it converts the provided keyword arguments to attributes.  
+    Unknown attributes evaluate to None.
+
+    >>> class Orwell(Info):
+    ...     pass
+
+    >>> george = Orwell(peace='war', truth='lies')
+    >>> print(str(george))
+    Orwell(peace=war, truth=lies)
+
+    >>> george.peace
+    'war'
+
+    >>> george.happiness
+
+    """
+    def __init__(self, **kwargs):
+        self.__dict__ = kwargs
+
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(
+            ['%s=%s' % item for item in self.__dict__.items()]
+        ))
+    __str__ = __repr__
+
+    def __getattr__(self, name):
+        return self.__dict__.get(name)
 
 
 # User Utilities {{{1
@@ -723,6 +763,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
 
 # ProgressBar class {{{2
 class ProgressBar:
+    # description {{{3
     """Draw a progress bar.
 
     Args:
@@ -779,6 +820,7 @@ class ProgressBar:
         ......9......8......7......6......5......4......3......2......1......0
     """
 
+    # constructor {{{3
     def __init__(self, stop, start=0, log=False, prefix=None, width=79, informant=None):
         self.major = width//10
         self.width = 10*self.major
@@ -803,18 +845,18 @@ class ProgressBar:
         self.start = start
         self.stop = stop
         self.log = log
-        self.prev_index = 0
+        self.prefix = prefix
         self.informant = informant if informant else display
-        self.finished = False
-        if prefix:
-            self.informant(prefix, end='', continuing=True)
 
-        def interrupted():
-            self.prev_index = 0
+        self.prev_index = 0
+        self.started = False
+        self.finished = not bool(stop - start)
+            # if stop == start, just declare progress bar to be done
+            # doing so avoids the divide by zero problem
+        self.informer = get_informer()
 
-        informer = get_informer()
-        informer.set_interrupted_callback(self.informant, interrupted)
 
+    # draw() {{{3
     def draw(self, abscissa, interrupted=False):
         """Draw the progress bar.
 
@@ -824,21 +866,20 @@ class ProgressBar:
         """
         if self.finished:
             return ''
-        if interrupted:
-            self.prev_index = 0
         if self.log:
             from math import log10
             abscissa = log10(abscissa)
         if self.reversed:
             abscissa = -abscissa
+
         index = int(self.width*(abscissa - self.start)/(self.stop - self.start))
         self._draw(index)
-        self.prev_index = index
 
         # Must actually print the bar rather than returning a string because
         # done() also needs to contribute to the output, and it is generally
         # called through __exit__() and so cannot return anything.
 
+    # done() {{{3
     def done(self):
         """Complete the progress bar.
 
@@ -846,26 +887,42 @@ class ProgressBar:
         """
         if self.finished:
             return
-        self._draw(self.width)
-        self.informant(0, continuing=True)
-        informer = get_informer()
-        informer.set_interrupted_callback(self.informant, None)
+        if self.prev_index:
+            # complete the bar if it was actually started
+            self._draw(self.width)
+            self.informant(0, continuing=True)
         self.finished = True
 
+    # escape() {{{3
     def escape(self):
         """Terminate the progress bar without completing it."""
         self.informant(continuing=True)
         self.finished = True
 
+    # _draw {{{3
     def _draw(self, index):
-        for i in range(self.prev_index, index):
+        stream_info = self.informer.get_stream_info(self.informant)
+        flush = False
+        if self.prefix:
+            if stream_info.interrupted or not self.started:
+                self.informant(self.prefix, end='', continuing=True)
+                flush = True
+        prev_index = 0 if stream_info.interrupted else self.prev_index
+        for i in range(prev_index, index):
             if i % self.major == self.major-1:
                 K = 9 - i // self.major
                 if K:
                     self.informant(K, end='', continuing=True)
+                    flush = True
             else:
                 self.informant('.', end='', continuing=True)
+                flush = True
+        stream_info.stream.flush()
+        self.prev_index = index
+        stream_info.interrupted = False
+        self.started = True
 
+    # context manager {{{3
     def __enter__(self):
         return self
 
@@ -875,6 +932,7 @@ class ProgressBar:
         else:
             self.done()
 
+    # __iter__ {{{3
     def __iter__(self):
         if self.iterator is not None:
             iterator = self.iterator
@@ -1269,6 +1327,7 @@ panic = InformantFactory(
 
 # Inform class {{{1
 class Inform:
+    # description {{{2
     """Inform
 
     Manages all informants, which in turn handle user messaging.  Generally
@@ -1445,8 +1504,7 @@ class Inform:
         self.notifier = notifier
         self.notify_if_no_tty = notify_if_no_tty
         self.culprit = ()
-        self.continuing_message = {}
-        self.interrupted_callbacks = {}
+        self.stream_info = {}
 
         # make verbosity flags consistent
         self.mute = mute
@@ -1597,6 +1655,7 @@ class Inform:
             if is_continuation:
                 multiline = bool(header)
                 header = ''
+            continuing = options.pop('continuing', False)
 
             messege_color = action.message_color
             header_color = action.header_color
@@ -1606,8 +1665,7 @@ class Inform:
                     header_color(header, scheme=cs) if header else header,
                     header_color(culprit, scheme=cs) if culprit else culprit,
                     messege_color(message, scheme=cs) if message else message,
-                    multiline,
-                    options
+                    multiline, continuing, options
                 )
             notify_override = (
                 options['file'] in [self.stdout, self.stderr]   and
@@ -1621,8 +1679,7 @@ class Inform:
                     header,
                     culprit,
                     Color.strip_colors(message),
-                    multiline,
-                    options
+                    multiline, continuing, options
                 )
 
             if action._notify_user(self) or notify_override:
@@ -1638,7 +1695,7 @@ class Inform:
         opts = dict(
             end = kwargs.get('end', '\n'),
             flush = kwargs.get('flush', self.flush),
-            continuing = kwargs.get('continuing'),
+            continuing = kwargs.get('continuing', False),
         )
             # sep is handled in _render_message
         if sys.version[0] == '2':
@@ -1675,24 +1732,22 @@ class Inform:
         return ''
 
     # _show_msg {{{2
-    def _show_msg(self, header, culprit, message, multiline, options):
-        stream = options.get('file')
-        continuing = options.pop('continuing', False)
+    def _show_msg(self, header, culprit, message, multiline, continuing, options):
+        stream_info = self.get_stream_info(stream=options.get('file'))
         end = options.get('end', '\n')
         terminated = end.endswith('\n')
-        if not continuing and self.continuing_message.get(id(stream)):
+        if not continuing and not stream_info.empty_line:
             # A continuing message is one where one line of output is built
             # using repeated calls to an informant. An example is the progress
             # bar. This clause is executed if a continuing message is
             # interrupted by a regular message before it has completed, such as
             # when a progress bar is interrupted with an informational message.
-            print()  # start the informational message on a new line
-            callback = self.interrupted_callbacks.get(id(stream))
-            if callback:
-                # inform the code that is generating the continuing message that
-                # it has been interrupted.
-                callback()
-        self.continuing_message[id(stream)] = continuing and not terminated
+            print(**options)  # start the informational message on a new line
+            stream_info.interrupted = True
+        if terminated:
+            stream_info.empty_line = True
+        elif continuing and len(message):
+            stream_info.empty_line = False
 
         if multiline:
             head = ': '.join(cull([header, culprit]))
@@ -1702,15 +1757,6 @@ class Inform:
                 print(indent(message), **options)
         else:
             print(': '.join(cull([header, culprit, message])), **options)
-
-    # set_interrupted_callbac {{{2
-    def set_interrupted_callback(self, informant, callback):
-        options = self._get_print_options({}, informant)
-        if callback:
-            self.interrupted_callbacks[id(options['file'])] = callback
-        else:
-            del self.interrupted_callbacks[id(options['file'])]
-
 
     # done {{{2
     def done(self, exit=True):
@@ -1835,6 +1881,29 @@ class Inform:
             INFORMER = self.previous_informer
         else:
             INFORMER = DEFAULT_INFORMER
+
+    # get_stream_info {{{2
+    def get_stream_info(self, informant=None, stream=None):
+        if informant:
+            options = self._get_print_options({}, informant)
+            stream = options.get('file')
+
+        # get stream name
+        aliases = {'<stderr>': '<stdout>'}
+            # treat stdout and stderr as the same stream
+            # they are usually sent to the tty
+        try:
+            name = aliases.get(stream.name, stream.name)
+        except AttributeError:
+            name = id(stream)
+
+        # get stream info
+        info = self.stream_info.get(name)
+        if not info:
+            info = Info(name=name, empty_line=True, stream=stream)
+        self.stream_info[name] = info
+        return info
+
 
     # __enter__ {{{2
     def __enter__(self):
