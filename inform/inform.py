@@ -346,7 +346,7 @@ class Info(object):
 
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, ', '.join(
-            ['%s=%s' % item for item in self.__dict__.items()]
+            ['%s=%s' % item for item in sorted(self.__dict__.items())]
         ))
     __str__ = __repr__
 
@@ -828,7 +828,7 @@ class ProgressBar:
         # override start, stop, log if argument is an iterator
         try:
             self.iterator = stop
-            stop = len(stop) - 1
+            stop = len(stop)
             start = 0
             log = False
         except TypeError:
@@ -887,7 +887,7 @@ class ProgressBar:
         """
         if self.finished:
             return
-        if self.prev_index:
+        if self.started:
             # complete the bar if it was actually started
             self._draw(self.width)
             self.informant(0, continuing=True)

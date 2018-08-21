@@ -956,6 +956,29 @@ def test_paramedic(capsys):
             after
         """).lstrip()
 
+def test_aerosol(capsys):
+    # ProgressBar: empty context manager
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        display('before')
+        for vs in ProgressBar([], prefix='nil: |', width=60):
+            pass
+        display('mid 1')
+        for vs in ProgressBar([1], prefix='one: |', width=60):
+            pass
+        display('mid 2')
+        for vs in ProgressBar([1,2], prefix='two: |', width=60):
+            pass
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            mid 1
+            one: |.....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+            mid 2
+            two: |.....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+            after
+        """).lstrip()
+
 def test_orwell():
     # Info:
     from inform import Info

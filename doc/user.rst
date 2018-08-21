@@ -1239,7 +1239,7 @@ The progress bar generally handles interruptions with grace. For example:
     >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
     ...     if item == 'i4':
     ...         warn('bad value.', culprit=item)
-    Progress: .....9.....8.....7..
+    Progress: .....9.....8.....7
     myprog warning: i4: bad value.
     Progress: .....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
 
