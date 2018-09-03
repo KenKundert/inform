@@ -136,7 +136,11 @@ def cull(collection, **kwargs):
         return collection.__class__(items)
     except (AttributeError, TypeError):
         values = [v for v in collection if not remove(v)]
-        return collection.__class__(values)
+        try:
+            return collection.__class__(values)
+        except TypeError:
+            # this occurs when collection is dict_keys or dict_values
+            return values
 
 
 # is_str {{{2
@@ -279,8 +283,7 @@ class Color:
             prefix = '\033[%s;3%dm' % (bright, self.COLORS.index(self.color))
             suffix = '\033[0m'
             return prefix + text + suffix
-        else:
-            return text
+        return text
 
     # isTTY {{{3
     @staticmethod
@@ -317,8 +320,7 @@ class Color:
         """Takes a string as its input and return that string stripped of any color codes."""
         if '\033' in text:
             return cls.COLOR_CODE_REGEX.sub('', text)
-        else:
-            return text
+        return text
 
 
 # Info class {{{2
@@ -413,6 +415,7 @@ def join(*args, **kwargs):
 
 # _join {{{2
 def _join(args, kwargs):
+    # build the message from the arguments
     template = kwargs.get('template')
     if template is None:
         message = kwargs.get('sep', ' ').join(str(arg) for arg in args)
@@ -431,12 +434,13 @@ def _join(args, kwargs):
                 except (KeyError, IndexError):
                     pass
             else:
-               raise KeyError('no template match.')
+                raise KeyError('no template match.')
 
+    # wrap the message if desired
     wrap = kwargs.get('wrap')
     if wrap:
         from textwrap import fill
-        if type(wrap) == int:
+        if type(wrap) is int:
             message = fill(message, width=wrap)
         else:
             message = fill(message)
@@ -491,19 +495,19 @@ def render(obj, sort=None, level=0, tab='    '):
     def leader(relative_level=0):
         return (level+relative_level)*tab
 
-    if type(obj) == dict:
+    if isinstance(obj, dict):
         endcaps = '{ }'
         content = [
             '%r: %s' % (k, render(obj[k], sort, level+1))
             for k in order(obj)
         ]
-    elif type(obj) is list:
+    elif isinstance(obj, list):
         endcaps = '[ ]'
         content = [render(v, sort, level+1) for v in obj]
-    elif type(obj) is tuple:
+    elif isinstance(obj, tuple):
         endcaps = '( )'
         content = [render(v, sort, level+1) for v in obj]
-    elif type(obj) is set:
+    elif isinstance(obj, set):
         endcaps = '{ }'
         content = [render(v, sort, level+1) for v in order(obj)]
     elif is_str(obj) and '\n' in obj:
@@ -677,8 +681,7 @@ def plural(count, singular, plural=None):
         plural = singular + 's'
     if is_iterable(count):
         return singular if len(count) == 1 else plural
-    else:
-        return singular if count == 1 else plural
+    return singular if count == 1 else plural
 
 
 # full_stop {{{2
@@ -865,7 +868,7 @@ class ProgressBar:
         characters are output as well.
         """
         if self.finished:
-            return ''
+            return
         if self.log:
             from math import log10
             abscissa = log10(abscissa)
@@ -902,21 +905,17 @@ class ProgressBar:
     # _draw {{{3
     def _draw(self, index):
         stream_info = self.informer.get_stream_info(self.informant)
-        flush = False
         if self.prefix:
             if stream_info.interrupted or not self.started:
                 self.informant(self.prefix, end='', continuing=True)
-                flush = True
         prev_index = 0 if stream_info.interrupted else self.prev_index
         for i in range(prev_index, index):
             if i % self.major == self.major-1:
                 K = 9 - i // self.major
                 if K:
                     self.informant(K, end='', continuing=True)
-                    flush = True
             else:
                 self.informant('.', end='', continuing=True)
-                flush = True
         stream_info.stream.flush()
         self.prev_index = index
         stream_info.interrupted = False
@@ -986,11 +985,11 @@ def _debug(frame_depth, args, kwargs):
         highlight_body = Color('blue', enable=Color.isTTY(sys.stdout))
 
         header = 'DEBUG: {fname}:{lineno}, {name}'.format(
-            filename=filename, fname=fname, lineno=lineno, name=name
+            fname=fname, lineno=lineno, name=name
         )
         body = _join(args, kwargs)
-        header += ':\n' if body else '.'
-        message = highlight_header(header) + highlight_body(indent(body))
+        #header += ':\n' if body else '.'
+        #message = highlight_header(header) + highlight_body(indent(body))
         debug(body, culprit=(fname, lineno, name))
 
     finally:
@@ -1637,7 +1636,7 @@ class Inform:
         is_continuation = action.is_continuation
         if is_continuation:
             action = self.previous_action
-            assert(action)
+            assert action
         else:
             if action.is_error:
                 self.errors += 1
@@ -1717,10 +1716,8 @@ class Inform:
         if culprit:
             if is_collection(culprit):
                 return self.culprit_sep.join(str(c) for c in culprit if c)
-            else:
-                return str(culprit)
-        else:
-            return ''
+            return str(culprit)
+        return ''
 
     # _render_header {{{2
     def _render_header(self, action):
@@ -1746,7 +1743,7 @@ class Inform:
             stream_info.interrupted = True
         if terminated:
             stream_info.empty_line = True
-        elif continuing and len(message):
+        elif continuing and message:
             stream_info.empty_line = False
 
         if multiline:
@@ -1824,7 +1821,7 @@ class Inform:
             ))
         else:
             log('%s: terminates with status %s.' % (prog_name, status))
-            assert 0 <= status and status < 128
+            assert 0 <= status < 128
         if self.logfile:
             self.logfile.close()
             self.logfile = None
@@ -1852,6 +1849,7 @@ class Inform:
 
         if self.errors:
             return self.terminate(status, exit)
+        return None
 
     # errors_accrued {{{2
     def errors_accrued(self, reset=False):
@@ -2151,51 +2149,44 @@ class Error(Exception):
         culprit = self.kwargs.get('culprit')
         if is_collection(culprit):
             return ', '.join(str(c) for c in culprit if c is not None)
-        elif culprit:
+        if culprit:
             return str(culprit)
+        return None
 
-    def report(self, template=None):
+    def report(self, **new_kwargs):
         """Report exception.
 
         The :func:`inform.error` function is called with the exception arguments.
 
         Args:
-            template (str):
-                This argument is treated as a format string and is passed both
-                the unnamed and named arguments. The resulting string is treated
-                as the message and returned.
-
-                If not specified, the *template* keyword argument passed to the
-                exception is used. If there was no *template* argument, then the
-                positional arguments of the exception are joined using *sep* and
-                that is returned.
+            **kwargs:
+                *report()* takes any of the normal keyword arguments normally
+                allowed on an informant (culprit, template, etc.). Any keyword
+                argument specified here overrides those that were specified when
+                the exception was first raised.
         """
-        if template:
+        if new_kwargs:
             kwargs = self.kwargs.copy()
-            kwargs.update(dict(template=template))
+            kwargs.update(new_kwargs)
         else:
             kwargs = self.kwargs
         error(*self.args, **kwargs)
 
-    def terminate(self, template=None):
+    def terminate(self, **new_kwargs):
         """Report exception and terminate.
 
         The :func:`inform.fatal` function is called with the exception arguments.
 
         Args:
-            template (str):
-                This argument is treated as a format string and is passed both
-                the unnamed and named arguments. The resulting string is treated
-                as the message and returned.
-
-                If not specified, the *template* keyword argument passed to the
-                exception is used. If there was no *template* argument, then the
-                positional arguments of the exception are joined using *sep* and
-                that is returned.
+            **kwargs:
+                *report()* takes any of the normal keyword arguments normally
+                allowed on an informant (culprit, template, etc.). Any keyword
+                argument specified here overrides those that were specified when
+                the exception was first raised.
         """
-        if template:
+        if new_kwargs:
             kwargs = self.kwargs.copy()
-            kwargs.update(dict(template=template))
+            kwargs.update(new_kwargs)
         else:
             kwargs = self.kwargs
         fatal(*self.args, **kwargs)

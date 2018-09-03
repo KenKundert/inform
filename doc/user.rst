@@ -744,17 +744,18 @@ be useful when processing the exception even though it is not incorporated into
 the message.
 
 You can override the template by passing a new one to 
-:meth:`inform.Error.get_message()`, :meth:`inform.Error.render()`, 
-:meth:`inform.Error.report()`, or :meth:`inform.Error.terminate()`. This can be 
-helpful if you need to translate a message or change it to make it more 
-meaningful to the end user:
+:meth:`inform.Error.get_message()` or :meth:`inform.Error.render()`.  With
+:meth:`inform.Error.report()` or :meth:`inform.Error.terminate()` you can 
+override any named argument, such as *template* or *culprit*.  This can be 
+helpful if you need to translate a message or change it or the culprit to make 
+either more meaningful to the end user:
 
 .. code-block:: python
 
     >>> try:
     ...     raise Error(name, template="name '{}' is not defined.")
     ... except Error as e:
-    ...     e.report("'{}' ist nicht definiert.")
+    ...     e.report(template="'{}' ist nicht definiert.")
     myprog error: 'alfa' ist nicht definiert.
 
 

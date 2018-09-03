@@ -31,4 +31,7 @@ Releases
 
     - Added :class:`inform.ProgressBar` class.
     - Added :class:`inform.Info` class.
+    - Allow culprit to be passed into :meth:`inform.Error.report()` and 
+      :meth:`inform.Error.terminate()`.
+
 
