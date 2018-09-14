@@ -1566,6 +1566,8 @@ class Inform:
                 taken to be the path of the logfile.  May be *True*, in which
                 case ./.<prog_name>.log is used.  May be an open stream.  Or it
                 may be *False*, in which case no log file is created.
+
+                Directory containing the logfile must exist.
             encoding (string):
                 The encoding to use when writing the file.
         """
@@ -1589,6 +1591,9 @@ class Inform:
                     logfile = logfile.open(mode='w', encoding=encoding)
                 except AttributeError:
                     pass
+            elif logfile:
+                assert hasattr(logfile, 'close'), 'expected logfile to be string, path, or stream.'
+            # else no logfile
         except (IOError, OSError) as err:
             print(os_error(err), file=sys.stderr)
             logfile = None
