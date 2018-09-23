@@ -21,7 +21,7 @@ Inform - Print & Logging Utilities
 | Released: 2018-09-09
 |
 
-A light-weight package with few dependencies that provides various print-like 
+A light-weight package with few dependencies that provides specialized print 
 functions that are used when communicating with the user. It allows you to 
 easily print attractive, informative, and consistent error messages.  For 
 example:
@@ -42,6 +42,12 @@ example:
     error: errors get a header that is printed in red.
 
 Inform also provides logging and output control.
+
+In addition, Inform provides a powerful generic exception that can be used 
+directly as a general purpose exception, or can be subclassed to produce 
+powerful specialized exceptions.  Inform exceptions are unique in that they keep 
+all of the named and unnamed arguments so they can be used when reporting 
+errors.
 
 You can find the documentation on `ReadTheDocs
 <https://inform.readthedocs.io>`_. You can download and install the latest
