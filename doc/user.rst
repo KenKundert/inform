@@ -19,9 +19,9 @@ informants.  They include include :ref:`log`, :ref:`comment`, :ref:`codicil`,
 
 They all take arguments in a manner that is a generalization of Python's 
 built-in print function.  Each of the informants is used for a specific purpose, 
-but they all take and process arguments in the same manner.  These functions 
-will be distinguished in the :ref:`predefined informants` section.  In this 
-section, the manner in which they process their arguments is presented.
+but they all take and process arguments in the same manner.  These functions are 
+distinguished in the :ref:`predefined informants` section.  In this section, the 
+manner in which they process their arguments is presented.
 
 With the simplest use of the program, you simply import the informants you need 
 and call them, placing those things that you wish to print in the argument list 
@@ -680,6 +680,11 @@ is a particular color:
     >>> fail('This message would be red.')
     This message would be red.
 
+A common use for this would be to have success and failure messages. For 
+example, if your program runs a series of tests, the successes could be printed 
+in green and the failures in red. In addition, the success informant may be 
+configured to suppress the messages if the user asks for quiet.  In that case, 
+only the failures would be displayed.
 
 .. _exceptions:
 
@@ -835,7 +840,7 @@ columns
 :func:`inform.columns` distributes the values of an array over enough columns to 
 fill the screen.
 
-This example uses prints out the phonetic alphabet:
+This example prints out the phonetic alphabet:
 
 .. code-block:: python
 
@@ -1195,8 +1200,8 @@ Finally, with the third illustrates progress through a continuous range:
     ......9......8......7......6......5......4......3......2......1......0
 
 In this case, you need to notify the progress bar if you decide to exit the loop 
-before its complete unless an exception is raised that cause the *with* block to 
-exit:
+before its complete unless an exception is raised that causes the *with* block 
+to exit:
 
 .. code-block:: python
 
@@ -1249,7 +1254,7 @@ from the beginning after the warning.
 
 Generally the progress bar is not printed if no tasks were performed. In some 
 cases you would like to associate a progress bar with an iterator, and then 
-decide later whether they are a task that requires processing. That could be 
+decide later whether there are any tasks that require processing. That could be 
 handled as follows:
 
 .. code-block:: python

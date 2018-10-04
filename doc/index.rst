@@ -243,7 +243,8 @@ constructing messages.
      - Distribute an array over enough columns to fill the screen.
 
    * - :ref:`conjoin desc`
-     - Like join, but adds a conjunction between the last two items.
+     - Like join, but adds a conjunction like 'and' or 'or' between the last two 
+       items.
 
    * - :ref:`cull desc`
      - Strips uninteresting value from collections.
