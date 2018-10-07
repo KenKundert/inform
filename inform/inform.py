@@ -1,4 +1,6 @@
 # Inform
+# encoding: utf8
+#
 # Utilities for communicating directly with the user.
 #
 # Documentation can be found at inform.readthedocs.io.
@@ -34,6 +36,11 @@ STREAM_POLICIES = {
     'header':  lambda i, so, se: se if i.severity else so,
         # stderr is used on all messages that include headers
 }
+if sys.version_info < (3,0,0):
+    BAR_CHARS = '-=#'
+else:
+    BAR_CHARS = '▏▎▍▌▋▊▉█'
+NUM_BAR_CHARS = len(BAR_CHARS)
 
 """
 These are used to configure inform for doctests:
@@ -268,7 +275,7 @@ class Color:
     # constructor {{{3
     def __init__(self, color, scheme=True, enable=True):
         self.color = color
-        self.scheme = 'dark' if scheme is True else scheme
+        self.scheme = scheme
         self.enable = enable
 
     # __call__ {{{3
@@ -277,6 +284,8 @@ class Color:
 
         # scheme is acting as an override, and False prevents the override.
         scheme = kwargs.get('scheme', self.scheme)
+        if scheme is True:
+            scheme = INFORMER.colorscheme
         if scheme and self.color and self.enable:
             assert self.color in self.COLORS
             bright = 1 if scheme == 'light' else 0
@@ -764,6 +773,24 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
     return '\n'.join(table)
 
 
+# render bar {{{2
+def render_bar(value, width=72):
+    """Render graphic representation of a value in the form of a bar
+
+    value (real): should be normalized (fall between 0 and 1)
+    width (int): the width of the bar in characters when value is 1.
+    """
+    scaled = value*width
+    if scaled > width:
+        scaled = width
+    if scaled < 0:
+        scaled = 0
+    buckets = int(scaled)
+    frac = int((NUM_BAR_CHARS*scaled) % NUM_BAR_CHARS)
+    extra = BAR_CHARS[frac-1:frac]
+    return buckets*BAR_CHARS[-1] + extra
+
+
 # ProgressBar class {{{2
 class ProgressBar:
     # description {{{3
@@ -790,7 +817,7 @@ class ProgressBar:
 
         informant (informant):
             Which informant to use when outputting the progress bar.  By
-            default, :inform:`inform.display()` is used.
+            default, :func:`inform.display()` is used.
 
     There are three typical use cases.
     First, use to illustrate the progress through an iterator:
@@ -798,12 +825,13 @@ class ProgressBar:
         for item in ProgressBar(items):
             process(item)
 
-    Second, use to illustrate the progress through a fixed number of items:
+    Second, use to illustrate the progress through a fixed number of items::
 
         for i in ProgressBar(50):
             process(i)
 
-    Lastly, to illustrate the progress through a continuous range:
+    Lastly, to illustrate the progress through a continuous range::
+
         stop = 1e-6
         step = 1e-9
         with ProgressBar(stop) as progress:
@@ -813,10 +841,11 @@ class ProgressBar:
                 value += step
 
     It produces a bar that grows in order to indicate progress.  After progress
-    is complete, it will have produced the following:
+    is complete, it will have produced the following::
+
         ......9......8......7......6......5......4......3......2......1......0
 
-    It coordinates with the informants so that interruptions are handled cleanly:
+    It coordinates with the informants so that interruptions are handled cleanly::
 
         ......9......8......7....
         warning: the sky is falling.
@@ -1661,6 +1690,15 @@ class Inform:
                 header = ''
             continuing = options.pop('continuing', False)
 
+            # attach codicils to the message
+            codicils = kwargs.get('codicil')
+            if codicils:
+                 codicils = [codicils] if is_str(codicils) else codicils
+                 codicils = '\n'.join(codicils)
+                 if header:
+                     codicils = indent(codicils)
+                 message = message + '\n' + codicils
+
             messege_color = action.message_color
             header_color = action.header_color
             if action._write_output(self):
@@ -2022,6 +2060,21 @@ class Inform:
             return self.culprit + culprit
         return self.culprit
 
+    # join culprit
+    def join_culprit(self, culprit):
+        """Join the specified culprits with the current culprit separators.
+
+        Culprits are returned from the informer or for exceptions as a tuple.
+        This function allows you to join those culprits into a string.
+
+        Args:
+            culprit (tuple of strings or numbers)
+
+        Returns:
+            The culprit tuple joined into a string.
+        """
+        return self.culprit_sep.join(str(c) for c in culprit)
+
 
 # Direct access to class methods {{{1
 # done {{{2
@@ -2100,6 +2153,15 @@ def get_culprit(culprit=None):
     return INFORMER.get_culprit(culprit)
 
 
+# join culprit {{{2
+def join_culprit(culprit=None):
+    """Join the given culprit tuple into a string.
+
+    Calls :meth:`inform.Inform.join_culprit` for the active informer.
+    """
+    return INFORMER.join_culprit(culprit)
+
+
 # Instantiate default informer {{{1
 DEFAULT_INFORMER = Inform()
 INFORMER = DEFAULT_INFORMER
@@ -2142,21 +2204,30 @@ class Error(Exception):
             kwargs = self.kwargs
         return _join(self.args, kwargs)
 
-    def get_culprit(self):
-        """Get exception culprit.
+    def get_culprit(self, culprit=None, join=False):
+        """Get the culprit.
 
-        If the *culprit* keyword argument was specified as a string, it is
-        returned. If it was specified as a collection, the members are converted
-        to strings and joined with *culprit_sep*. The resulting string is
-        returned.
+        Return the culprit as a tuple. If a culprit is specified as an
+        argument, it is appended to the exception's culprit without modifying it.
+
+        Args:
+            culprit (string, number or tuple of strings and numbers):
+                A culprit or collection of culprits that is appended to the
+                return value without modifying the cached culprit.
+
+        Returns:
+            The culprit argument is appended to the exception's culprit and the
+            combination is returned. The return value is always in the form of a
+            tuple even if there is only one component.
         """
-
-        culprit = self.kwargs.get('culprit')
-        if is_collection(culprit):
-            return ', '.join(str(c) for c in culprit if c is not None)
+        exception_culprit = self.kwargs.get('culprit', ())
+        if not is_collection(exception_culprit):
+            exception_culprit = (exception_culprit,)
         if culprit:
-            return str(culprit)
-        return None
+            if not is_collection(culprit):
+                culprit = (culprit,)
+            return exception_culprit + culprit
+        return exception_culprit
 
     def report(self, **new_kwargs):
         """Report exception.
@@ -2175,7 +2246,8 @@ class Error(Exception):
             kwargs.update(new_kwargs)
         else:
             kwargs = self.kwargs
-        error(*self.args, **kwargs)
+        informant = kwargs.get('informant', error)
+        informant(*self.args, **kwargs)
 
     def terminate(self, **new_kwargs):
         """Report exception and terminate.
@@ -2196,6 +2268,10 @@ class Error(Exception):
             kwargs = self.kwargs
         fatal(*self.args, **kwargs)
 
+    def reraise(self, **new_kwargs):
+        self.kwargs.update(new_kwargs)
+        raise
+
     def render(self, template=None):
         """Convert exception to a string for use in an error message.
 
@@ -2211,7 +2287,7 @@ class Error(Exception):
                 that is returned.
         """
         message = self.get_message(template)
-        culprit = self.get_culprit()
+        culprit = join_culprit(self.get_culprit())
         return "%s: %s" % (culprit, message) if culprit else message
 
     def __str__(self):

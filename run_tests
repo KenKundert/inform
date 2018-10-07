@@ -3,7 +3,7 @@
 echo "#########"
 echo Python 2:
 echo "#########"
-python2 test.doctests.py
+# python2 test.doctests.py
 python2 test.inform.py
 py.test-2
 

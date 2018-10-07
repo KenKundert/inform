@@ -993,3 +993,17 @@ def test_orwell():
     assert george.truth == 'lies'
     assert george.happiness is None
 
+def test_oblong():
+    from inform import render_bar
+
+    assert render_bar(-0.1, 25) == ''
+
+    if sys.version_info < (3,0,0):
+        assert render_bar(1.1, 25) == '#########################'
+        assert render_bar(0.11, 25) == '##='
+        assert render_bar(0.66, 25) == '################-'
+    else:
+        assert render_bar(1.1, 25) == '█████████████████████████'
+        assert render_bar(0.11, 25) == '██▊'
+        assert render_bar(0.66, 25) == '████████████████▌'
+

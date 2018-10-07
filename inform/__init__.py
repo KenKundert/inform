@@ -7,7 +7,7 @@ from .inform import (
 
     # user utility functions and classes
     columns, conjoin, fmt, full_stop, os_error, plural, ProgressBar,
-    render,
+    render, render_bar,
 
     # debug functions
     aaa, ppp, ddd, vvv, sss,
@@ -26,5 +26,5 @@ from .inform import (
     get_informer,
 
     # culprit functions
-    set_culprit, add_culprit, get_culprit
+    set_culprit, add_culprit, get_culprit, join_culprit
 )

@@ -49,38 +49,44 @@ InformantFactory
 Inform Utilities
 ================
 
-.. autofunction:: inform.indent
+.. autoclass:: inform.Color
+    :members:
 
 .. autofunction:: inform.cull
 
-.. autofunction:: inform.is_str
-
-.. autofunction:: inform.is_iterable
+.. autofunction:: inform.indent
 
 .. autofunction:: inform.is_collection
 
-.. autoclass:: inform.Color
-    :members:
+.. autofunction:: inform.is_iterable
+
+.. autofunction:: inform.is_str
 
 
 User Utilities
 ==============
 
-.. autofunction:: inform.fmt
+.. autoclass:: inform.Info
+    :members:
 
-.. autofunction:: inform.join
+.. autoclass:: inform.ProgressBar
+    :members:
 
-.. autofunction:: inform.render
-
-.. autofunction:: inform.os_error
+.. autofunction:: inform.columns
 
 .. autofunction:: inform.conjoin
 
-.. autofunction:: inform.plural
+.. autofunction:: inform.fmt
 
 .. autofunction:: inform.full_stop
 
-.. autofunction:: inform.columns
+.. autofunction:: inform.join
+
+.. autofunction:: inform.os_error
+
+.. autofunction:: inform.plural
+
+.. autofunction:: inform.render
 
 
 Debug Utilities

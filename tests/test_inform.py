@@ -4,13 +4,15 @@
 
 # Imports {{{1
 from inform import (
-    Inform, Error, codicil, display, done, error, errors_accrued, log, output,
-    terminate, terminate_if_errors, warn, set_culprit, add_culprit, get_culprit
+    Inform, Error, codicil, display, done, error, errors_accrued, fatal, log,
+    output, terminate, terminate_if_errors, warn, set_culprit, add_culprit,
+    get_culprit, join_culprit
 )
 from contextlib import contextmanager
 from textwrap import dedent
 import sys
 import re
+import pytest
 
 if sys.version[0] == '2':
     # io assumes unicode, which python2 does not provide by default
@@ -168,7 +170,8 @@ def test_pardon():
             assert False
         except Error as err:
             assert err.get_message() == 'hey now!'
-            assert err.get_culprit() == 'nutz'
+            assert err.get_culprit() == ('nutz',)
+            assert join_culprit(err.get_culprit()) == 'nutz'
             assert err.extra == 'foo'
             assert str(err) == 'nutz: hey now!'
             assert errors_accrued() == 0  # errors don't accrue until reported
@@ -178,7 +181,8 @@ def test_pardon():
             assert False
         except Error as err:
             assert err.get_message() == 'hey now!'
-            assert err.get_culprit() == 'nutz, crunch'
+            assert err.get_culprit() == ('nutz', 'crunch')
+            assert join_culprit(err.get_culprit()) == 'nutz, crunch'
             assert err.extra == 'foo'
             assert str(err) == 'nutz, crunch: hey now!'
             assert err.get_message() == 'hey now!'
@@ -246,6 +250,17 @@ def test_pardon():
                 assert rv == 1
             except SystemExit as e:
                 assert False
+
+        try:
+            raise Error('hey now', culprit=('nutz', 347))
+            assert False
+        except Error as err:
+            assert err.get_message() == 'hey now'
+            assert err.get_culprit() == ('nutz', 347)
+            assert join_culprit(err.get_culprit()) == 'nutz, 347'
+            assert join_culprit(err.get_culprit(66)) == 'nutz, 347, 66'
+            assert join_culprit(err.get_culprit(('a', 'b'))) == 'nutz, 347, a, b'
+            assert str(err) == 'nutz, 347: hey now'
 
 def test_possess():
     with messenger(stream_policy='header') as (msg, stdout, stderr, logfile):
@@ -325,3 +340,229 @@ def test_carbuncle():
                     assert get_culprit() == ('a', 'b', 'c',)
                     assert get_culprit('x') == ('a', 'b', 'c', 'x')
                     assert get_culprit(('x', 'y')) == ('a', 'b', 'c', 'x', 'y')
+                    assert join_culprit(get_culprit((45, 99))) == 'a, b, c, 45, 99'
+
+def test_guitar():
+    with messenger() as (msg, stdout, stderr, logfile):
+        try:
+            raise Error('Hey now!')
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == 'error: Hey now!'
+        assert strip(stderr) == ''
+
+def test_tramp():
+    with messenger() as (msg, stdout, stderr, logfile):
+        try:
+            raise Error('Hey now.', informant=display)
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == 'Hey now.'
+        assert strip(stderr) == ''
+
+def test_periphery():
+    with messenger() as (msg, stdout, stderr, logfile):
+        try:
+            raise Error('Hey now.', informant=warn)
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == 'warning: Hey now.'
+        assert strip(stderr) == ''
+
+def test_cameraman():
+    with messenger() as (msg, stdout, stderr, logfile):
+        try:
+            raise Error('Hey now.', informant=error)
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == 'error: Hey now.'
+        assert strip(stderr) == ''
+
+def test_roadway():
+    with messenger() as (msg, stdout, stderr, logfile):
+        with pytest.raises(Error) as exception:
+            try:
+                raise Error('Hey now!')
+            except Error as e:
+                e.reraise(culprit='bux')
+        exception.value.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == 'error: bux: Hey now!'
+        assert strip(stderr) == ''
+
+def test_sedan():
+    with messenger() as (msg, stdout, stderr, logfile):
+        display('aaa bbb ccc')
+        codicil('000 111 222')
+        codicil('!!! @@@ ###')
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == dedent('''
+            aaa bbb ccc
+            000 111 222
+            !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_fathead():
+    with messenger() as (msg, stdout, stderr, logfile):
+        display('aaa bbb ccc', codicil=('000 111 222', '!!! @@@ ###'))
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == dedent('''
+            aaa bbb ccc
+            000 111 222
+            !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_ceilidh():
+    with messenger() as (msg, stdout, stderr, logfile):
+        warn('aaa bbb ccc')
+        codicil('000 111 222')
+        codicil('!!! @@@ ###')
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == dedent('''
+            warning: aaa bbb ccc
+                000 111 222
+                !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_slice():
+    with messenger() as (msg, stdout, stderr, logfile):
+        warn('aaa bbb ccc', codicil=('000 111 222', '!!! @@@ ###'))
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == dedent('''
+            warning: aaa bbb ccc
+                000 111 222
+                !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_toboggan():
+    with messenger() as (msg, stdout, stderr, logfile):
+        warn('aaa bbb ccc')
+        codicil('000 111 222')
+        codicil('!!! @@@ ###')
+        assert msg.errors_accrued() == 0
+        assert errors_accrued(True) == 0
+        assert strip(stdout) == dedent('''
+            warning: aaa bbb ccc
+                000 111 222
+                !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_showing():
+    with messenger() as (msg, stdout, stderr, logfile):
+        error('aaa bbb ccc', codicil=('000 111 222', '!!! @@@ ###'))
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == dedent('''
+            error: aaa bbb ccc
+                000 111 222
+                !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_exact():
+    with messenger() as (msg, stdout, stderr, logfile):
+        error('aaa bbb ccc')
+        codicil('000 111 222')
+        codicil('!!! @@@ ###')
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == dedent('''
+            error: aaa bbb ccc
+                000 111 222
+                !!! @@@ ###
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_syllable():
+    with messenger() as (msg, stdout, stderr, logfile):
+        try:
+            raise Error(
+                'Hey now!', 'Hey now!',
+                codicil=(
+                    'Aiko aiko all day',
+                    'jockomo feeno na na nay',
+                    'jockomo feena nay'
+                )
+            )
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == dedent('''
+            error: Hey now! Hey now!
+                Aiko aiko all day
+                jockomo feeno na na nay
+                jockomo feena nay
+        ''').strip()
+        assert strip(stderr) == ''
+
+def test_socialist():
+    with messenger() as (msg, stdout, stderr, logfile):
+        with pytest.raises(SystemExit) as exception:
+            try:
+                raise Error(
+                    'Hey now!', 'Hey now!',
+                    codicil=(
+                        'Aiko aiko all day',
+                        'jockomo feeno na na nay',
+                        'jockomo feena nay'
+                    ),
+                    informant=fatal
+                )
+            except Error as e:
+                e.report()
+            assert msg.errors_accrued() == 1
+            assert errors_accrued(True) == 1
+            assert exception.value.args == (1,)
+            assert strip(stdout) == dedent('''
+                error: Hey now! Hey now!
+                    Aiko aiko all day
+                    jockomo feeno na na nay
+                    jockomo feena nay
+            ''').strip()
+            assert strip(stderr) == ''
+
+def test_crocodile():
+    with messenger() as (msg, stdout, stderr, logfile):
+        try:
+            try:
+                raise Error(
+                    'Hey now!', 'Hey now!',
+                    codicil=(
+                        'Aiko aiko all day',
+                        'jockomo feeno na na nay',
+                        'jockomo feena nay'
+                    )
+                )
+            except Error as e:
+                e.reraise(culprit='I said')
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == dedent('''
+            error: I said: Hey now! Hey now!
+                Aiko aiko all day
+                jockomo feeno na na nay
+                jockomo feena nay
+        ''').strip()
+        assert strip(stderr) == ''
+

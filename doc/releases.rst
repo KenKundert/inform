@@ -29,9 +29,18 @@ Releases
     | Version: 1.13.2
     | Released: 2018-09-09
 
+    - Added :class:`inform.render_bar` utility function.
     - Added :class:`inform.ProgressBar` class.
     - Added :class:`inform.Info` class.
+    - Added :meth:`inform.Inform.join_culprit` method and 
+      :func:`inform.join_culprit`.
     - Allow culprit to be passed into :meth:`inform.Error.report()` and 
       :meth:`inform.Error.terminate()`.
+    - Add :meth:`inform.Error.reraise` method.
+    - Allow a codicil or codicils to be added to any informant.
+    - Added *codicil* named argument to informants and :class:`inform.Error`.
+    - Added *informant* named argument to :class:`inform.Error`.
+    - Use colorscheme of active informer as default for colorizers.
+    - :meth:`inform.Error.get_culprit` now returns a tuple rather than a string.
 
 

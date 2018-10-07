@@ -61,6 +61,10 @@ culprit = *None*:
    the members are converted to strings and joined with *culprit_sep* (default 
    is ', ').
 
+codicil = *None*:
+   A string or a collection of strings that contain messages that are printed 
+   after the primary message.
+
 wrap = False:
    Specifies whether message should be wrapped. *wrap* may be True, in which 
    case the default width of 70 is used.  Alternately, you may specify the 
@@ -386,9 +390,8 @@ notify
    )
 
 Temporarily display the message in a bubble at the top of the screen.  Also 
-prints the message on the standard output and sends it to the log file.  This is 
-used for messages that the user is otherwise unlikely to see because they have 
-no access to the standard output.
+sends it to the log file.  This is used for messages that the user is otherwise 
+unlikely to see because they have no access to the standard output.
 
 
 .. _debug:
@@ -416,8 +419,8 @@ to the message and the header is colored magenta.
     myprog DEBUG: HERE!
 
 Generally one does not use the *debug* informant directly. Instead one uses the 
-available debugging functions: ``aaa()``, ``ddd()``, ``ppp()``, ``sss()`` and 
-``vvv()``.
+available debugging functions: :func:`inform.aaa()`, :func:`inform.ddd()`, 
+:func:`inform.ppp()`, :func:`inform.sss()` and :func:`inform.vvv()`.
 
 
 .. _warn:
@@ -491,6 +494,16 @@ Displays and logs an error message. A header with the label *error* is added to
 the message.  The header is colored red when writing to the console. The program 
 is terminated with an exit status of 1.
 
+.. code-block:: python
+
+    >> from inform import fatal, os_error
+    >> try:
+    ..     with open('config') as f:
+    ..         read_config(f.read())
+    .. except OSError as e:
+    ..     fatal(os_error(e), codicil='Cannot continue.')
+    myprog error: config: file not found
+        Cannot continue.
 
 .. _panic:
 
@@ -512,6 +525,27 @@ Displays and logs a panic message. A header with the label *internal error* is
 added to the message.  The header is colored red when writing to the console.  
 The program is terminated with an exit status of 3.
 
+
+Modifying Existing Informants
+"""""""""""""""""""""""""""""
+
+You may adjust the behavior of existing informants by overriding the attributes 
+that were passed in when they were created. For example, normally *display* logs 
+its messages. That can be turned off as follows:
+
+.. code-block:: python
+
+    from inform import display
+    display.log = False
+
+Any attribute that can be passed into :class:`inform.InformantFactory` when 
+creating an informant can be overridden. However, when overriding a color you 
+must use a colorizor rather than a color name:
+
+.. code-block:: python
+
+    from inform import comment, Color
+    comment.message_color=Color('cyan')
 
 
 .. informers:
@@ -711,6 +745,36 @@ nothing else with the exception.
     ...     e.report()
     myprog error: naught: must not be zero.
 
+Besides *culprit*, you can use any of the named arguments accepted by 
+informants. In addition, you can also use *informant* as a named argument.  
+*informant* changes the informant that is used when reporting the error. It is 
+often used to convert an exception to a warning or to a fatal error. For 
+example:
+
+.. code-block:: python
+
+    >>> from inform import Inform, Error, warn
+
+    >>> Inform(prog_name='myprog')
+    <...>
+    >>> def read_files(filenames):
+    ...     files = {}
+    ...     for filename in filenames:
+    ...        try:
+    ...            with open(filename) as f:
+    ...                files[filename] = f.read()
+    ...        except FileNotFoundError:
+    ...            raise Error('missing.', culprit=filename, informant=warn)
+    ...     return files
+
+    >>> filenames = 'parameters swallows worlds'.split()
+    >>> try:
+    ...     files = read_files(filenames)
+    ... except Error as e:
+    ...     files = None
+    ...     e.report()
+    myprog warning: worlds: missing.
+
 :class:`inform.Error` also provides :meth:`inform.Error.get_message()` and 
 :meth:`inform.Error.get_culprit()` methods, which return the message and the 
 culprit.  You can also cast the exception to a string or call the 
@@ -752,8 +816,8 @@ You can override the template by passing a new one to
 :meth:`inform.Error.get_message()` or :meth:`inform.Error.render()`.  With
 :meth:`inform.Error.report()` or :meth:`inform.Error.terminate()` you can 
 override any named argument, such as *template* or *culprit*.  This can be 
-helpful if you need to translate a message or change it or the culprit to make 
-either more meaningful to the end user:
+helpful if you need to translate a message or change it to make it more 
+meaningful to the end user:
 
 .. code-block:: python
 
@@ -762,6 +826,38 @@ either more meaningful to the end user:
     ... except Error as e:
     ...     e.report(template="'{}' ist nicht definiert.")
     myprog error: 'alfa' ist nicht definiert.
+
+You can catch an :class:`inform.Error` exception and then reraise it after
+modifying its named arguments using :meth:`inform.Error.reraise()`.  This is
+helpful when all the information needed for the error message is not available
+where the initial exception is detected. Typically new culprits or codicils are
+added. For example, in the following the filename is added to the exception
+using *reraise* in *parse_file*:
+
+.. code-block:: python
+
+    >>> def parse_lines(lines):
+    ...     values = {}
+    ...     for i, line in enumerate(lines):
+    ...         try:
+    ...             k, v = line.split()
+    ...         except ValueError:
+    ...             raise Error('syntax error.', culprit=i+1)
+    ...         values[k] = v
+    ...     return values
+
+    >>> def parse_file(filename):
+    ...     try:
+    ...         with open(filename) as f:
+    ...             return parse_lines(f.read().splitlines())
+    ...     except Error as e:
+    ...         e.reraise(culprit=(filename,) + e.get_culprit())
+
+    >>> try:
+    ...     unladen_airspeed = parse_file('swallows')
+    ... except Error as e:
+    ...     e.report()
+    myprog error: swallows, 2: syntax error.
 
 
 Utilities
@@ -777,10 +873,10 @@ Color Class
 """""""""""
 
 The :class:`inform.Color` class creates colorizers, which are functions used to 
-render text in a particular color.  They are like the informants in that they 
-take any number of unnamed arguments that are converted to strings and then 
-joined into a single string, though the result is not printed.  Instead, the 
-string is then coded for the chosen color and returned.  For example:
+render text in a particular color.  They combine their arguments in a manner 
+very similar to an :ref:`informant <using informants>` and returns the result as 
+a string, except the string is coded for the chosen color.  Uses the *sep*, 
+*template* and *wrap* keyword arguments to combine the arguments.
 
 .. code-block:: python
 
@@ -800,10 +896,12 @@ string is then coded for the chosen color and returned.  For example:
 
 When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
 
-The Color class has the concept of a colorscheme. There are three supported 
-schemes: *None*, 'light', and 'dark'. With *None* the text is not colored. In 
-general it is best to use the 'light' colorscheme on 'dark' backgrounds and the 
-'dark' colorscheme on light backgrounds.
+The Color class has the concept of a colorscheme. There are four supported 
+schemes: *None*, *True, 'light', and 'dark'. With *None* the text is not 
+colored, with *True* the colorscheme of the currently active informer is used.
+In general it is best to use the 'light' colorscheme on 'dark' backgrounds and 
+the 'dark' colorscheme on light backgrounds.  You can pass in the colorscheme 
+using the *scheme* argument either to the color class or to the colorizer.
 
 Colorizers have one user settable attribute: *enable*. By default *enable* is 
 *True*. If you set it to *False* the colorizer no longer renders the text in 
@@ -1017,18 +1115,19 @@ a base class.
 
 .. code-block:: python
 
-    >>> from inform import Info
+    >>> from inform import display, Info
     >>> class Orwell(Info):
     ...     pass
 
     >>> george = Orwell(peace='war', truth='lies')
-    >>> print(str(george))
+    >>> display(str(george))
     Orwell(peace=war, truth=lies)
 
-    >>> george.peace
-    'war'
+    >>> display(george.peace)
+    war
 
-    >>> george.happiness
+    >>> display(george.happiness)
+    None
 
 
 .. _is_collection desc:
@@ -1180,10 +1279,10 @@ how many iterations you wish:
 .. code-block:: python
 
     >>> for i in ProgressBar(50, prefix='Progress: '):
-    ...     process(item)
+    ...     process(i)
     Progress: ......9......8......7......6......5......4......3......2......1......0
 
-Finally, with the third illustrates progress through a continuous range:
+Finally, the third illustrates progress through a continuous range:
 
 .. code-block:: python
 
@@ -1360,6 +1459,36 @@ This example prints several Python data types:
     }
 
 
+.. _render_bar desc:
+
+render_bar
+""""""""""
+
+.. py:function:: render_bar(normalized_value, width=72)
+
+:func:`inform.render_bar()` produces a graphic representation of a normalized 
+value in the form of a bar.  *normalized_value* is the value to render; it is 
+expected to be a value between 0 and 1.  *width* specifies the maximum width of 
+the line in characters.
+
+.. code-block:: python
+
+    >>> from inform import render_bar, display
+    >>> for i in range(10):
+    ...     value = 1 - i/9.02
+    ...     display('{:0.3f}: {}'.format(value, render_bar(value, 70)))
+    1.000: ██████████████████████████████████████████████████████████████████████
+    0.889: ██████████████████████████████████████████████████████████████▏
+    0.778: ██████████████████████████████████████████████████████▍
+    0.667: ██████████████████████████████████████████████▋
+    0.557: ██████████████████████████████████████▉
+    0.446: ███████████████████████████████▏
+    0.335: ███████████████████████▍
+    0.224: ███████████████▋
+    0.113: ███████▉
+    0.002: ▏
+
+
 Debugging Functions
 -------------------
 
@@ -1405,11 +1534,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int1: 2
-    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int2: 2
+    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int2: 2
     vout = 1.4
-    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int1: 1.6
-    myprog DEBUG: <doctest user.rst[153]>, 2, __main__: int2: 3.6
+    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1430,7 +1559,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    myprog DEBUG: <doctest user.rst[159]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[169]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1446,7 +1575,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    myprog DEBUG: <doctest user.rst[161]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[171]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1470,7 +1599,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    myprog DEBUG: <doctest user.rst[163]>, 4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[173]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1500,7 +1629,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    myprog DEBUG: <doctest user.rst[170]>, 1, __main__: 1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[180]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1543,7 +1672,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    myprog DEBUG: <doctest user.rst[172]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[182]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1561,7 +1690,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    myprog DEBUG: <doctest user.rst[175]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[185]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1
