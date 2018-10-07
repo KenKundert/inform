@@ -325,14 +325,51 @@ def test_is_collection():
     assert is_collection({}) == True
 
 def test_color():
+    assert Color('black', 'dark')('black') == '\x1b[0;30mblack\x1b[0m'
+    assert Color('red', 'dark')('red') == '\x1b[0;31mred\x1b[0m'
+    assert Color('green', 'dark')('green') == '\x1b[0;32mgreen\x1b[0m'
+    assert Color('yellow', 'dark')('yellow') == '\x1b[0;33myellow\x1b[0m'
+    assert Color('blue', 'dark')('blue') == '\x1b[0;34mblue\x1b[0m'
+    assert Color('magenta', 'dark')('magenta') == '\x1b[0;35mmagenta\x1b[0m'
+    assert Color('cyan', 'dark')('cyan') == '\x1b[0;36mcyan\x1b[0m'
+    assert Color('white', 'dark')('white') == '\x1b[0;37mwhite\x1b[0m'
+
+    assert Color('black', 'light')('black') == '\x1b[1;30mblack\x1b[0m'
+    assert Color('red', 'light')('red') == '\x1b[1;31mred\x1b[0m'
+    assert Color('green', 'light')('green') == '\x1b[1;32mgreen\x1b[0m'
+    assert Color('yellow', 'light')('yellow') == '\x1b[1;33myellow\x1b[0m'
+    assert Color('blue', 'light')('blue') == '\x1b[1;34mblue\x1b[0m'
+    assert Color('magenta', 'light')('magenta') == '\x1b[1;35mmagenta\x1b[0m'
+    assert Color('cyan', 'light')('cyan') == '\x1b[1;36mcyan\x1b[0m'
+    assert Color('white', 'light')('white') == '\x1b[1;37mwhite\x1b[0m'
+
+    assert Color('black')('black', scheme='dark') == '\x1b[0;30mblack\x1b[0m'
+    assert Color('red')('red', scheme='dark') == '\x1b[0;31mred\x1b[0m'
+    assert Color('green')('green', scheme='dark') == '\x1b[0;32mgreen\x1b[0m'
+    assert Color('yellow')('yellow', scheme='dark') == '\x1b[0;33myellow\x1b[0m'
+    assert Color('blue')('blue', scheme='dark') == '\x1b[0;34mblue\x1b[0m'
+    assert Color('magenta')('magenta', scheme='dark') == '\x1b[0;35mmagenta\x1b[0m'
+    assert Color('cyan')('cyan', scheme='dark') == '\x1b[0;36mcyan\x1b[0m'
+    assert Color('white')('white', scheme='dark') == '\x1b[0;37mwhite\x1b[0m'
+
+    assert Color('black')('black', scheme='light') == '\x1b[1;30mblack\x1b[0m'
+    assert Color('red')('red', scheme='light') == '\x1b[1;31mred\x1b[0m'
+    assert Color('green')('green', scheme='light') == '\x1b[1;32mgreen\x1b[0m'
+    assert Color('yellow')('yellow', scheme='light') == '\x1b[1;33myellow\x1b[0m'
+    assert Color('blue')('blue', scheme='light') == '\x1b[1;34mblue\x1b[0m'
+    assert Color('magenta')('magenta', scheme='light') == '\x1b[1;35mmagenta\x1b[0m'
+    assert Color('cyan')('cyan', scheme='light') == '\x1b[1;36mcyan\x1b[0m'
+    assert Color('white')('white', scheme='light') == '\x1b[1;37mwhite\x1b[0m'
+
+    assert Color('black', scheme=None)('black') == 'black'
+    assert Color('black')('black', scheme=None) == 'black'
+
+    Inform(colorscheme=None)
+    assert Color('black')('black') == 'black'
+    Inform(colorscheme='dark')
     assert Color('black')('black') == '\x1b[0;30mblack\x1b[0m'
-    assert Color('red')('red') == '\x1b[0;31mred\x1b[0m'
-    assert Color('green')('green') == '\x1b[0;32mgreen\x1b[0m'
-    assert Color('yellow')('yellow') == '\x1b[0;33myellow\x1b[0m'
-    assert Color('blue')('blue') == '\x1b[0;34mblue\x1b[0m'
-    assert Color('magenta')('magenta') == '\x1b[0;35mmagenta\x1b[0m'
-    assert Color('cyan')('cyan') == '\x1b[0;36mcyan\x1b[0m'
-    assert Color('white')('white') == '\x1b[0;37mwhite\x1b[0m'
+    Inform(colorscheme='light')
+    assert Color('black')('black') == '\x1b[1;30mblack\x1b[0m'
     assert Color.strip_colors(Color('red')('red')) == 'red'
 
 def test_join():
