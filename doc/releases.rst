@@ -26,8 +26,8 @@ Releases
       and :func:`inform.get_culprit()`.
 
 **Latest development release**:
-    | Version: 1.13.2
-    | Released: 2018-09-09
+    | Version: 1.13.3
+    | Released: 2018-10-07
 
     - Added :class:`inform.render_bar` utility function.
     - Added :class:`inform.ProgressBar` class.
