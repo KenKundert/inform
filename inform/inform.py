@@ -26,6 +26,7 @@ from __future__ import print_function
 import re
 import os
 import sys
+from codecs import open
 
 # Globals {{{1
 INFORMER = None
@@ -1610,11 +1611,7 @@ class Inform:
             logfile = '.%s.log' % self.prog_name if self.prog_name else '.log'
         try:
             if is_str(logfile):
-                try:                # python 3
-                    logfile = open(logfile, 'w', encoding=encoding)
-                except TypeError:   # python 2
-                    import codecs
-                    logfile = codecs.open(logfile, 'w', encoding=encoding)
+                logfile = open(logfile, 'w', encoding=encoding)
             elif logfile:  # pathlib
                 try:
                     logfile = logfile.open(mode='w', encoding=encoding)
