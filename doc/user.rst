@@ -978,6 +978,13 @@ a conjunction that is placed between the last two elements. For example:
     >>> conjoin(['a', 'b', 'c'], conj=' or ')
     'a, b or c'
 
+If you prefer the use of the Oxford comma, you can add it as follow:
+
+.. code-block:: python
+
+    >>> conjoin(['a', 'b', 'c'], conj=', and ')
+    'a, b, and c'
+
 
 .. _cull desc:
 
@@ -1534,11 +1541,11 @@ method has the side effect of updating the state of the integrator.
     >>> for t in range(1, 3):
     ...    vout = 0.7*aaa(int2=int2.update(aaa(int1=int1.update(vin-vout))))
     ...    display('vout = {}'.format(vout))
-    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int1: 2
-    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int2: 2
+    myprog DEBUG: <doctest user.rst[...]>, 2, __main__: int1: 2
+    myprog DEBUG: <doctest user.rst[...]>, 2, __main__: int2: 2
     vout = 1.4
-    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int1: 1.6
-    myprog DEBUG: <doctest user.rst[163]>, 2, __main__: int2: 3.6
+    myprog DEBUG: <doctest user.rst[...]>, 2, __main__: int1: 1.6
+    myprog DEBUG: <doctest user.rst[...]>, 2, __main__: int2: 3.6
     vout = 2.52
 
 
@@ -1559,7 +1566,7 @@ ddd
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ddd(a, b, c, d)
-    myprog DEBUG: <doctest user.rst[169]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[...]>, 1, __main__:
         1
         'this is a test'
         (2, 3)
@@ -1575,7 +1582,7 @@ If you give named arguments, the name is prepended to its value:
 
     >>> from inform import ddd
     >>> ddd(a=a, b=b, c=c, d=d, s='hey now!')
-    myprog DEBUG: <doctest user.rst[171]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[...]>, 1, __main__:
         a = 1
         b = 'this is a test'
         c = (2, 3)
@@ -1599,7 +1606,7 @@ argument itself.
     ...         ddd(self=self)
 
     >>> contact = Info(email='ted@ledbelly.com', name='Ted Ledbelly')
-    myprog DEBUG: <doctest user.rst[173]>, 4, __main__.Info.__init__():
+    myprog DEBUG: <doctest user.rst[...]>, 4, __main__.Info.__init__():
         self = Info object containing {
             'email': 'ted@ledbelly.com',
             'name': 'Ted Ledbelly',
@@ -1629,7 +1636,7 @@ good way of confirming that a line of code has been reached.
     >>> c = (2, 3)
     >>> d = {'a': a, 'b': b, 'c': c}
     >>> ppp(a, b, c)
-    myprog DEBUG: <doctest user.rst[180]>, 1, __main__: 1 this is a test (2, 3)
+    myprog DEBUG: <doctest user.rst[...]>, 1, __main__: 1 this is a test (2, 3)
 
 
 .. _sss desc:
@@ -1651,7 +1658,7 @@ here?* question better than a simple print function.
     ..     print('CONTINUING')
 
     >> foo()
-    DEBUG: <doctest user.rst[171]>:2, __main__.foo():
+    DEBUG: <doctest user.rst[...]>:2, __main__.foo():
         Traceback (most recent call last):
             ...
     CONTINUING
@@ -1672,7 +1679,7 @@ variables on the argument list and only those variables are printed.
     >>> from inform import vvv
 
     >>> vvv(b, d)
-    myprog DEBUG: <doctest user.rst[182]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[...]>, 1, __main__:
         b = 'this is a test'
         d = {
             'a': 1,
@@ -1690,7 +1697,7 @@ shown.
 
     >>> aa = 1
     >>> vvv(a)
-    myprog DEBUG: <doctest user.rst[185]>, 1, __main__:
+    myprog DEBUG: <doctest user.rst[...]>, 1, __main__:
         a = 1
         aa = 1
         vin = 1

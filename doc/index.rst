@@ -346,5 +346,6 @@ Documentation
    :maxdepth: 1
 
    user
+   examples
    api
    releases
