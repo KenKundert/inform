@@ -317,3 +317,11 @@ variables to your account.
     except KeyboardInterrupt:
         terminate()                                                    ## inform
     terminate(raw_status != 'normal')                                  ## inform
+
+A typical output of the utility is::
+
+    date: Friday, 2018-10-12 @ 03:36:45 PM
+    status: normal
+    power: 1.48 kW (44 %)
+    energy today: 15.2 kWh
+    energy lifetime: 2.71 MWh
