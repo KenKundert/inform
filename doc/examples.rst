@@ -11,6 +11,8 @@ modes. You can also use *Error* directly or you can subclass it to access
 *Inform's* rich exception handling. You can use the various *Inform* utilities
 such as the text colors, multiple columns lists, and progress bars.
 
+You can the source text for these examples on `GitHub 
+<https://github.com/KenKundert/inform/blob/master/examples`_.
 
 ..  _fdb:
 
@@ -325,3 +327,421 @@ A typical output of the utility is::
     power: 1.48 kW (44 %)
     energy today: 15.2 kWh
     energy lifetime: 2.71 MWh
+
+
+..  _run:
+
+Run Command
+-----------
+
+This function runs a command and captures it output. It uses *Inform's* rich 
+exceptions. If something goes wrong while invoking the command then all relevant 
+information is attached to the exception and so is available to help build the 
+most informative error message.  In this way, the code that is responsible for 
+reporting the problem to the user can adapt to the errant command reports its 
+errors (some commands just return an exit status, some output the error in 
+stderr, some in stdout).
+
+.. code-block:: python
+
+    from inform import Error, narrate, os_error
+    from subprocess import Popen, PIPE
+
+    def run(cmd, stdin='', accept=0):
+        "Run a command and capture its output."
+        narrate('running:', cmd)
+
+        try:
+            process = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            stdout, stderr = process.communicate(stdin.encode('utf8'))
+            stdout = stdout.decode('utf8')
+            stderr = stderr.decode('utf8')
+            status = process.returncode
+        except OSError as e:
+            raise Error(msg=os_error(e), cmd=cmd, template = '{msg}')
+
+        # check exit status
+        narrate('completion status:', status)
+        if status < 0 or status > accept:
+            raise Error(
+                msg = 'unexpected exit status',
+                status = status,
+                stdout = stdout.rstrip(),
+                stderr = stderr.rstrip(),
+                cmd = cmd,
+                template = '{msg} ({status}).'
+            )
+        return status, stdout, stderr
+
+    try:
+        status, stdout, stderr = run('unobtanium')
+    except Error as e:
+        e.terminate(culprit=e.cmd, codicil=e.stderr)
+
+The output to this command would be something like this::
+
+    error: unobtanium: unexpected exit status (127).
+        /bin/sh: unobtanium: command not found
+
+
+..  _networth:
+
+Networth
+--------
+
+This utility use the `Avendesora Collaborative Password Manager 
+<avendesora.readthedocs.io>`_ to keep track of the value of assets and 
+liabilities that together make up ones networth.
+
+.. code-block:: python
+
+    #!/usr/bin/env python3
+    # Description
+    """Networth
+
+    Show a summary of the networth of the specified person.
+
+    Usage:
+        networth [options] [<profile>]
+
+    Options:
+        -u, --updated           show the account update date rather than breakdown
+
+    {available_profiles}
+    Settings can be found in: {settings_dir}.
+    Typically there is one file for generic settings named 'config' and then one 
+    file for each profile whose name is the same as the profile name with a '.prof' 
+    suffix.  Each of the files may contain any setting, but those values in 'config' 
+    override those built in to the program, and those in the individual profiles 
+    override those in 'config'. The following settings are understood. The values 
+    are those before an individual profile is applied.
+
+    Profile values:
+        default_profile = {default_profile}
+
+    Account values:
+        avendesora_fieldname = {avendesora_fieldname}
+        value_updated_subfieldname = {value_updated_subfieldname}
+        date_formats = {date_formats}
+        max_account_value_age = {max_account_value_age}  (in days)
+        aliases = {aliases}
+            (aliases is used to fix account names to make them more readable)
+
+    Cryptocurrency values:
+        coins = {coins}
+        prices_filename = {prices_filename}
+        max_coin_price_age = {max_coin_price_age}  (in seconds)
+
+    Bar graph values:
+        screen_width = {screen_width}
+        asset_color = {asset_color}
+        debt_color = {debt_color}
+
+    The prices and log files can be found in {cache_dir}.
+
+    A description of how to configure and use this program can be found at 
+    <https://avendesora.readthedocs.io/en/latest/api.html#example-net-worth>`_
+    """
+
+    # Imports
+    from avendesora import PasswordGenerator, PasswordError
+    from avendesora.gpg import PythonFile
+    from inform import (
+        conjoin, display, done, error, fatal, is_str, join, narrate, os_error, 
+        render_bar, terminate, warn, Color, Error, Inform,
+    )
+    from quantiphy import Quantity
+    from docopt import docopt
+    from appdirs import user_config_dir, user_cache_dir
+    from pathlib import Path
+    import arrow
+
+    # Settings
+    # These can be overridden in ~/.config/networth/config
+    prog_name = 'networth'
+    config_filename = 'config'
+
+    # Avendesora settings
+    default_profile = 'me'
+    avendesora_fieldname = 'estimated_value'
+    value_updated_subfieldname = 'updated'
+    aliases = {}
+
+    # cryptocurrency settings (empty coins to disable cryptocurrency support)
+    proxy = None
+    prices_filename = 'prices'
+    coins = None
+    max_coin_price_age = 86400  # refresh cache if older than this (seconds)
+
+    # bar settings
+    screen_width = 79
+    asset_color = 'green'
+    debt_color = 'red'
+        # currently we only colorize the bar because ...
+        # - it is the only way of telling whether value is positive or negative
+        # - trying to colorize the value really messes with the column widths and is 
+        #     not attractive
+
+    # date settings
+    date_formats = [
+        'MMMM YYYY',
+        'YYMMDD',
+    ]
+    max_account_value_age = 120  # days
+
+    # Utility functions
+    # get the age of an account value
+    def get_age(date, profile):
+        if date:
+            for fmt in date_formats:
+                try:
+                    then = arrow.get(date, fmt)
+                    age = arrow.now() - then
+                    return age.days
+                except:
+                    pass
+        warn(
+            'could not compute age of account value',
+            '(updated missing or misformatted).',
+            culprit=profile
+        )
+
+    # colorize text
+    def colorize(value, text = None):
+        if text is None:
+            text = str(value)
+        return debt_color(text) if value < 0 else asset_color(text)
+
+    try:
+        # Initialization
+        settings_dir = Path(user_config_dir(prog_name))
+        cache_dir = user_cache_dir(prog_name)
+        Quantity.set_prefs(prec=2)
+        Inform(logfile=Path(cache_dir, 'log'))
+        display.log = False   # do not log normal output
+
+        # Read generic settings
+        config_filepath = Path(settings_dir, config_filename)
+        if config_filepath.exists():
+            narrate('reading:', config_filepath)
+            settings = PythonFile(config_filepath)
+            settings.initialize()
+            locals().update(settings.run())
+        else:
+            narrate('not found:', config_filepath)
+
+        # Read command line and process options
+        available=set(p.stem for p in settings_dir.glob('*.prof'))
+        available.add(default_profile)
+        if len(available) > 1:
+            choose_from = f'Choose <profile> from {conjoin(sorted(available))}.'
+            default = f'The default is {default_profile}.'
+            available_profiles = f'{choose_from} {default}\n'
+        else:
+            available_profiles = ''
+
+        cmdline = docopt(__doc__.format(
+            **locals()
+        ))
+        show_updated = cmdline['--updated']
+        profile = cmdline['<profile>'] if cmdline['<profile>'] else default_profile
+        if profile not in available:
+            fatal(
+                'unknown profile.', choose_from, template=('{} {}', '{}'), 
+                culprit=profile
+            )
+
+        # Read profile settings
+        config_filepath = Path(user_config_dir(prog_name), profile + '.prof')
+        if config_filepath.exists():
+            narrate('reading:', config_filepath)
+            settings = PythonFile(config_filepath)
+            settings.initialize()
+            locals().update(settings.run())
+        else:
+            narrate('not found:', config_filepath)
+
+        # Process the settings
+        if is_str(date_formats):
+            date_formats = [date_formats]
+        asset_color = Color(asset_color)
+        debt_color = Color(debt_color)
+
+        # Get cryptocurrency prices
+        if coins:
+            import requests
+
+            cache_valid = False
+            cache_dir = Path(cache_dir)
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            prices_cache = Path(cache_dir, prices_filename)
+            if prices_cache and prices_cache.exists():
+                now = arrow.now()
+                age = now.timestamp - prices_cache.stat().st_mtime
+                cache_valid = age < max_coin_price_age
+            if cache_valid:
+                contents = prices_cache.read_text()
+                prices = Quantity.extract(contents)
+                narrate('coin prices are current:', prices_cache)
+            else:
+                narrate('updating coin prices')
+                # download latest asset prices from cryptocompare.com
+                currencies = dict(
+                    fsyms=','.join(coins),     # from symbols
+                    tsyms='USD',               # to symbols
+                )
+                url_args = '&'.join(f'{k}={v}' for k, v in currencies.items())
+                base_url = f'https://min-api.cryptocompare.com/data/pricemulti'
+                url = '?'.join([base_url, url_args])
+                try:
+                    r = requests.get(url, proxies=proxy)
+                except Exception as e:
+                    # must catch all exceptions as requests.get() can generate 
+                    # a variety based on how it fails, and if the exception is not 
+                    # caught the thread dies.
+                    raise Error('cannot access cryptocurrency prices:', codicil=str(e))
+                except KeyboardInterrupt:
+                    done()
+
+                try:
+                    data = r.json()
+                except:
+                    raise Error('cryptocurrency price download was garbled.')
+                prices = {k: Quantity(v['USD'], '$') for k, v in data.items()}
+
+                if prices_cache:
+                    contents = '\n'.join('{} = {}'.format(k,v) for k,v in 
+                    prices.items())
+                    prices_cache.write_text(contents)
+                    narrate('updating coin prices:', prices_cache)
+            prices['USD'] = Quantity(1, '$')
+        else:
+            prices = {}
+
+        # Build account summaries
+        narrate('running avendesora')
+        pw = PasswordGenerator()
+        totals = {}
+        accounts = {}
+        total_assets = Quantity(0, '$')
+        total_debt = Quantity(0, '$')
+        grand_total = Quantity(0, '$')
+        width = 0
+        for account in pw.all_accounts():
+
+            # get data
+            data = account.get_composite(avendesora_fieldname)
+            if not data:
+                continue
+            if type(data) != dict:
+                error(
+                    'expected a dictionary.',
+                    culprit=(account_name, avendesora_fieldname)
+                )
+                continue
+
+            # get account name
+            account_name = account.get_name()
+            account_name = aliases.get(account_name, account_name)
+            account_name = account_name.replace('_', ' ')
+            width = max(width, len(account_name))
+
+            # sum the data
+            updated = None
+            contents = {}
+            total = Quantity(0, '$')
+            odd_units = False
+            for k, v in data.items():
+                if k == value_updated_subfieldname:
+                    updated = v
+                    continue
+                if k in prices:
+                    value = Quantity(v*prices[k], prices[k])
+                    k = 'cryptocurrency'
+                else:
+                    value = Quantity(v, '$')
+                if value.units == '$':
+                    total = total.add(value)
+                else:
+                    odd_units = True
+                contents[k] = value.add(contents.get(k, 0))
+                width = max(width, len(k))
+            for k, v in contents.items():
+                totals[k] = v.add(totals.get(k, 0))
+
+            # generate the account summary
+            age = get_age(data.get(value_updated_subfieldname), account_name)
+            if show_updated:
+                desc = updated
+            else:
+                desc = ', '.join('{}={}'.format(k, v) for k, v in contents.items() if v)
+                if len(contents) == 1 and not odd_units:
+                    desc = k
+                if age and age > max_account_value_age:
+                    desc += f' ({age//30} months old)'
+            accounts[account_name] = join(
+                total, desc.replace('_', ' '),
+                template=('{:7q} {}', '{:7q}'), remove=(None,'')
+            )
+
+            # sum assets and debts
+            if total > 0:
+                total_assets = total_assets.add(total)
+            else:
+                total_debt = total_debt.add(-total)
+            grand_total = grand_total.add(total)
+
+        # Summarize by account
+        display('By Account:')
+        for name in sorted(accounts):
+            summary = accounts[name]
+            display(f'{name:>{width+2}s}: {summary}')
+
+        # Summarize by investment type
+        display('\nBy Type:')
+        largest_share = max(v for v in totals.values() if v.units == '$')
+        barwidth = screen_width - width - 18
+        for asset_type in sorted(totals, key=lambda k: totals[k], reverse=True):
+            value = totals[asset_type]
+            if value.units != '$':
+                continue
+            share = value/grand_total
+            bar = render_bar(value/largest_share, barwidth)
+            asset_type = asset_type.replace('_', ' ')
+            display(f'{asset_type:>{width+2}s}: {value:>7s} ({share:>5.1%}) {bar}')
+        display(
+            f'\n{"TOTAL":>{width+2}s}:',
+            f'{grand_total:>7s} (assets = {total_assets}, debt = {total_debt})'
+        )
+
+    # Handle exceptions
+    except OSError as e:
+        error(os_error(e))
+    except KeyboardInterrupt:
+        terminate('Killed by user.')
+    except (PasswordError, Error) as e:
+        e.terminate()
+    done()
+
+The output of this program should look something like this::
+
+    By Account:
+              ameritrade:   $705k equities=$315k, cash=$389k (4 months old)
+                pnc bank:  $21.3k cash (4 months old)
+            john hancock:    $80k equities (28 months old)
+                  praxis:  $55.7k equities (4 months old)
+             oppenheimer:   $134k equities (4 months old)
+               tiaa cref:    $93k retirement (21 months old)
+               blackrock:  $98.4k equities (4 months old)
+                   pimco:   $211k equities (4 months old)
+                jpmorgan:  $12.9k equities (4 months old)
+                hartford:    $31k equities (24 months old)
+        american century:   $914k equities (4 months old)
+
+    By Type:
+                equities:  $1.85M (78.6%) ████████████████████████████████████████████████████████████████████████
+                    cash:   $411k (17.4%) ███████████████▉
+              retirement:    $93k ( 3.9%) ███▌
+
+                   TOTAL:  $2.36M (assets = $2.36M, debt = $0)
+

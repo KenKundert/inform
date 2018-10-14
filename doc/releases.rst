@@ -43,4 +43,3 @@ Releases
     - Use colorscheme of active informer as default for colorizers.
     - :meth:`inform.Error.get_culprit` now returns a tuple rather than a string.
 
-

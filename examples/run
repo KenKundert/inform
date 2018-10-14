@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+from inform import Error, narrate, os_error
+from subprocess import Popen, PIPE
+
+def run(cmd, stdin='', accept=0):
+    "Run a command and capture its output."
+    narrate('running:', cmd)
+
+    try:
+        process = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate(stdin.encode('utf8'))
+        stdout = stdout.decode('utf8')
+        stderr = stderr.decode('utf8')
+        status = process.returncode
+    except OSError as e:
+        raise Error(msg=os_error(e), cmd=cmd, template = '{msg}')
+
+
+    # check exit status
+    narrate('completion status:', status)
+    if status < 0 or status > accept:
+        raise Error(
+            msg = 'unexpected exit status',
+            status = status,
+            stdout = stdout.rstrip(),
+            stderr = stderr.rstrip(),
+            cmd = cmd,
+            template = '{msg} ({status}).'
+        )
+    return status, stdout, stderr
+
+try:
+    status, stdout, stderr = run('unobtanium')
+except Error as e:
+    e.terminate(culprit=e.cmd, codicil=e.stderr)

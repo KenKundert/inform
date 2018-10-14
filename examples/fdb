@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+# Description {{{1
+"""
+fdb
+
+Search through all python files in current working directory and all 
+subdirectories and edit those that contain any Inform debug functions (aaa, ddd,
+ppp, sss, vvv).  Use *n* to search for debug functions, and *^n* to go to next 
+file.  Going to the next file automatically writes the current file if any 
+changes were made.
+
+Usage:
+    fdb [options]
+
+Options:
+    -l, --list   list the files rather than edit them
+"""
+
+# Imports {{{1
+from docopt import docopt
+from inform import display, os_error, terminate
+import re
+from shlib import lsf, Run
+
+# Globals {{{1
+debug_functions = 'aaa ddd ppp sss vvv'.split()
+finder = re.compile(r'\b({})\('.format('|'.join(debug_functions)))
+vim = 'vim'
+vim_search = r'\<\({}\)('.format(r'\|'.join(debug_functions))
+vim_flags = 'aw nofen'.split()   # autowrite, disable folds
+vim_options = 'set {}'.format(' '.join(vim_flags))
+# Configure ctrl-N to move to first occurrence of search string in next file
+# while suppressing the annoying 'press enter' message and echoing the
+# name of the new file so you know where you are.
+next_file_map = 'map <C-N> :silent next +//<CR> :file<CR>'
+search_pattern = 'silent /{}'.format(vim_search)
+
+# Main {{{1
+cmdline = docopt(__doc__)
+
+# determine which files contains any debug function
+matches = []
+for filepath in lsf(select='**/*.py', reject='inform.py'):
+    try:
+        contents = filepath.read_text()
+        if finder.search(contents):
+            matches.append(filepath)
+    except OSError as e:
+        error(os_error(e))
+if not matches:
+    terminate()
+
+if cmdline['--list']:
+    display(*matches, sep='\n')
+    terminate()
+
+# edit the files
+cmd = [
+    vim,
+    '+{}'.format('|'.join([vim_options, next_file_map, search_pattern]))
+] + matches
+editor = Run(cmd, modes='soeW*')
+terminate(editor.status)

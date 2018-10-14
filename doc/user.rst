@@ -540,7 +540,7 @@ its messages. That can be turned off as follows:
 
 Any attribute that can be passed into :class:`inform.InformantFactory` when 
 creating an informant can be overridden. However, when overriding a color you 
-must use a colorizor rather than a color name:
+must use a colorizer rather than a color name:
 
 .. code-block:: python
 
