@@ -639,7 +639,8 @@ def conjoin(iterable, conj=' and ', sep=', '):
 
     Args:
         iterable (exception):
-            The collection of strings to be joined.
+            The collection of items to be joined. All items are converted to
+            strings.
         conj (string):
             The separator used between the next to last and last values.
         sep (string):
@@ -665,7 +666,7 @@ def conjoin(iterable, conj=' and ', sep=', '):
         a, b and c
 
     """
-    lst = list(iterable)
+    lst = [str(m) for m in iterable]
     if conj is not None and len(lst) > 1:
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst)
@@ -1755,7 +1756,7 @@ class Inform:
         culprit = kwargs.get('culprit')
         if culprit:
             if is_collection(culprit):
-                return self.culprit_sep.join(str(c) for c in culprit if c)
+                return self.culprit_sep.join(str(c) for c in culprit if c is not None)
             return str(culprit)
         return ''
 
