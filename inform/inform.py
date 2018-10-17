@@ -2214,7 +2214,7 @@ class Error(Exception):
                 return value without modifying the cached culprit.
 
         Returns:
-            The culprit argument is appended to the exception's culprit and the
+            The culprit argument is prepended to the exception's culprit and the
             combination is returned. The return value is always in the form of a
             tuple even if there is only one component.
         """
@@ -2224,8 +2224,33 @@ class Error(Exception):
         if culprit:
             if not is_collection(culprit):
                 culprit = (culprit,)
-            return exception_culprit + culprit
+            return culprit + exception_culprit
         return exception_culprit
+
+    def get_codicil(self, codicil=None, join=False):
+        """Get the codicil.
+
+        Return the codicil as a tuple. If a codicil is specified as an
+        argument, it is appended to the exception's codicil without modifying it.
+
+        Args:
+            codicil (string or tuple of strings):
+                A codicil or collection of codicils that is appended to the
+                return value without modifying the cached codicil.
+
+        Returns:
+            The codicil argument is appended to the exception's codicil and the
+            combination is returned. The return value is always in the form of a
+            tuple even if there is only one component.
+        """
+        exception_codicil = self.kwargs.get('codicil', ())
+        if not is_collection(exception_codicil):
+            exception_codicil = (exception_codicil,)
+        if codicil:
+            if not is_collection(codicil):
+                codicil = (codicil,)
+            return exception_codicil + codicil
+        return exception_codicil
 
     def report(self, **new_kwargs):
         """Report exception.

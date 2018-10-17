@@ -162,6 +162,7 @@ up their argument lists, the culprits are cached in case they are needed.
    ...    parameters = read_params(lines)
    error: parameters, 3, c: expected a number, found: ack
 
+
 Templates
 """""""""
 
@@ -851,7 +852,7 @@ using *reraise* in *parse_file*:
     ...         with open(filename) as f:
     ...             return parse_lines(f.read().splitlines())
     ...     except Error as e:
-    ...         e.reraise(culprit=(filename,) + e.get_culprit())
+    ...         e.reraise(culprit=e.get_culprit(filename))
 
     >>> try:
     ...     unladen_airspeed = parse_file('swallows')

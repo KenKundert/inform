@@ -12,7 +12,7 @@ modes. You can also use *Error* directly or you can subclass it to access
 such as the text colors, multiple columns lists, and progress bars.
 
 You can the source text for these examples on `GitHub 
-<https://github.com/KenKundert/inform/blob/master/examples`_.
+<https://github.com/KenKundert/inform/tree/master/examples>`_.
 
 ..  _fdb:
 
@@ -110,8 +110,8 @@ github key, key for your remote backups, etc.  For convenience, you might want
 to add all of these keys to your SSH agent when you first login.  This can
 become quite tedious. This script could be used load all of the keys to your
 agent in one simple action. It assumes the use of the `Avendesora Collaborative
-Password Manager <avendesora.readthedocs.io>`_ to securely hold the pass phrases
-of the keys.
+Password Manager <https://avendesora.readthedocs.io>`_ to securely hold the pass 
+phrases of the keys.
 
 You would put the name of your SSH keys in *SSHkeys*. The program steps through
 each key, accessing the passphrase and key file name from *Avendesora*, then
@@ -390,7 +390,7 @@ Networth
 --------
 
 This utility use the `Avendesora Collaborative Password Manager 
-<avendesora.readthedocs.io>`_ to keep track of the value of assets and 
+<https://avendesora.readthedocs.io>`_ to keep track of the value of assets and 
 liabilities that together make up ones networth.
 
 To get the prerequisites for this example, run::

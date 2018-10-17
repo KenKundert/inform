@@ -258,8 +258,8 @@ def test_pardon():
             assert err.get_message() == 'hey now'
             assert err.get_culprit() == ('nutz', 347)
             assert join_culprit(err.get_culprit()) == 'nutz, 347'
-            assert join_culprit(err.get_culprit(66)) == 'nutz, 347, 66'
-            assert join_culprit(err.get_culprit(('a', 'b'))) == 'nutz, 347, a, b'
+            assert join_culprit(err.get_culprit(66)) == '66, nutz, 347'
+            assert join_culprit(err.get_culprit(('a', 'b'))) == 'a, b, nutz, 347'
             assert str(err) == 'nutz, 347: hey now'
 
 def test_possess():
