@@ -42,4 +42,4 @@ Releases
     - Added *informant* named argument to :class:`inform.Error`.
     - Use colorscheme of active informer as default for colorizers.
     - :meth:`inform.Error.get_culprit` now returns a tuple rather than a string.
-
+    - Added :meth:`inform.Error.get_codicil`.
