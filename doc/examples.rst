@@ -206,8 +206,8 @@ pass phrases.
 
 ..  _solar:
 
-Status of Solar System
-----------------------
+Status of Solar Energy System
+-----------------------------
 
 This utility prints the current status of an Enphase home solar array.
 
@@ -392,6 +392,10 @@ Networth
 This utility use the `Avendesora Collaborative Password Manager 
 <avendesora.readthedocs.io>`_ to keep track of the value of assets and 
 liabilities that together make up ones networth.
+
+To get the prerequisites for this example, run::
+
+    > pip3 install --user --upgrade docopt inform quantiphy arrow requests appdirs
 
 .. code-block:: python
 
@@ -726,17 +730,17 @@ liabilities that together make up ones networth.
 The output of this program should look something like this::
 
     By Account:
-              ameritrade:   $705k equities=$315k, cash=$389k (4 months old)
-                pnc bank:  $21.3k cash (4 months old)
-            john hancock:    $80k equities (28 months old)
-                  praxis:  $55.7k equities (4 months old)
-             oppenheimer:   $134k equities (4 months old)
-               tiaa cref:    $93k retirement (21 months old)
-               blackrock:  $98.4k equities (4 months old)
-                   pimco:   $211k equities (4 months old)
-                jpmorgan:  $12.9k equities (4 months old)
-                hartford:    $31k equities (24 months old)
-        american century:   $914k equities (4 months old)
+              ameritrade:   $705k equities=$315k, cash=$389k
+                pnc bank:  $21.3k cash
+            john hancock:    $80k equities
+                  praxis:  $55.7k equities
+             oppenheimer:   $134k equities
+               tiaa cref:    $93k retirement
+              black rock:  $98.4k equities
+                   pimco:   $211k equities
+                jpmorgan:  $12.9k equities
+                hartford:    $31k equities
+        american century:   $914k equities
 
     By Type:
                 equities:  $1.85M (78.6%) ████████████████████████████████████████████████████████████████████████
