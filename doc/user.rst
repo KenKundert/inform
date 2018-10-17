@@ -860,6 +860,14 @@ using *reraise* in *parse_file*:
     ...     e.report()
     myprog error: swallows, 2: syntax error.
 
+This example uses :meth:`inform.Error.get_culprit()` to access the existing 
+culprit or culprits of the exception. Regardless of how many there are, they are 
+always returned as a culprit. It also accepts a culprit as an argument, which is 
+returned along with and before the culprit from the exception.
+
+Also available is :meth:`inform.Error.get_codicil()`, which behaves similarly 
+except with codicils rather than culprits and the argument is added after the 
+codicil from the exception rather than before.
 
 Utilities
 ---------
