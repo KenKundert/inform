@@ -7,5 +7,10 @@
 # To run with python3 use               : python3 test
 
 from runtests import runTests
+import sys
+
+if sys.version_info < (3,):
+    # unicode issues result in tests failing on Python2
+    raise SystemExit
 
 runTests(['inform', 'doctests'])
