@@ -25,10 +25,7 @@ Releases
     - Added :func:`inform.set_culprit()`, :func:`inform.add_culprit()`
       and :func:`inform.get_culprit()`.
 
-**Latest development release**:
-    | Version: 1.13.5
-    | Released: 2018-10-16
-
+**1.14 (2018-12-03)**:
     - Added :func:`inform.render_bar` utility function.
     - Added :class:`inform.ProgressBar` class.
     - Added :class:`inform.Info` class.
@@ -44,3 +41,8 @@ Releases
     - :meth:`inform.Error.get_culprit` now returns a tuple rather than a string.
     - Added :meth:`inform.Error.join_culprit`.
     - Added :meth:`inform.Error.get_codicil`.
+
+**Latest development release**:
+    | Version: 1.13.5
+    | Released: 2018-10-16
+
