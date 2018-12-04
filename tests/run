@@ -5,7 +5,7 @@ rm -rf ~/.local/lib/python*/site-packages/inform*
 echo "#################"
 echo "Python2 tests ..."
 echo "#################"
-pip2 install --user -e ..
+pip2 install --user ..
 # python2.7 -m pytest -xvv
 python2.7 -m pytest -v
 
@@ -15,6 +15,6 @@ echo
 echo "#################"
 echo "Python3 tests ..."
 echo "#################"
-pip3.6 install --user -e ..
+pip3 install --user ..
 # python3.6 -m pytest -xvv
-python3.6 -m pytest -v
+python3 -m pytest -v

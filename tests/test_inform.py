@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # Test Inform
 
 # Imports {{{1
