@@ -5,6 +5,7 @@ install.out
 htmlcov
 .coverage
 .cache
+COVERAGE_ISSUE
 
 # Packages
 *.egg
