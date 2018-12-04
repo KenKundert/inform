@@ -166,22 +166,29 @@ def test_pardon():
             assert e.args == (0,)
 
         try:
-            raise Error('hey now!', culprit='nutz', extra='foo')
+            raise Error('hey now!', culprit='nutz', extra='foo', codicil='putz')
             assert False
         except Error as err:
             assert err.get_message() == 'hey now!'
             assert err.get_culprit() == ('nutz',)
+            assert err.get_codicil() == ('putz',)
             assert join_culprit(err.get_culprit()) == 'nutz'
             assert err.extra == 'foo'
             assert str(err) == 'nutz: hey now!'
             assert errors_accrued() == 0  # errors don't accrue until reported
 
         try:
-            raise Error('hey now!', culprit=('nutz',  'crunch'), extra='foo')
+            raise Error(
+                'hey now!',
+                culprit=('nutz',  'crunch'),
+                extra='foo',
+                codicil=('putz',  'toodle'),
+            )
             assert False
         except Error as err:
             assert err.get_message() == 'hey now!'
             assert err.get_culprit() == ('nutz', 'crunch')
+            assert err.get_codicil() == ('putz', 'toodle')
             assert join_culprit(err.get_culprit()) == 'nutz, crunch'
             assert err.extra == 'foo'
             assert str(err) == 'nutz, crunch: hey now!'
