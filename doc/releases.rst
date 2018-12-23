@@ -43,6 +43,6 @@ Releases
     - Added :meth:`inform.Error.get_codicil`.
 
 **Latest development release**:
-    | Version: 1.14.0
-    | Released: 2018-12-03
+    | Version: 1.14.1
+    | Released: 2018-12-22
 
