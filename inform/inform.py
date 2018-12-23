@@ -1340,7 +1340,7 @@ error = InformantFactory(
 fatal = InformantFactory(
     severity='error',
     is_error=True,
-    terminate=1,
+    terminate=True,
     header_color='red',
     output=lambda inform: not inform.mute,
     log=True,
@@ -1405,6 +1405,10 @@ class Inform:
             ./.<prog_name>.log is used.  May be an open stream.  Or it may be
             *False*, in which case no log file is created.
 
+        error_status (int)
+            The default exit status to return to the shell when terminating the
+            program due to an error.  The default is 1.
+
         prog_name (string):
             The program name. Is appended to the message headers and used to
             create the default logfile name. May be a string, in which case it
@@ -1421,7 +1425,11 @@ class Inform:
             program version (logged if provided).
 
         termination_callback (func):
-            A function that is called at program termination.
+            A function that is called at program termination. This function is
+            called before the logfile is closed and is only called if Inform
+            processes the program termination. If you want to register a
+            function to run regardless of how the program exit is processed, use
+            the atexit module.
 
         colorscheme (*None*, 'light', or 'dark'):
             Color scheme to use. *None* indicates that messages should not be
@@ -1496,29 +1504,31 @@ class Inform:
     # constructor {{{2
     def __init__(
         self,
-        mute=False,
-        quiet=False,
-        verbose=False,
-        narrate=False,
-        logfile=False,
-        prog_name=True,
-        argv=None,
-        version=None,
-        termination_callback=None,
-        colorscheme='dark',
-        flush=False,
-        stdout=None,
-        stderr=None,
-        length_thresh=80,
-        culprit_sep=', ',
-        stream_policy='termination',
-        notify_if_no_tty=False,
-        notifier=NOTIFIER,
+        mute = False,
+        quiet = False,
+        verbose = False,
+        narrate = False,
+        logfile = False,
+        error_status = 1,
+        prog_name = True,
+        argv = None,
+        version = None,
+        termination_callback = None,
+        colorscheme = 'dark',
+        flush = False,
+        stdout = None,
+        stderr = None,
+        length_thresh = 80,
+        culprit_sep = ', ',
+        stream_policy = 'termination',
+        notify_if_no_tty = False,
+        notifier = NOTIFIER,
         **kwargs
     ):
         self.errors = 0
         self.version = version
         self.termination_callback = termination_callback
+        self.error_status = error_status
         self.flush = flush
         self.stdout = stdout if stdout else sys.stdout
         self.stderr = stderr if stderr else sys.stderr
@@ -1819,7 +1829,7 @@ class Inform:
             self.logfile.close()
             self.logfile = None
         if exit:
-            sys.exit(0)
+            raise SystemExit(0)
         else:
             return 0
 
@@ -1830,8 +1840,11 @@ class Inform:
         Args:
             status (int, bool, string, or None):
                 The desired exit status or exit message.
-                Exit status is 1 if True is passed in.
-                When None, return 1 if errors occurred and 0 otherwise
+                Exit status is inform.error_status if True is passed in.
+                When None, return inform.error_status if errors occurred and 0
+                otherwise.  Status may also be a string, in which case it is
+                printed to stderr without a header and the exit status is
+                inform.error_status.
             exit (bool):
                 If False, all preparations for termination are done, but
                 sys.exit() is not called. Instead, the exit status is returned.
@@ -1846,33 +1859,35 @@ class Inform:
             | 2: invalid invocation
             | 3: panic
 
-        Status may also be a string, in which case it is printed to stderr and
-        the exit status is 1.
+        Of, if your program naturally want to signal pass or failure using its exit status:
+            | 0: success
+            | 1: failure
+            | 2: error
+            | 3: panic
         """
         if status is None:
-            status = 1 if self.errors_accrued() else 0
+            status = self.error_status if self.errors_accrued() else 0
         elif status is True:
-            status = 1
+            status = self.error_status
         prog_name = self.prog_name if self.prog_name else sys.argv[0]
         if self.termination_callback:
             self.termination_callback()
         if is_str(status):
-            log("%s: terminates with status 1 and with message '%s'." % (
-                prog_name, status
-            ))
-        else:
-            log('%s: terminates with status %s.' % (prog_name, status))
-            assert 0 <= status < 128
+            log(status)
+            print(status, file=sys.stderr)
+            status = self.error_status
+        log('%s: terminates with status %s.' % (prog_name, status))
+        assert 0 <= status < 128
         if self.logfile:
             self.logfile.close()
             self.logfile = None
         if exit:
-            sys.exit(status)
+            raise SystemExit(status)
         else:
             return status
 
     # terminate_if_errors {{{2
-    def terminate_if_errors(self, status=1, exit=True):
+    def terminate_if_errors(self, status=None, exit=True):
         """Terminate the program if error count is nonzero.
 
         Args:
@@ -2094,7 +2109,7 @@ def terminate(status=None, exit=True):
 
 
 # terminate_if_errors {{{2
-def terminate_if_errors(status=1, exit=True):
+def terminate_if_errors(status=None, exit=True):
     """Terminate the program if error count is nonzero."
 
     Calls :meth:`inform.Inform.terminate_if_errors` for the active informer.

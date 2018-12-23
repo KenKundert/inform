@@ -481,7 +481,7 @@ def test_exits(capsys):
     def callback():
         status['called'] = True
 
-    with Inform(prog_name=False, termination_callback=callback):
+    with Inform(prog_name=False, termination_callback=callback) as inform:
         status = {}
         with pytest.raises(SystemExit) as exception:
             done()
@@ -513,11 +513,11 @@ def test_exits(capsys):
         status = {}
         with pytest.raises(SystemExit) as exception:
             terminate('hey now!')
-        assert exception.value.args == ('hey now!',)
+        assert exception.value.args == (1,)
         assert status.get('called') == True
         captured = capsys.readouterr()
         assert captured[0] == ''
-        assert captured[1] == ''
+        assert captured[1] == 'hey now!\n'
 
         status = {}
         with pytest.raises(SystemExit) as exception:
@@ -560,6 +560,88 @@ def test_exits(capsys):
         captured = capsys.readouterr()
         assert captured[0] == ''
         assert captured[1] == 'error: hey now!\n'
+
+        inform.error_status = 2
+        inform.errors_accrued(reset=True)
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            done()
+        assert exception.value.args == (0,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            terminate()
+        assert exception.value.args == (0,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            error('hey now!')
+            terminate()
+        assert exception.value.args == (2,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: hey now!\n'
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            terminate('hey now!')
+        assert exception.value.args == (2,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'hey now!\n'
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            terminate(3)
+        assert exception.value.args == (3,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == ''
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            fatal('hey now!')
+        assert exception.value.args == (2,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            try:
+                raise Error('hey', when='now!')
+            except Error as e:
+                e.terminate()
+        assert exception.value.args == (2,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey\n'
+
+        status = {}
+        with pytest.raises(SystemExit) as exception:
+            try:
+                raise Error('hey', when='now!')
+            except Error as e:
+                e.terminate(template='{} {when}')
+        assert exception.value.args == (2,)
+        assert status.get('called') == True
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
 
 def test_error(capsys):
     with Inform(prog_name=False):

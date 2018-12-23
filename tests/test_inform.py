@@ -233,7 +233,7 @@ def test_pardon():
 
             try:
                 rv = terminate('fuxit', exit=False)
-                assert rv == 'fuxit'
+                assert rv == 1
             except SystemExit as e:
                 assert False
 
