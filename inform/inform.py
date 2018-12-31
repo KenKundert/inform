@@ -150,7 +150,6 @@ def cull(collection, **kwargs):
             # this occurs when collection is dict_keys or dict_values
             return values
 
-
 # is_str {{{2
 def is_str(arg):
     """Identifies strings in all their various guises.
@@ -673,26 +672,59 @@ def conjoin(iterable, conj=' and ', sep=', '):
 
 
 # plural {{{2
-def plural(count, singular, plural=None):
-    '''Pluralize a word.
+class plural:
+    """
+    Conditionally format a phrase depending on whether it refers to a singular 
+    or plural number of things.
 
-    If *count* is 1 or has length 1, the *singular* argument is returned,
-    otherwise the *plural* argument is returned. If *plural* is None, then it is
-    created by adding an 's' to the end of *singular* argument.
+    The format string has three sections, separated by '/'.  The first section 
+    is always included, the last section is included if the given number is 
+    plural, and the middle section (which can be omitted) is included if the 
+    given number is singular.
 
-    Example::
+    You may provide either a number (e.g. 0, 1, 2, ...) or any object that 
+    implements `__len__()` (e.g. list, dict, set, ...).  In the latter case, 
+    the length of the object will be used to decide whether to use the singular 
+    of plural form.  Only 1 is considered to be singular; every other number is 
+    considered plural.
 
-        >>> from inform import display, plural
-        >>> fruits = 'apple banana cranberry date'.split()
-        >>> display('I have {} {} of fruit.'.format(len(fruits), plural(fruits, 'piece')))
-        I have 4 pieces of fruit.
+    Examples::
+    
+        >>> from inform import plural
 
-    '''
-    if plural is None:
-        plural = singular + 's'
-    if is_iterable(count):
-        return singular if len(count) == 1 else plural
-    return singular if count == 1 else plural
+        >>> f"{plural(1):# thing/s}"
+        1 thing
+        >>> f"{plural(2):# thing/s}"
+        2 things
+
+        >>> f"{plural(1):/a cactus/# cacti}"
+        a cactus
+        >>> f"{plural(2):/a cactus/# cacti}"
+        2 cacti
+
+        >>> f"{plural([]:# thing/s}"
+        0 things
+        >>> f"{plural([0]:# thing/s}"
+        1 thing
+
+    The original implementation is from Veedrac on Stack Overflow: 
+    http://stackoverflow.com/questions/21872366/plural-string-formatting
+    """
+
+    def __init__(self, value, num='#'):
+        self.value = value
+        self.symbol = num
+
+    def __format__(self, formatter):
+        from collections.abc import Sized
+
+        x = self.value
+        number = len(x) if isinstance(x, Sized) else self.value
+        formatter = formatter.replace(self.symbol, str(number))
+        always, _, suffixes = formatter.partition("/")
+        singular, _, plural = suffixes.rpartition("/")
+
+        return "{}{}".format(always, singular if number == 1 else plural)
 
 
 # full_stop {{{2
