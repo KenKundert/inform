@@ -43,8 +43,8 @@ Releases
     - Added :meth:`inform.Error.get_codicil`.
 
 **Latest development release**:
-    | Version: 1.14.1
-    | Released: 2018-12-22
+    | Version: 1.14.2
+    | Released: 2018-12-31
 
     - Added *error_status* argument to :class:`inform.Inform`.
     - Enhanced :class:`inform.plural`.  This enhancement is not backward 
