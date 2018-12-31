@@ -45,4 +45,7 @@ Releases
 **Latest development release**:
     | Version: 1.14.1
     | Released: 2018-12-22
+
     - Added *error_status* argument to :class:`inform.Inform`.
+    - Enhanced :class:`inform.plural`.  This enhancement is not backward 
+      compatible.

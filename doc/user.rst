@@ -1039,14 +1039,13 @@ local scope.
 
 .. code-block:: python
 
-    >>> from inform import conjoin, display, fmt, plural
+    >>> from inform import conjoin, display, fmt
 
     >>> filenames = ['a', 'b', 'c', 'd']
     >>> filetype = 'CSV'
     >>> display(
     ...     fmt(
-    ...         'Reading {filetype} {files}: {names}.',
-    ...         files=plural(filenames, 'file'),
+    ...         'Reading {filetype} files: {names}.',
     ...         names=conjoin(filenames),
     ...     )
     ... )
@@ -1389,23 +1388,47 @@ that no items are processed and so the progress bar is not printed.
 plural
 """"""
 
-.. py:function:: plural(count, singular_form, plural_form=*None*)
+.. py:class:: plural(count, num='#')
 
-Produces either the singular or plural form of a word based on a count.
-The count may be an integer, or an iterable, in which case its length is used. 
-If the plural form is not given, the singular form is used with an 's' added to 
-the end.
+    Used with python format strings to conditionally format a phrase depending 
+    on whether it refers to a singular or plural number of things.
 
-.. code-block:: python
+    The format specification has three sections, separated by '/'.  The first 
+    section is always included, the last section is included if the given number 
+    is plural, and the middle section, which can be omitted, is included if the 
+    given number is singular.
 
-    >>> from inform import conjoin, display, plural
+    You may provide either a number (e.g. 0, 1, 2, ...) or any object that 
+    implements `__len__()` (e.g. list, dict, set, ...).  In the latter case, 
+    the length of the object will be used to decide whether to use the singular 
+    of plural form.  Only 1 is considered to be singular; every other number is 
+    considered plural.
 
-    >>> filenames = ['a', 'b', 'c', 'd']
-    >>> display(
-    ...     files=plural(filenames, 'file'), names=conjoin(filenames),
-    ...     template='Reading {files}: {names}.'
-    ... )
-    Reading files: a, b, c and d.
+    The count can be inserted into the output by placing # into the format 
+    specification. If using '#' is inconvenient, you can specify a different 
+    string to use to trigger the substitution.
+
+    Examples::
+
+        >>> from inform import plural
+
+        >>> f"{plural(1):# thing/s}"
+        '1 thing'
+        >>> f"{plural(2):# thing/s}"
+        '2 things'
+
+        >>> f"{plural(1):/a cactus/# cacti}"
+        'a cactus'
+        >>> f"{plural(2):/a cactus/# cacti}"
+        '2 cacti'
+
+        >>> f"{plural([]):# thing/s}"
+        '0 things'
+        >>> f"{plural([0]):# thing/s}"
+        '1 thing'
+
+    The original implementation is from `Veedrac
+    <http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.
 
 
 .. _render desc:

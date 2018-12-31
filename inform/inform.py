@@ -150,6 +150,7 @@ def cull(collection, **kwargs):
             # this occurs when collection is dict_keys or dict_values
             return values
 
+
 # is_str {{{2
 def is_str(arg):
     """Identifies strings in all their various guises.
@@ -689,23 +690,23 @@ class plural:
     considered plural.
 
     Examples::
-    
+
         >>> from inform import plural
 
         >>> f"{plural(1):# thing/s}"
-        1 thing
+        '1 thing'
         >>> f"{plural(2):# thing/s}"
-        2 things
+        '2 things'
 
         >>> f"{plural(1):/a cactus/# cacti}"
-        a cactus
+        'a cactus'
         >>> f"{plural(2):/a cactus/# cacti}"
-        2 cacti
+        '2 cacti'
 
-        >>> f"{plural([]:# thing/s}"
-        0 things
-        >>> f"{plural([0]:# thing/s}"
-        1 thing
+        >>> f"{plural([]):# thing/s}"
+        '0 things'
+        >>> f"{plural([0]):# thing/s}"
+        '1 thing'
 
     The original implementation is from Veedrac on Stack Overflow: 
     http://stackoverflow.com/questions/21872366/plural-string-formatting
@@ -716,7 +717,10 @@ class plural:
         self.symbol = num
 
     def __format__(self, formatter):
-        from collections.abc import Sized
+        try: # python3
+            from collections.abc import Sized
+        except ImportError: # python2
+            from collections import Sized
 
         x = self.value
         number = len(x) if isinstance(x, Sized) else self.value

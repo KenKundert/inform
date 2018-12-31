@@ -255,7 +255,7 @@ For example:
 
 .. code-block:: python
 
-    >>> from inform import Inform, display, error, conjoin, cull, fmt, plural, os_error
+    >>> from inform import Inform, display, error, conjoin, cull, fmt, os_error
 
     >>> Inform(prog_name=False)
     <...>
@@ -263,8 +263,7 @@ For example:
     >>> filetype = 'CSV'
     >>> display(
     ...     fmt(
-    ...         'Reading {filetype} {files}: {names}.',
-    ...         files=plural(filenames, 'file'),
+    ...         'Reading {filetype} files: {names}.',
     ...         names=conjoin(filenames),
     ...     )
     ... )
