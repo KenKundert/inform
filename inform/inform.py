@@ -458,7 +458,9 @@ def _join(args, kwargs):
 
 
 # render {{{2
-def render(obj, sort=None, level=0, tab='    '):
+_level = 0
+_sort = None
+def render(obj, sort=None, level=None, tab='    '):
     """
     Recursively convert object to string with reasonable formatting.
 
@@ -488,14 +490,17 @@ def render(obj, sort=None, level=0, tab='    '):
     from textwrap import dedent
 
     # define sort function, make it either sort or not based on sort
+    global _sort
+    prev_sort = _sort
     if sort is None:
-        sort = True if sys.version_info < (3, 6) else False
+        sort = sys.version_info < (3, 6) or _sort
+    _sort = sort
     if sort:
         def order(keys):
             try:
                 return sorted(keys)
             except TypeError:
-                # keys is not homogeneous, cannot sort
+                # keys are not homogeneous, cannot sort
                 return keys
     else:
         def order(keys):
@@ -505,31 +510,44 @@ def render(obj, sort=None, level=0, tab='    '):
     def leader(relative_level=0):
         return (level+relative_level)*tab
 
-    if isinstance(obj, dict):
-        endcaps = '{ }'
-        content = [
-            '%r: %s' % (k, render(obj[k], sort, level+1))
-            for k in order(obj)
-        ]
-    elif isinstance(obj, list):
-        endcaps = '[ ]'
-        content = [render(v, sort, level+1) for v in obj]
-    elif isinstance(obj, tuple):
-        endcaps = '( )'
-        content = [render(v, sort, level+1) for v in obj]
-    elif isinstance(obj, set):
-        endcaps = '{ }'
-        content = [render(v, sort, level+1) for v in order(obj)]
-    elif is_str(obj) and '\n' in obj:
-        endcaps = None
-        content = [
-            '"""',
-            indent(dedent(obj.strip()), leader(1)),
-            leader(0) + '"""'
-        ]
+    # determine the level
+    global _level
+    prev_level = _level
+    if level is None:
+        level = _level
     else:
-        endcaps = None
-        content = [repr(obj)]
+        _level = level
+
+    try:
+        if isinstance(obj, dict):
+            endcaps = '{ }'
+            content = [
+                '%r: %s' % (k, render(obj[k], sort, level+1))
+                for k in order(obj)
+            ]
+        elif isinstance(obj, list):
+            endcaps = '[ ]'
+            content = [render(v, sort, level+1) for v in obj]
+        elif isinstance(obj, tuple):
+            endcaps = '( )'
+            content = [render(v, sort, level+1) for v in obj]
+        elif isinstance(obj, set):
+            endcaps = '{ }'
+            content = [render(v, sort, level+1) for v in order(obj)]
+        elif is_str(obj) and '\n' in obj:
+            endcaps = None
+            content = [
+                '"""',
+                indent(dedent(obj.strip()), leader(1)),
+                leader(0) + '"""'
+            ]
+        else:
+            endcaps = None
+            content = [repr(obj)]
+    finally:
+        # restore level and sort
+        _level = prev_level
+        _sort = prev_sort
 
     if endcaps:
         endcaps = endcaps.split()
@@ -921,7 +939,7 @@ class ProgressBar:
         self.prev_index = 0
         self.started = False
         self.finished = not bool(stop - start)
-            # if stop == start, just declare progress bar to be done
+            # if stop == start, just declare progress bar to be done;
             # doing so avoids the divide by zero problem
         self.informer = get_informer()
 
@@ -2175,6 +2193,15 @@ def get_prog_name():
 def get_informer():
     """Returns the active informer."""
     return INFORMER
+
+
+# set_informer {{{2
+def set_informer(new):
+    """Replaces the existing informer and returns the old one."""
+    global INFOMER
+    old = INFORMER
+    INFORMER = new
+    return old
 
 
 # set/replace the culprit {{{2

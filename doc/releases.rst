@@ -49,3 +49,4 @@ Releases
     - Added *error_status* argument to :class:`inform.Inform`.
     - Enhanced :class:`inform.plural`.  This enhancement is not backward 
       compatible.
+    - Enhance for render() to allow it to be used in a __repr__ function.

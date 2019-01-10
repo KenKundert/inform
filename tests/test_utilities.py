@@ -15,7 +15,7 @@ import pytest
 # most unexpected changes.  This is not needed for 3.6 and beyond.
 if sys.version_info < (3, 6):
     def X(arg):
-        return sorted(arg)
+        return '\n'.join(sorted(arg.split('\n')))
 else:
     def X(arg):
         return arg
@@ -281,6 +281,90 @@ def test_render():
     }
     if sys.version_info >= (3, 6):
         assert render(n, sort=True) == "{'c': 'y', 'e': 'x', None: 'z'}"
+
+    # These tests check the ability to use render in a class __repr__.
+    class AAA:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+        def __repr__(self):
+            if self.kwargs.get('fault'):
+                raise NotImplementedError
+            return render(dict(args=self.args, kwargs=self.kwargs))
+
+    aaa = AAA('aaa', thisis='aaa')
+    bbb = AAA('bbb', thisis='bbb', child=aaa)
+    ccc = AAA('ccc', thisis='ccc', child=bbb)
+    ddd = AAA('ddd', thisis='ddd', fault=True)
+    eee = AAA('eee', thisis='eee', child=ddd)
+    fff = AAA('fff', thisis='fff', child=eee)
+
+    bbb_expected_sorted = dedent('''
+    {
+        'args': ('bbb'),
+        'kwargs': {
+            'child': {
+                'args': ('aaa'),
+                'kwargs': {'thisis': 'aaa'},
+            },
+            'thisis': 'bbb',
+        },
+    }
+    ''').strip()
+    assert render(bbb, sort=True) == bbb_expected_sorted
+
+    ccc_expected_unsorted = dedent('''
+    {
+        'args': ('ccc'),
+        'kwargs': {
+            'thisis': 'ccc',
+            'child': {
+                'args': ('bbb'),
+                'kwargs': {
+                    'thisis': 'bbb',
+                    'child': {
+                        'args': ('aaa'),
+                        'kwargs': {'thisis': 'aaa'},
+                    },
+                },
+            },
+        },
+    }
+    ''').strip()
+    if sys.version_info >= (3, 6):
+        assert render(ccc) == ccc_expected_unsorted
+
+    ccc_expected_sorted = dedent('''
+    {
+        'args': ('ccc'),
+        'kwargs': {
+            'child': {
+                'args': ('bbb'),
+                'kwargs': {
+                    'child': {
+                        'args': ('aaa'),
+                        'kwargs': {'thisis': 'aaa'},
+                    },
+                    'thisis': 'bbb',
+                },
+            },
+            'thisis': 'ccc',
+        },
+    }
+    ''').strip()
+    assert render(ccc, sort=True) == ccc_expected_sorted
+
+    try:
+        render(fff, sort=True)
+    except NotImplementedError:
+        pass
+
+    if sys.version_info >= (3, 6):
+        assert render(ccc) == ccc_expected_unsorted
+
+    assert render(ccc, sort=True) == ccc_expected_sorted
+
 
 def test_plural():
     assert '{:cart/s}'.format(plural(0)) == 'carts'
