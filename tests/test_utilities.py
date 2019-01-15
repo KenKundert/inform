@@ -826,7 +826,7 @@ def test_logging(capsys):
             assert str(stderr.getvalue()) == ''
             logfile_text = logfile.getvalue()
             logfile_text_sum = str(logfile_text[:10]), str(logfile_text[-13:])
-            assert logfile_text_sum == ('dog - vers', 'running test\n')
+            assert logfile_text_sum == ('dog: versi', 'running test\n')
             assert '3v14' in logfile_text
 
             msg.set_logfile(False)

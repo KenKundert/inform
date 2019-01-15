@@ -45,9 +45,12 @@ def format(text):
     except:
         return text
 
-invokeTimeRegex = r"(?<=Invoked as )'.*' on .*(?=\.)"
-def stripInvokeTime(text):
-    return re.sub(invokeTimeRegex, '<exe> on <date>', text)
+invokeExecutableRegex = r"\w+: invoked as: \w+(?=\n)"
+invokeTimeRegex = r"\w+: invoked on: [^\n]+(?=\n)"
+def stripInvokeInfo(text):
+    text = re.sub(invokeExecutableRegex, 'inform: invoked as: <exe>', text)
+    text = re.sub(invokeTimeRegex, 'inform: invoked on: <date>', text)
+    return text
 
 # showDiff {{{2
 def showDiff(achieved, expected, indent=''):
@@ -100,7 +103,7 @@ class Case():
                 exec(self.stimulus, test_globals, test_locals)
                 self.output = stdout.getvalue().strip()
                 self.error = stderr.getvalue().strip()
-                self.log = stripInvokeTime(logfile.getvalue().strip())
+                self.log = stripInvokeInfo(logfile.getvalue().strip())
 
         except Exception as err:
             return (self.name, self.stimulus, str(err), None, 'exception')
@@ -198,7 +201,8 @@ testCases = [
             log('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -210,7 +214,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -222,7 +227,8 @@ testCases = [
         ''').format(stdargs=captureAll, nl=r'\n'),
         stdout="This_is_a_test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This_is_a_test.
         '''),
     ),
@@ -234,7 +240,8 @@ testCases = [
         ''').format(stdargs=captureAll, nl=r'\n'),
         stdout="This is an ...\n    output test!",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is an ...
                 output test!
         '''),
@@ -247,7 +254,8 @@ testCases = [
         ''').format(stdargs=captureAll, nl=r'\n'),
         stdout="This is an ...\n    output test!",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is an ...
                 output test!
         '''),
@@ -259,7 +267,8 @@ testCases = [
             log('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -271,7 +280,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -282,7 +292,8 @@ testCases = [
             comment('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -294,7 +305,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -305,7 +317,8 @@ testCases = [
             narrate('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -317,7 +330,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -328,7 +342,8 @@ testCases = [
             display('This is a test.')
         '''.format(stdargs=captureAll)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -340,7 +355,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="inform DEBUG: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform DEBUG: This is a test.
         '''),
     ),
@@ -352,7 +368,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="inform warning: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning: This is a test.
         '''),
     ),
@@ -368,7 +385,8 @@ testCases = [
                 test.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning:
                 This is a ...
                 test.
@@ -386,7 +404,8 @@ testCases = [
                 test.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning:
                 This is a ...
                 test.
@@ -400,7 +419,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="inform error: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: This is a test.
         '''),
     ),
@@ -412,7 +432,8 @@ testCases = [
         '''.format(stdargs=noProg)),
         stdout="error: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             error: This is a test.
         '''),
     ),
@@ -428,7 +449,8 @@ testCases = [
                 This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning: This is a test.
                 This is an appendage.
         '''),
@@ -449,7 +471,8 @@ testCases = [
                 This is the third appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error
                 This is the first appendage.
                 This is the second appendage.
@@ -471,7 +494,8 @@ testCases = [
                 and the third.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error
                 This is the first appendage.
                 This is the second appendage,
@@ -494,7 +518,8 @@ testCases = [
             This is the third appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is main message.
             This is the first appendage.
             This is the second appendage.
@@ -513,7 +538,8 @@ testCases = [
                 Additional info.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error:
                 Error message.
                 Additional info.
@@ -527,7 +553,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="src: this is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             src: this is a test.
         '''),
     ),
@@ -539,7 +566,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="inform error: src: this is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: src: this is a test.
         '''),
     ),
@@ -555,7 +583,8 @@ testCases = [
                 error message.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: src:
                 this is the ...
                 error message.
@@ -569,7 +598,8 @@ testCases = [
         '''.format(stdargs=captureAll)),
         stdout="inform error: src1, src2, src3: this is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: src1, src2, src3: this is a test.
         '''),
     ),
@@ -589,7 +619,8 @@ testCases = [
             This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the output message.
             This is an appendage.
@@ -611,7 +642,8 @@ testCases = [
                 This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the error message.
                 This is an appendage.
@@ -634,7 +666,8 @@ testCases = [
                 This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the ...
                 error message.
@@ -658,7 +691,8 @@ testCases = [
             This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the ...
                 error message.
@@ -672,7 +706,8 @@ testCases = [
             log('This is a test.')
         '''.format(stdargs=noHang)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -684,7 +719,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -696,7 +732,8 @@ testCases = [
         ''').format(stdargs=noHang, nl=r'\n'),
         stdout="This_is_a_test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This_is_a_test.
         '''),
     ),
@@ -708,7 +745,8 @@ testCases = [
         ''').format(stdargs=noHang, nl=r'\n'),
         stdout="This is an ...\n    output test!",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is an ...
                 output test!
         '''),
@@ -721,7 +759,8 @@ testCases = [
         ''').format(stdargs=noHang, nl=r'\n'),
         stdout="This is an ...\n    output test!",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is an ...
                 output test!
         '''),
@@ -733,7 +772,8 @@ testCases = [
             log('This is a test.')
         '''.format(stdargs=noHang)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -745,7 +785,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -756,7 +797,8 @@ testCases = [
             comment('This is a test.')
         '''.format(stdargs=noHang)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -768,7 +810,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -779,7 +822,8 @@ testCases = [
             narrate('This is a test.')
         '''.format(stdargs=noHang)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -791,7 +835,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -802,7 +847,8 @@ testCases = [
             display('This is a test.')
         '''.format(stdargs=noHang)),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a test.
         '''),
     ),
@@ -814,7 +860,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="inform DEBUG: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform DEBUG: This is a test.
         '''),
     ),
@@ -826,7 +873,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="inform warning: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning: This is a test.
         '''),
     ),
@@ -842,7 +890,8 @@ testCases = [
                 test.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning:
                 This is a ...
                 test.
@@ -860,7 +909,8 @@ testCases = [
                 test.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning:
                 This is a ...
                 test.
@@ -874,7 +924,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="inform error: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: This is a test.
         '''),
     ),
@@ -886,7 +937,8 @@ testCases = [
         '''.format(stdargs=noProg)),
         stdout="error: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             error: This is a test.
         '''),
     ),
@@ -898,7 +950,8 @@ testCases = [
         '''.format(stdargs=yesProg)),
         stdout="olver error: This is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             olver error: This is a test.
         '''),
     ),
@@ -914,7 +967,8 @@ testCases = [
                 This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform warning: This is a test.
                 This is an appendage.
         '''),
@@ -935,7 +989,8 @@ testCases = [
                 This is the third appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error
                 This is the first appendage.
                 This is the second appendage.
@@ -957,7 +1012,8 @@ testCases = [
                 and the third.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error
                 This is the first appendage.
                 This is the second appendage,
@@ -980,7 +1036,8 @@ testCases = [
             This is the third appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is main message.
             This is the first appendage.
             This is the second appendage.
@@ -999,7 +1056,8 @@ testCases = [
                 Additional info.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error:
                 Error message.
                 Additional info.
@@ -1013,7 +1071,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="src: this is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             src: this is a test.
         '''),
     ),
@@ -1025,7 +1084,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="inform error: src: this is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: src: this is a test.
         '''),
     ),
@@ -1041,7 +1101,8 @@ testCases = [
                 error message.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: src:
                 this is the ...
                 error message.
@@ -1055,7 +1116,8 @@ testCases = [
         '''.format(stdargs=noHang)),
         stdout="inform error: src1, src2, src3: this is a test.",
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: src1, src2, src3: this is a test.
         '''),
     ),
@@ -1075,7 +1137,8 @@ testCases = [
             This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the output message.
             This is an appendage.
@@ -1097,7 +1160,8 @@ testCases = [
                 This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the error message.
                 This is an appendage.
@@ -1120,7 +1184,8 @@ testCases = [
                 This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             inform error: This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the ...
                 error message.
@@ -1144,7 +1209,8 @@ testCases = [
             This is an appendage.
         '''),
         logfile=dedent('''
-            Invoked as <exe> on <date>.
+            inform: invoked as: <exe>
+            inform: invoked on: <date>
             This is a very long culprit, indeed it is very very very very very very very long:
                 This is the body of the ...
                 error message.

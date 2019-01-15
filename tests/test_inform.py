@@ -22,14 +22,18 @@ if sys.version[0] == '2':
 else:
     from io import StringIO
 
+sys.argv=['ack']
+
 # Utilities {{{1
-invokeTimeRegex = r"(?<=Invoked as )'.*' on .*(?=\.)"
+invokeExecutableRegex = r"(?<=ack: invoked as: )[^\n]+(?=\n)"
+invokeTimeRegex = r"(?<=ack: invoked on: )[^\n]+(?=\n)"
 def strip(stringio):
     return stringio.getvalue().strip()
 
 def log_strip(stringio):
     achieved = stringio.getvalue().strip()
-    achieved = re.sub(invokeTimeRegex, '<exe> on <date>', achieved)
+    achieved = re.sub(invokeExecutableRegex, '<exe>', achieved)
+    achieved = re.sub(invokeTimeRegex, '<date>', achieved)
     return achieved
 
 # Helper classes and functions {{{1
@@ -58,7 +62,8 @@ def test_grove():
         assert strip(stdout) == ''
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
-            Invoked as <exe> on <date>.
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
             {expected}
         ''').strip().format(expected=stimulus)
 
@@ -78,7 +83,8 @@ def test_billfold():
         assert strip(stdout) == expected
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
-            Invoked as <exe> on <date>.
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -98,7 +104,8 @@ def test_wring():
         assert strip(stdout) == expected
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
-            Invoked as <exe> on <date>.
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -128,7 +135,8 @@ def test_fabricate():
         assert strip(stdout) == expected
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
-            Invoked as <exe> on <date>.
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -151,7 +159,8 @@ def test_cartwheel():
         assert strip(stdout) == expected
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
-            Invoked as <exe> on <date>.
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
             {expected}
         ''').strip().format(expected=expected)
 

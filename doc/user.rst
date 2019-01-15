@@ -633,8 +633,8 @@ access the normally printed output of your code:
     >>> str(error_text)
     ''
 
-    >>> str(logfile_text[:10]), str(logfile_text[-13:])
-    ('Invoked as', 'running test\n')
+    >>> str(logfile_text.strip().split('\n')[-1])
+    'running test'
 
 
 Message Destination
