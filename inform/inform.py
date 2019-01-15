@@ -6,7 +6,7 @@
 # Documentation can be found at inform.readthedocs.io.
 
 # License {{{1
-# Copyright (c) 2014-2018 Kenneth S. Kundert
+# Copyright (c) 2014-2019 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -1695,10 +1695,10 @@ class Inform:
 
         # write header to log file
         if self.prog_name and self.version:
-            log("%s - version %s" % (self.prog_name, self.version))
+            log('version %s' % self.version, culprit=self.prog_name)
         try:
             import arrow
-            now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p")
+            now = arrow.now().strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
         except:
             now = ""
         if self.argv is None:
@@ -1707,9 +1707,9 @@ class Inform:
             # sitecustomize.py). False implies it should not be logged.
             self.argv = sys.argv
         if self.argv:
-            log("Invoked as '%s'%s." % (' '.join(self.argv), now))
-        elif now:
-            log("Invoked%s." % now)
+            log("invoked as: %s" % ' '.join(self.argv), culprit=self.prog_name)
+        if now:
+            log("invoked on: %s" % now, culprit=self.prog_name)
 
     # flush_logfile {{{2
     def flush_logfile(self):
@@ -1930,7 +1930,12 @@ class Inform:
             log(status)
             print(status, file=sys.stderr)
             status = self.error_status
-        log('%s: terminates with status %s.' % (prog_name, status))
+        try:
+            import arrow
+            now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p %Z")
+        except:
+            now = ""
+        log('terminates with status %s%s.' % (status, now), culprit=prog_name)
         assert 0 <= status < 128
         if self.logfile:
             self.logfile.close()
