@@ -49,6 +49,6 @@ Releases
     - Enhance for render() to allow it to be used in a __repr__ function.
 
 **Latest development release**:
-    | Version: 1.14.2
-    | Released: 2018-12-31
+    | Version: 1.15.0
+    | Released: 2019-01-16
 
