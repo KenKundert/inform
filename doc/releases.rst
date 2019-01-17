@@ -42,11 +42,13 @@ Releases
     - Added :meth:`inform.Error.join_culprit`.
     - Added :meth:`inform.Error.get_codicil`.
 
-**Latest development release**:
-    | Version: 1.14.2
-    | Released: 2018-12-31
-
+**1.15 (2019-01-16)**:
     - Added *error_status* argument to :class:`inform.Inform`.
     - Enhanced :class:`inform.plural`.  This enhancement is not backward 
       compatible.
     - Enhance for render() to allow it to be used in a __repr__ function.
+
+**Latest development release**:
+    | Version: 1.14.2
+    | Released: 2018-12-31
+
