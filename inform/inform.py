@@ -2203,7 +2203,7 @@ def get_informer():
 # set_informer {{{2
 def set_informer(new):
     """Replaces the existing informer and returns the old one."""
-    global INFOMER
+    global INFORMER
     old = INFORMER
     INFORMER = new
     return old
