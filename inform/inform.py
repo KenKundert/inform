@@ -188,8 +188,11 @@ def is_iterable(obj):
         True
 
     """
-    import collections
-    return isinstance(obj, collections.Iterable)
+    try: # python3
+        from collections.abc import Iterable
+    except ImportError: # python2
+        from collections import Iterable
+    return isinstance(obj, Iterable)
 
 
 # is_collection {{{2
@@ -420,7 +423,8 @@ def join(*args, **kwargs):
         'c z'
 
     """
-    return _join(args, kwargs)
+    # _join does not process end, so do it explicitly
+    return _join(args, kwargs) + kwargs.get('end', '')
 
 
 # _join {{{2
