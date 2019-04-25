@@ -1463,6 +1463,10 @@ class Inform:
             ./.<prog_name>.log is used.  May be an open stream.  Or it may be
             *False*, in which case no log file is created.
 
+        prev_logfile_suffix (string):
+            If specified, the previous logfile will be moved aside before
+            creating the new logfile.
+
         error_status (int)
             The default exit status to return to the shell when terminating the
             program due to an error.  The default is 1.
@@ -1567,6 +1571,7 @@ class Inform:
         verbose = False,
         narrate = False,
         logfile = False,
+        prev_logfile_suffix = None,
         error_status = 1,
         prog_name = True,
         argv = None,
@@ -1593,6 +1598,7 @@ class Inform:
         self.__dict__.update(kwargs)
         self.previous_action = None
         self.logfile = None
+        self.logfile_copied = False
         self.length_thresh = length_thresh
         self.culprit_sep = culprit_sep
         if is_str(stream_policy):
@@ -1634,7 +1640,7 @@ class Inform:
         INFORMER = self
 
         # activate the logfile
-        self.set_logfile(logfile)
+        self.set_logfile(logfile, prev_logfile_suffix)
 
     # __getattr__ {{{2
     def __getattr__(self, name):
@@ -1656,7 +1662,7 @@ class Inform:
         self.mute = bool(mute)
 
     # set_logfile {{{2
-    def set_logfile(self, logfile, encoding='utf-8'):
+    def set_logfile(self, logfile, prev_logfile_suffix=None, encoding='utf-8'):
         """Allows you to change the logfile (only available as a method).
 
         Args:
@@ -1667,6 +1673,10 @@ class Inform:
                 may be *False*, in which case no log file is created.
 
                 Directory containing the logfile must exist.
+            prev_logfile_suffix:
+                If specified, the existing logfile will be renamed before
+                creating the new logfile.  This only occurs the first time the
+                logfile is specified.
             encoding (string):
                 The encoding to use when writing the file.
         """
@@ -1678,6 +1688,18 @@ class Inform:
 
         if logfile is True:
             logfile = '.%s.log' % self.prog_name if self.prog_name else '.log'
+
+        if self.logfile_copied and prev_logfile_suffix:
+            try:
+                prev_logfile = logfile + prev_logfile_suffix
+                if os.path.exists(prev_logfile) and os.path.isfile(prev_logfile):
+                    os.unlink(prev_logfile)
+                if os.path.exists(logfile) and os.path.isfile(logfile):
+                    os.rename(logfile, prev_logfile)
+            except (OSError, IOError) as e:
+                pass
+        self.logfile_copied = True
+
         try:
             if is_str(logfile):
                 logfile = open(logfile, 'w', encoding=encoding)
@@ -1792,8 +1814,11 @@ class Inform:
 
             if action._notify_user(self) or notify_override:
                 import subprocess
+                urgency = kwargs.get('urgency')
+                if urgency in ['low', 'normal', 'critical']:
+                    urgency = '--urgency=' + urgency
                 body = ': '.join(cull([culprit, message]))
-                subprocess.call(cull([self.notifier, header, body]))
+                subprocess.call(cull([self.notifier, urgency, header, body]))
         if action.terminate is not False:
             self.terminate(status=action.terminate)
         self.previous_action = action

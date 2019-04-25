@@ -394,6 +394,10 @@ Temporarily display the message in a bubble at the top of the screen.  Also
 sends it to the log file.  This is used for messages that the user is otherwise 
 unlikely to see because they have no access to the standard output.
 
+When using notify you may pass in the *urgency* named argument to specify the 
+urgency of the notification. Its value must 'low', 'normal', or 'critical' or it 
+will be ignored.
+
 
 .. _debug:
 

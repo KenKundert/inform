@@ -89,7 +89,7 @@ class Case():
     __repr__ = __str__
 
     def run(self):
-        sys.argv[0] = case.name
+        sys.argv = [case.name]
         try:
             with StringIO() as stdout, \
                  StringIO() as stderr, \
