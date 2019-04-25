@@ -5,6 +5,8 @@ Releases
     | Version: 1.15.2
     | Released: 2019-03-17
     - Add end support to join().
+    - Allow previous logfile to be saved.
+    - Allow urgency to be specified on notifications.
 
 **1.15 (2019-01-16)**:
     - Added *error_status* argument to :class:`inform.Inform`.
