@@ -2370,7 +2370,7 @@ class Error(Exception):
         The :func:`inform.error` function is called with the exception arguments.
 
         Args:
-            **kwargs:
+            \**kwargs:
                 *report()* takes any of the normal keyword arguments normally
                 allowed on an informant (culprit, template, etc.). Any keyword
                 argument specified here overrides those that were specified when
@@ -2390,7 +2390,7 @@ class Error(Exception):
         The :func:`inform.fatal` function is called with the exception arguments.
 
         Args:
-            **kwargs:
+            \**kwargs:
                 *report()* takes any of the normal keyword arguments normally
                 allowed on an informant (culprit, template, etc.). Any keyword
                 argument specified here overrides those that were specified when
