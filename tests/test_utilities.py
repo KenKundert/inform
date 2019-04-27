@@ -1220,7 +1220,7 @@ def test_oblong():
 
     assert render_bar(-0.1, 25) == ''
 
-    if sys.version_info < (3):
+    if sys.version_info < (3,):
         assert render_bar(1.1, 25) == '#########################'
         assert render_bar(0.11, 25) == '##='
         assert render_bar(0.66, 25) == '################-'
