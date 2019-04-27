@@ -1206,7 +1206,9 @@ def test_orwell():
 
     george = Orwell(peace='war', truth='lies')
 
-    assert str(george) == 'Orwell(peace=war, truth=lies)'
+    assert render(george) == "Orwell(peace='war', truth='lies')"
+    assert repr(george) == "Orwell(peace='war', truth='lies')"
+    assert str(george) == "Orwell(peace='war', truth='lies')"
     assert george.peace == 'war'
     assert george.truth == 'lies'
     assert george.happiness is None
