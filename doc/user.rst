@@ -1140,7 +1140,7 @@ a base class.
 
     >>> george = Orwell(peace='war', truth='lies')
     >>> display(str(george))
-    Orwell(peace=war, truth=lies)
+    Orwell(peace='war', truth='lies')
 
     >>> display(george.peace)
     war
@@ -1500,6 +1500,36 @@ This example prints several Python data types:
         'n': 42,
         's': 'alpha string',
     }
+
+
+In addition, you can add support for *render* to your classes by adding one or 
+both of these methods:
+
+    _inform_get_args(): returns a list of argument values.
+
+    _inform_get_kwargs(): returns a dictionary of keyword arguments.
+
+.. code-block:: python
+
+    >>> class Chimera:
+    ...     def __init__(self, *args, **kwargs):
+    ...         self.args = args
+    ...         self.kwargs = kwargs
+    ...
+    ...     def _inform_get_args(self):
+    ...         return self.args
+    ...
+    ...     def _inform_get_kwargs(self):
+    ...         return self.kwargs
+
+    >>> lycia = Chimera('Lycia', front='lion', middle='goat', tail='snake')
+    >>> display(render(lycia))
+    Chimera(
+        'Lycia',
+        front='lion',
+        middle='goat',
+        tail='snake',
+    )
 
 
 .. _render_bar desc:

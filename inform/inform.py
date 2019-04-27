@@ -348,7 +348,7 @@ class Info(object):
 
     >>> george = Orwell(peace='war', truth='lies')
     >>> print(str(george))
-    Orwell(peace=war, truth=lies)
+    Orwell(peace='war', truth='lies')
 
     >>> george.peace
     'war'
@@ -359,14 +359,14 @@ class Info(object):
     def __init__(self, **kwargs):
         self.__dict__ = kwargs
 
-    def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(
-            ['%s=%s' % item for item in sorted(self.__dict__.items())]
-        ))
-    __str__ = __repr__
+    def _inform_get_kwargs(self):
+        return {k:v for k, v in self.__dict__.items() if not k.startswith('_')}
 
     def __getattr__(self, name):
         return self.__dict__.get(name)
+
+    def __repr__(self):
+        return render(self)
 
 
 # User Utilities {{{1
@@ -490,6 +490,35 @@ def render(obj, sort=None, level=None, tab='    '):
         >>> display('result =', render({'a': (0, 1), 'b': [2, 3, 4]}))
         result = {'a': (0, 1), 'b': [2, 3, 4]}
 
+    In addition, you can add support for render to your classes by adding one or
+    both of these methods:
+
+        _inform_get_args(): returns a list of argument values.
+
+        _inform_get_kwargs(): returns a dictionary of keyword arguments.
+
+    Example::
+
+        >>> class Chimera:
+        ...     def __init__(self, *args, **kwargs):
+        ...         self.args = args
+        ...         self.kwargs = kwargs
+        ...
+        ...     def _inform_get_args(self):
+        ...         return self.args
+        ...
+        ...     def _inform_get_kwargs(self):
+        ...         return self.kwargs
+
+        >>> lycia = Chimera('Lycia', front='lion', middle='goat', tail='snake')
+        >>> display(render(lycia))
+        Chimera(
+            'Lycia',
+            front='lion',
+            middle='goat',
+            tail='snake',
+        )
+
     """
     from textwrap import dedent
 
@@ -538,6 +567,17 @@ def render(obj, sort=None, level=None, tab='    '):
         elif isinstance(obj, set):
             endcaps = '{ }'
             content = [render(v, sort, level+1) for v in order(obj)]
+        elif hasattr(obj, '_inform_get_args') or hasattr(obj, '_inform_get_kwargs'):
+            args = kwargs = []
+            if hasattr(obj, '_inform_get_args') and obj._inform_get_args:
+                args = obj._inform_get_args()
+            if hasattr(obj, '_inform_get_kwargs') and obj._inform_get_kwargs:
+                kwargs = obj._inform_get_kwargs()
+            endcaps = '{}( )'.format(obj.__class__.__name__)
+            content = (
+                [render(v, sort, level+1) for v in args] +
+                [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
+            )
         elif is_str(obj) and '\n' in obj:
             endcaps = None
             content = [
