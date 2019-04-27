@@ -64,11 +64,24 @@ by configuring a single object.
 Installation
 ------------
 
-Install with::
+Install the latest stable version with::
 
    pip3 install --user inform
 
 Requires Python2.7 or Python3.3 or better.
+
+The source code is available from `GitHub 
+<https://github.com/KenKundert/inform>`_.  You can download the repository and 
+install using::
+
+    git clone https://github.com/KenKundert/inform.git
+    pip3 install --user inform
+
+
+Issues
+------
+
+Please ask questions or report problems on `Github <https://github.com/KenKundert/inform/issues>`_.
 
 
 Quick Tour
