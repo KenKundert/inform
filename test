@@ -9,8 +9,9 @@
 from runtests import runTests
 import sys
 
-if sys.version_info < (3,):
+if sys.version_info < (3,5):
     # unicode issues result in tests failing on Python2
+    # missing language features result in tests failing on Python 3.4 and earlier
     raise SystemExit
 
 runTests(['inform', 'doctests'])

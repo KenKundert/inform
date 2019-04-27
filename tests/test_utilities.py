@@ -1206,9 +1206,11 @@ def test_orwell():
 
     george = Orwell(peace='war', truth='lies')
 
-    assert render(george) == "Orwell(peace='war', truth='lies')"
-    assert repr(george) == "Orwell(peace='war', truth='lies')"
-    assert str(george) == "Orwell(peace='war', truth='lies')"
+    if sys.version_info < (3,5):
+        # argument sort order is unpredictable on earlier versions of python
+        assert render(george) == "Orwell(peace='war', truth='lies')"
+        assert repr(george) == "Orwell(peace='war', truth='lies')"
+        assert str(george) == "Orwell(peace='war', truth='lies')"
     assert george.peace == 'war'
     assert george.truth == 'lies'
     assert george.happiness is None
@@ -1218,7 +1220,7 @@ def test_oblong():
 
     assert render_bar(-0.1, 25) == ''
 
-    if sys.version_info < (3,0,0):
+    if sys.version_info < (3):
         assert render_bar(1.1, 25) == '#########################'
         assert render_bar(0.11, 25) == '##='
         assert render_bar(0.66, 25) == '################-'
