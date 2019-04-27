@@ -362,3 +362,5 @@ Documentation
    examples
    api
    releases
+
+*  :ref:`genindex`
