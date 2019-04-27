@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.15.3
-    | Released: 2019-04-24
+    | Version: 1.15.4
+    | Released: 2019-04-27
 
     - Add end support to join().
     - Allow previous logfile to be saved.
