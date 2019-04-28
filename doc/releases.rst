@@ -8,6 +8,7 @@ Releases
     - Add end support to join().
     - Allow previous logfile to be saved.
     - Allow urgency to be specified on notifications.
+    - Allow render support in user-defined classes with addition of special methods.
 
 **1.15 (2019-01-16)**:
     - Added *error_status* argument to :class:`inform.Inform`.

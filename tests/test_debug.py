@@ -8,6 +8,7 @@ except ImportError:  # python2
 # Imports {{{1
 from inform import Inform, aaa, ddd, ppp, sss, vvv
 from textwrap import dedent
+import sys
 
 
 # Test cases {{{1
@@ -16,7 +17,7 @@ def test_anglicize(capsys):
     ppp()
     out, err = capsys.readouterr()
     assert out == dedent('''
-        DEBUG: test_debug.py, 16, test_debug.test_anglicize()
+        DEBUG: test_debug.py, 17, test_debug.test_anglicize()
     ''').lstrip()
 
 def test_grouch(capsys):
@@ -26,46 +27,48 @@ def test_grouch(capsys):
     ppp('hey now!', a, b)
     out, err = capsys.readouterr()
     assert out == dedent('''
-        DEBUG: test_debug.py, 26, test_debug.test_grouch(): hey now! 0 b
+        DEBUG: test_debug.py, 27, test_debug.test_grouch(): hey now! 0 b
     ''').lstrip()
 
 def test_salver(capsys):
     Inform(colorscheme=None, prog_name=False)
-    a = 0
-    b = 'b'
-    c = [a, b]
-    d = {a, b}
-    e = {a:b}
-    ddd('hey now!', a, b, c, d, e)
-    out, err = capsys.readouterr()
-    assert out == dedent('''
-        DEBUG: test_debug.py, 39, test_debug.test_salver():
-            'hey now!'
-            0
-            'b'
-            [0, 'b']
-            {0, 'b'}
-            {0: 'b'}
-    ''').lstrip()
+    if sys.version_info > (3,5):
+        a = 0
+        b = 'b'
+        c = [a, b]
+        d = {a, b}
+        e = {a:b}
+        ddd('hey now!', a, b, c, d, e)
+        out, err = capsys.readouterr()
+        assert out == dedent('''
+            DEBUG: test_debug.py, 41, test_debug.test_salver():
+                'hey now!'
+                0
+                'b'
+                [0, 'b']
+                {0, 'b'}
+                {0: 'b'}
+        ''').lstrip()
 
 def test_daiquiri(capsys):
     Inform(colorscheme=None, prog_name=False)
-    a = 0
-    b = 'b'
-    c = [a, b]
-    d = {a, b}
-    e = {a:b}
-    ddd(s='hey now!', a=a, b=b, c=c, d=d, e=e)
-    out, err = capsys.readouterr()
-    assert out == dedent('''
-        DEBUG: test_debug.py, 58, test_debug.test_daiquiri():
-            a = 0
-            b = 'b'
-            c = [0, 'b']
-            d = {0, 'b'}
-            e = {0: 'b'}
-            s = 'hey now!'
-    ''').lstrip()
+    if sys.version_info > (3,5):
+        a = 0
+        b = 'b'
+        c = [a, b]
+        d = {a, b}
+        e = {a:b}
+        ddd(s='hey now!', a=a, b=b, c=c, d=d, e=e)
+        out, err = capsys.readouterr()
+        assert out == dedent('''
+            DEBUG: test_debug.py, 61, test_debug.test_daiquiri():
+                a = 0
+                b = 'b'
+                c = [0, 'b']
+                d = {0, 'b'}
+                e = {0: 'b'}
+                s = 'hey now!'
+        ''').lstrip()
 
 class Info:
     def __init__(self, **kwargs):
@@ -77,70 +80,72 @@ def test_prude(capsys):
     Info(email='ted@ledbelly.com')
     out, err = capsys.readouterr()
     assert out == dedent('''
-        DEBUG: test_debug.py, 73, test_debug.Info.__init__():
+        DEBUG: test_debug.py, 76, test_debug.Info.__init__():
             email = 'ted@ledbelly.com'
             self = Info object containing {'email': 'ted@ledbelly.com'}
     ''').lstrip()
 
 def test_update(capsys):
     Inform(colorscheme=None, prog_name=False)
-    a = 0
-    b = 'b'
-    c = [a, b]
-    d = {a, b}
-    e = {a:b}
-    vvv()
-    out, err = capsys.readouterr()
-    out = '\n'.join(l for l in out.split('\n') if 'capsys' not in l)
-    assert out == dedent('''
-        DEBUG: test_debug.py, 92, test_debug.test_update():
-            a = 0
-            b = 'b'
-            c = [0, 'b']
-            d = {0, 'b'}
-            e = {0: 'b'}
-    ''').lstrip()
+    if sys.version_info > (3,5):
+        a = 0
+        b = 'b'
+        c = [a, b]
+        d = {a, b}
+        e = {a:b}
+        vvv()
+        out, err = capsys.readouterr()
+        out = '\n'.join(l for l in out.split('\n') if 'capsys' not in l)
+        assert out == dedent('''
+            DEBUG: test_debug.py, 96, test_debug.test_update():
+                a = 0
+                b = 'b'
+                c = [0, 'b']
+                d = {0, 'b'}
+                e = {0: 'b'}
+        ''').lstrip()
 
 def test_shear(capsys):
     Inform(colorscheme=None, prog_name=False)
-    a = 0
-    b = 'b'
-    c = [a, b]
-    d = {a, b}
-    e = {a:b}
-    vvv(a, b, c, d, e)
-    out, err = capsys.readouterr()
-    assert out == dedent('''
-        DEBUG: test_debug.py, 111, test_debug.test_shear():
-            a = 0
-            b = 'b'
-            c = [0, 'b']
-            d = {0, 'b'}
-            e = {0: 'b'}
-    ''').lstrip()
+    if sys.version_info > (3,5):
+        a = 0
+        b = 'b'
+        c = [a, b]
+        d = {a, b}
+        e = {a:b}
+        vvv(a, b, c, d, e)
+        out, err = capsys.readouterr()
+        assert out == dedent('''
+            DEBUG: test_debug.py, 116, test_debug.test_shear():
+                a = 0
+                b = 'b'
+                c = [0, 'b']
+                d = {0, 'b'}
+                e = {0: 'b'}
+        ''').lstrip()
 
-def test_prostrate(capsys):
-    Inform(colorscheme=None, prog_name=False)
-    sss()
-    out, err = capsys.readouterr()
-    out = out.strip().split('\n')
-    assert out[0] == 'DEBUG: test_debug.py, 124, test_debug.test_prostrate():'
-    assert out[-2][-57:] == "inform/tests/test_debug.py', line 124, in test_prostrate,"
-    assert out[-1] == '        sss()'
+    def test_prostrate(capsys):
+        Inform(colorscheme=None, prog_name=False)
+        sss()
+        out, err = capsys.readouterr()
+        out = out.strip().split('\n')
+        assert out[0] == 'DEBUG: test_debug.py, 124, test_debug.test_prostrate():'
+        assert out[-2][-57:] == "inform/tests/test_debug.py', line 124, in test_prostrate,"
+        assert out[-1] == '        sss()'
 
-def test_rubber(capsys):
-    Inform(colorscheme=None, prog_name=False)
-    a = aaa('a')
-    out, err = capsys.readouterr()
-    assert out == dedent('''
-        DEBUG: test_debug.py, 133, test_debug.test_rubber(): 'a'
-    ''').lstrip()
-    assert a == 'a'
+    def test_rubber(capsys):
+        Inform(colorscheme=None, prog_name=False)
+        a = aaa('a')
+        out, err = capsys.readouterr()
+        assert out == dedent('''
+            DEBUG: test_debug.py, 133, test_debug.test_rubber(): 'a'
+        ''').lstrip()
+        assert a == 'a'
 
-    b = aaa(b = 'b')
-    out, err = capsys.readouterr()
-    assert out == dedent('''
-        DEBUG: test_debug.py, 140, test_debug.test_rubber(): b: 'b'
-    ''').lstrip()
-    assert b == 'b'
+        b = aaa(b = 'b')
+        out, err = capsys.readouterr()
+        assert out == dedent('''
+            DEBUG: test_debug.py, 140, test_debug.test_rubber(): b: 'b'
+        ''').lstrip()
+        assert b == 'b'
 
