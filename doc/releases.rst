@@ -5,6 +5,7 @@ Releases
     | Version: 1.16.0
     | Released: 2019-04-27
 
+**1.16 (2019-04-27)**:
     - Add end support to join().
     - Allow previous logfile to be saved.
     - Allow urgency to be specified on notifications.
