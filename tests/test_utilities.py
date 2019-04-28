@@ -1206,7 +1206,7 @@ def test_orwell():
 
     george = Orwell(peace='war', truth='lies')
 
-    if sys.version_info > (3,5):
+    if sys.version_info >= (3,6):
         # argument sort order is unpredictable on earlier versions of python
         assert render(george) == "Orwell(peace='war', truth='lies')"
         assert repr(george) == "Orwell(peace='war', truth='lies')"

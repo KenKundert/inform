@@ -32,7 +32,7 @@ def test_grouch(capsys):
 
 def test_salver(capsys):
     Inform(colorscheme=None, prog_name=False)
-    if sys.version_info > (3,5):
+    if sys.version_info >= (3,6):
         a = 0
         b = 'b'
         c = [a, b]
@@ -52,7 +52,7 @@ def test_salver(capsys):
 
 def test_daiquiri(capsys):
     Inform(colorscheme=None, prog_name=False)
-    if sys.version_info > (3,5):
+    if sys.version_info >= (3,6):
         a = 0
         b = 'b'
         c = [a, b]
@@ -87,7 +87,7 @@ def test_prude(capsys):
 
 def test_update(capsys):
     Inform(colorscheme=None, prog_name=False)
-    if sys.version_info > (3,5):
+    if sys.version_info >= (3,6):
         a = 0
         b = 'b'
         c = [a, b]
@@ -107,7 +107,7 @@ def test_update(capsys):
 
 def test_shear(capsys):
     Inform(colorscheme=None, prog_name=False)
-    if sys.version_info > (3,5):
+    if sys.version_info >= (3,6):
         a = 0
         b = 'b'
         c = [a, b]
