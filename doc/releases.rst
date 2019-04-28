@@ -2,7 +2,7 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.15.4
+    | Version: 1.16.0
     | Released: 2019-04-27
 
     - Add end support to join().
