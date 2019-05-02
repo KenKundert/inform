@@ -1164,12 +1164,17 @@ not include strings.
 
     >>> from inform import is_collection
 
-    >>> is_collection('abc')
+    >>> is_collection('')  # string
     False
 
-    >>> is_collection(['a', 'b', 'c'])
+    >>> is_collection([])  # list
     True
 
+    >>> is_collection(())  # tuple
+    True
+
+    >>> is_collection({})  # dictionary
+    True
 
 .. _is_iterable desc:
 
@@ -1189,6 +1194,33 @@ a string.
     True
 
     >>> is_iterable(['a', 'b', 'c'])
+    True
+
+
+.. _is_mapping desc:
+
+is_mapping
+""""""""""
+
+.. py:function:: is_mapping(obj)
+
+:func:`inform.is_collection` returns *True* if its argument is a mapping.  This 
+includes dictionary and other dictionary-like objects.
+
+.. code-block:: python
+
+    >>> from inform import is_mapping
+
+    >>> is_mapping('')  # string
+    False
+
+    >>> is_mapping([])  # list
+    False
+
+    >>> is_mapping(())  # tuple
+    False
+
+    >>> is_mapping({})  # dictionary
     True
 
 

@@ -199,19 +199,53 @@ def is_iterable(obj):
 def is_collection(obj):
     """Identifies objects that can be iterated over, excluding strings.
 
-    Returns *True* if argument is a collecton (tuple, list, set or dictionary).
+    Returns *True* if argument is a collection (tuple, list, set or dictionary).
 
     Example::
 
         >>> from inform import is_collection
-        >>> is_collection('abc')
+        >>> is_collection('')  # string
         False
 
-        >>> is_collection(['a', 'b', 'c'])
+        >>> is_collection([])  # list
+        True
+
+        >>> is_collection(())  # tuple
+        True
+
+        >>> is_collection({})  # dictionary
         True
 
     """
     return is_iterable(obj) and not is_str(obj)
+
+# is_mapping {{{2
+def is_mapping(obj):
+    """Identifies objects that are mappings (are dictionary like).
+
+    Returns *True* if argument is a mapping.
+
+    Example::
+
+        >>> from inform import is_mapping
+        >>> is_mapping('')  # string
+        False
+
+        >>> is_mapping([])  # list
+        False
+
+        >>> is_mapping(())  # tuple
+        False
+
+        >>> is_mapping({})  # dictionary
+        True
+
+    """
+    try: # python3
+        from collections.abc import Mapping
+    except ImportError: # python2
+        from collections import Mapping
+    return isinstance(obj, Mapping)
 
 # Color class {{{2
 class Color:

@@ -5,17 +5,19 @@ Releases
     | Version: 1.16.0
     | Released: 2019-04-27
 
+    - Added :func:`inform.is_mapping()`
+
 **1.16 (2019-04-27)**:
-    - Add end support to join().
+    - Add end support to :func:`inform.join()`.
     - Allow previous logfile to be saved.
     - Allow urgency to be specified on notifications.
-    - Allow render support in user-defined classes with addition of special methods.
+    - Allow :func:`inform.render()` support in user-defined classes with addition of special methods.
 
 **1.15 (2019-01-16)**:
     - Added *error_status* argument to :class:`inform.Inform`.
     - Enhanced :class:`inform.plural`.  This enhancement is not backward 
       compatible.
-    - Enhance for render() to allow it to be used in a __repr__ function.
+    - Enhance for :func:`inform.render()` to allow it to be used in a __repr__ function.
 
 **1.14 (2018-12-03)**:
     - Added :func:`inform.render_bar` utility function.

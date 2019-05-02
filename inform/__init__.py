@@ -2,8 +2,9 @@ __version__ = '1.16.0'
 __released__ = '2019-04-27'
 
 from .inform import (
-    # inform utility functions
-    cull, indent, is_collection, is_iterable, is_str, join, Color, Info,
+    # inform utility functions and classes
+    cull, indent, is_collection, is_iterable, is_mapping, is_str, join,
+    Color, Info,
 
     # user utility functions and classes
     columns, conjoin, fmt, full_stop, os_error, plural, ProgressBar,

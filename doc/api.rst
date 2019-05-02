@@ -60,6 +60,8 @@ Inform Utilities
 
 .. autofunction:: inform.is_iterable
 
+.. autofunction:: inform.is_mapping
+
 .. autofunction:: inform.is_str
 
 

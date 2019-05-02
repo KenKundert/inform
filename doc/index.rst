@@ -283,6 +283,9 @@ constructing messages.
    * - :ref:`is_iterable desc`
      - Is object iterable (includes strings).
 
+   * - :ref:`is_mapping desc`
+     - Is object a mapping (i.e., is it a dictionary or is it dictionary like)?
+
    * - :ref:`is_str desc`
      - Is object a string?
 
