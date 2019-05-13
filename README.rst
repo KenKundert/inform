@@ -1,4 +1,4 @@
-Inform - Print & Logging Utilities
+Inform — Print & Logging Utilities
 ==================================
 
 .. image:: https://img.shields.io/travis/KenKundert/inform/master.svg
