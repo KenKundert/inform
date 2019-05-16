@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.16.1
-    | Released: 2019-05-13
+    | Version: 1.17.0
+    | Released: 2019-05-16
 
 **1.17 (2019-05-16)**:
     - Added :func:`inform.is_mapping()`
