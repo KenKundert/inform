@@ -2,9 +2,9 @@
 
 from inform import (
     Color, columns, conjoin, comment, cull, display, done, error, Error, fatal,
-    fmt, full_stop, indent, Inform, is_collection, is_iterable, is_str, join,
-    get_prog_name, get_informer, narrate, os_error, output, plural, render,
-    terminate, warn, ddd, ppp, sss, vvv, ProgressBar,
+    fmt, full_stop, indent, Inform, is_collection, is_iterable, is_mapping,
+    is_str, join, get_prog_name, get_informer, narrate, os_error, output,
+    plural, render, terminate, warn, ddd, ppp, sss, vvv, ProgressBar,
 )
 from textwrap import dedent
 import sys
@@ -137,7 +137,9 @@ def test_cull():
     assert cull([None, 0, 1, 2], remove=None) == [0, 1, 2]
     assert cull([None, 0, 1, 2], remove=0) == [None, 1, 2]
     assert cull([None, 0, 1, 2], remove=(1, 2)) == [None, 0]
-    assert cull({1:0, 2:1, 0:2}, ) == {2:1, 0:2}
+    assert cull({1:0, 2:1, 0:2}) == {2:1, 0:2}
+    assert set(cull({1:0, 2:1, 0:2}.keys(), remove=1)) == set([0, 2])
+    assert set(cull({1:0, 2:1, 0:2}.values())) == set([1, 2])
 
 def test_fmt():
     a = 'a'
@@ -366,6 +368,27 @@ def test_render():
     assert render(ccc, sort=True) == ccc_expected_sorted
 
 
+    # test ability to render inform-aware classes
+    class Chimera:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+        def _inform_get_args(self):
+            return self.args
+        def _inform_get_kwargs(self):
+            return self.kwargs
+
+    lycia = Chimera('Lycia', front='lion', middle='goat', tail='snake')
+    assert render(lycia) == dedent('''
+        Chimera(
+            'Lycia',
+            front='lion',
+            middle='goat',
+            tail='snake',
+        )
+    ''').strip()
+
+
 def test_plural():
     assert '{:cart/s}'.format(plural(0)) == 'carts'
     assert '{:cart/s}'.format(plural(1)) == 'cart'
@@ -422,6 +445,13 @@ def test_is_collection():
     assert is_collection([]) == True
     assert is_collection(()) == True
     assert is_collection({}) == True
+
+def test_is_mapping():
+    assert is_mapping(0) == False
+    assert is_mapping('') == False
+    assert is_mapping([]) == False
+    assert is_mapping(()) == False
+    assert is_mapping({}) == True
 
 def test_color():
     assert Color('black', 'dark')('black') == '\x1b[0;30mblack\x1b[0m'
@@ -1194,6 +1224,27 @@ def test_aerosol(capsys):
             one: |.....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
             mid 2
             two: |.....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+            after
+        """).lstrip()
+
+def test_employ(capsys):
+    # ProgressBar: multiple escapes
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        stop = 10
+        step = 1
+        display('before')
+        with ProgressBar(stop) as progress:
+            value = 0
+            while value <= stop:
+                progress.draw(value)
+                value += step
+                if value > stop/2:
+                    progress.escape()
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
+            ......9......8......7......6......5
             after
         """).lstrip()
 

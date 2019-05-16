@@ -37,10 +37,10 @@ STREAM_POLICIES = {
     'header':  lambda i, so, se: se if i.severity else so,
         # stderr is used on all messages that include headers
 }
-if sys.version_info < (3,0,0):
-    BAR_CHARS = '-=#'
-else:
+if sys.version_info >= (3,0,0):
     BAR_CHARS = '▏▎▍▌▋▊▉█'
+else:                                  # pragma: no cover
+    BAR_CHARS = '-=#'
 NUM_BAR_CHARS = len(BAR_CHARS)
 
 """
@@ -190,7 +190,7 @@ def is_iterable(obj):
     """
     try: # python3
         from collections.abc import Iterable
-    except ImportError: # python2
+    except ImportError: # python2               # pragma: no cover
         from collections import Iterable
     return isinstance(obj, Iterable)
 
@@ -243,7 +243,7 @@ def is_mapping(obj):
     """
     try: # python3
         from collections.abc import Mapping
-    except ImportError: # python2
+    except ImportError: # python2               # pragma: no cover
         from collections import Mapping
     return isinstance(obj, Mapping)
 
@@ -819,7 +819,7 @@ class plural:
     def __format__(self, formatter):
         try: # python3
             from collections.abc import Sized
-        except ImportError: # python2
+        except ImportError: # python2               # pragma: no cover
             from collections import Sized
 
         x = self.value
@@ -1066,6 +1066,8 @@ class ProgressBar:
     # escape() {{{3
     def escape(self):
         """Terminate the progress bar without completing it."""
+        if self.finished:
+            return
         self.informant(continuing=True)
         self.finished = True
 
@@ -1803,7 +1805,7 @@ class Inform:
         try:
             import arrow
             now = arrow.now().strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
-        except:
+        except:                                        # pragma: no cover
             now = ""
         if self.argv is None:
             # self.argv may be None, False or a list. None implies that argv was

@@ -149,3 +149,13 @@ def test_shear(capsys):
         ''').lstrip()
         assert b == 'b'
 
+def test_bartender(capsys):
+    Inform(colorscheme=None, prog_name=False)
+    b = 'b'
+    ret = aaa(b)
+    out, err = capsys.readouterr()
+    assert out == dedent('''
+        DEBUG: test_debug.py, 155, test_debug.test_bartender(): 'b'
+    ''').lstrip()
+    assert ret == 'b'
+
