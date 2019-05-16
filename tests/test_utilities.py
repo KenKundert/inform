@@ -369,24 +369,25 @@ def test_render():
 
 
     # test ability to render inform-aware classes
-    class Chimera:
-        def __init__(self, *args, **kwargs):
-            self.args = args
-            self.kwargs = kwargs
-        def _inform_get_args(self):
-            return self.args
-        def _inform_get_kwargs(self):
-            return self.kwargs
+    if sys.version_info >= (3, 6):
+        class Chimera:
+            def __init__(self, *args, **kwargs):
+                self.args = args
+                self.kwargs = kwargs
+            def _inform_get_args(self):
+                return self.args
+            def _inform_get_kwargs(self):
+                return self.kwargs
 
-    lycia = Chimera('Lycia', front='lion', middle='goat', tail='snake')
-    assert render(lycia) == dedent('''
-        Chimera(
-            'Lycia',
-            front='lion',
-            middle='goat',
-            tail='snake',
-        )
-    ''').strip()
+        lycia = Chimera('Lycia', front='lion', middle='goat', tail='snake')
+        assert render(lycia) == dedent('''
+            Chimera(
+                'Lycia',
+                front='lion',
+                middle='goat',
+                tail='snake',
+            )
+        ''').strip()
 
 
 def test_plural():
