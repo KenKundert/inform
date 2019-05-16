@@ -510,6 +510,10 @@ def render(obj, sort=None, level=None, tab='    '):
             Sometimes this is not possible because the values are not
             comparable, in which case *render* reverts to using the natural
             order.
+        level (int):
+            The indent level.
+            If not specified and render is called recursively the indent
+            will be incremented, otherwise the indent is 0.
         tab (string):
             The string used when indenting.
 

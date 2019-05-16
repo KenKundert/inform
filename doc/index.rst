@@ -11,7 +11,7 @@ Inform: Print & Logging Utilities
 | Version: 1.16.1
 | Released: 2019-05-13
 | Please post all bugs and suggestions at
-  `Github <https://github.com/KenKundert/inform/issues>`_
+  `Inform Issues <https://github.com/KenKundert/inform/issues>`_
   (or contact me directly at
   `inform@nurdletech.com <mailto://inform@nurdletech.com>`_).
 
@@ -70,9 +70,8 @@ Install the latest stable version with::
 
 Requires Python2.7 or Python3.3 or better.
 
-The source code is available from `GitHub 
-<https://github.com/KenKundert/inform>`_.  You can download the repository and 
-install using::
+The source code is available from `GitHub <https://github.com/KenKundert/inform>`_.
+You can download the repository and install using::
 
     git clone https://github.com/KenKundert/inform.git
     pip3 install --user inform
@@ -81,7 +80,7 @@ install using::
 Issues
 ------
 
-Please ask questions or report problems on `Github <https://github.com/KenKundert/inform/issues>`_.
+Please ask questions or report problems on `Inform Issues`_.
 
 
 Quick Tour
