@@ -1862,7 +1862,7 @@ class Inform:
             codicils = kwargs.get('codicil')
             if codicils:
                  codicils = [codicils] if is_str(codicils) else codicils
-                 codicils = '\n'.join(codicils)
+                 codicils = _join(codicils, dict(sep='\n', wrap=kwargs.get('wrap')))
                  if header:
                      codicils = indent(codicils)
                  message = message + '\n' + codicils

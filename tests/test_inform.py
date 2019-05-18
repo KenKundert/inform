@@ -22,7 +22,16 @@ if sys.version[0] == '2':
 else:
     from io import StringIO
 
+# Globals {{{1
 sys.argv=['ack']
+lorum_ipsum = dedent('''
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+''').strip()
 
 # Utilities {{{1
 invokeExecutableRegex = r"(?<=ack: invoked as: )[^\n]+(?=\n)"
@@ -580,3 +589,128 @@ def test_crocodile():
         ''').strip()
         assert strip(stderr) == ''
 
+def test_envoy():
+    with messenger() as (msg, stdout, stderr, logfile):
+        expected = dedent('''
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+            minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat. Duis aute irure dolor in
+            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+            culpa qui officia deserunt mollit anim id est laborum.
+        ''').strip()
+        display(lorum_ipsum, wrap=True)
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
+
+def test_jaguar():
+    with messenger() as (msg, stdout, stderr, logfile):
+        expected = dedent('''
+            Lorem ipsum dolor sit amet, consectetur
+            adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna
+            aliqua. Ut enim ad minim veniam, quis
+            nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat.
+            Duis aute irure dolor in reprehenderit
+            in voluptate velit esse cillum dolore eu
+            fugiat nulla pariatur. Excepteur sint
+            occaecat cupidatat non proident, sunt in
+            culpa qui officia deserunt mollit anim
+            id est laborum.
+        ''').strip()
+        display(lorum_ipsum, wrap=40)
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
+
+def test_birthmark():
+    with messenger() as (msg, stdout, stderr, logfile):
+        expected = dedent('''
+            error:
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                aliquip ex ea commodo consequat. Duis aute irure dolor in
+                reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                culpa qui officia deserunt mollit anim id est laborum.
+        ''').strip()
+        error(lorum_ipsum, wrap=True)
+        assert msg.errors_accrued() == 1
+        assert errors_accrued() == 1
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
+
+
+def test_currant():
+    with messenger() as (msg, stdout, stderr, logfile):
+        expected = dedent('''
+            error:
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                aliquip ex ea commodo consequat. Duis aute irure dolor in
+                reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                culpa qui officia deserunt mollit anim id est laborum.
+        ''').strip()
+        try:
+            raise Error(lorum_ipsum, wrap=True)
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued() == 1
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
+
+
+def test_stripy():
+    with messenger() as (msg, stdout, stderr, logfile):
+        expected = dedent('''
+            error: de Finibus Bonorum et Malorum
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                aliquip ex ea commodo consequat. Duis aute irure dolor in
+                reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                culpa qui officia deserunt mollit anim id est laborum.
+        ''').strip()
+        try:
+            raise Error('de Finibus Bonorum et Malorum', codicil=lorum_ipsum, wrap=True)
+        except Error as e:
+            e.report()
+        assert msg.errors_accrued() == 1
+        assert errors_accrued() == 1
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
