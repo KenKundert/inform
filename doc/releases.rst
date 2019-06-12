@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.17.1
-    | Released: 2019-05-18
+    | Version: 1.17.2
+    | Released: 2019-06-11
     - wrap now applies to codicils passed as arguments.
 
 **1.17 (2019-05-16)**:
