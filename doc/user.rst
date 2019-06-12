@@ -1440,13 +1440,23 @@ plural
     of plural form.  Only 1 is considered to be singular; every other number is 
     considered plural.
 
+    Here is a typical usage::
+
+        >>> from inform import plural, conjoin
+
+        >>> astronauts = ['John Glenn']
+        >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
+        'The astronaut: John Glenn'
+
+        >>> astronauts = ['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins']
+        >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
+        'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
+
     The count can be inserted into the output by placing # into the format 
     specification. If using '#' is inconvenient, you can specify a different 
     string to use to trigger the substitution.
 
     Examples::
-
-        >>> from inform import plural
 
         >>> f"{plural(1):# thing/s}"
         '1 thing'

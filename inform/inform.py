@@ -793,6 +793,11 @@ class plural:
 
         >>> from inform import plural
 
+        >>> f"{plural(1):thing/s}"
+        'thing'
+        >>> f"{plural(2):thing/s}"
+        'things'
+
         >>> f"{plural(1):# thing/s}"
         '1 thing'
         >>> f"{plural(2):# thing/s}"
@@ -852,7 +857,11 @@ def full_stop(sentence):
 
     """
     sentence = str(sentence)
-    return sentence if sentence[-1] in '.?!' else sentence + '.'
+    try:
+        return sentence if sentence[-1] in '.?!' else sentence + '.'
+    except:
+        # this occurs when sentence is empty string
+        return sentence
 
 
 # columns {{{2

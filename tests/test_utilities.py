@@ -421,6 +421,7 @@ def test_full_stop():
     assert full_stop('hey now.') == 'hey now.'
     assert full_stop('hey now?') == 'hey now?'
     assert full_stop('hey now!') == 'hey now!'
+    assert full_stop('') == ''
 
 def test_os_error():
     try:
