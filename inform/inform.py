@@ -781,7 +781,9 @@ class plural:
     The format string has three sections, separated by '/'.  The first section 
     is always included, the last section is included if the given number is 
     plural, and the middle section (which can be omitted) is included if the 
-    given number is singular.
+    given number is singular.  If there is only one section, it is used as is
+    for the singular case and an 's' is added to it for the plural case.
+    If any of the sections contain a '#', it is replaced by the number of things.
 
     You may provide either a number (e.g. 0, 1, 2, ...) or any object that 
     implements `__len__()` (e.g. list, dict, set, ...).  In the latter case, 
@@ -789,9 +791,18 @@ class plural:
     of plural form.  Only 1 is considered to be singular; every other number is 
     considered plural.
 
+    If the format string starts with '!' then it is removed and the
+    sense of plurality is reversed (the plural form is used for one thing, and
+    the singular form is used otherwise). This is useful when pluralizing verbs.
+
     Examples::
 
         >>> from inform import plural
+
+        >>> f"{plural(1):thing}"
+        'thing'
+        >>> f"{plural(2):thing}"
+        'things'
 
         >>> f"{plural(1):thing/s}"
         'thing'
@@ -808,18 +819,32 @@ class plural:
         >>> f"{plural(2):/a cactus/# cacti}"
         '2 cacti'
 
+        >>> f"{plural(1):# /is/are}"
+        '1 is'
+        >>> f"{plural(2):# /is/are}"
+        '2 are'
+
         >>> f"{plural([]):# thing/s}"
         '0 things'
         >>> f"{plural([0]):# thing/s}"
         '1 thing'
 
+        >>> f"{plural(1):!agree}"
+        'agrees'
+        >>> f"{plural(2):!agree}"
+        'agree'
+
+    If '#' or '!' are inconvenient, you can change them by passing the *num* and
+    *invert* arguments to plural().
+
     The original implementation is from Veedrac on Stack Overflow: 
     http://stackoverflow.com/questions/21872366/plural-string-formatting
     """
 
-    def __init__(self, value, num='#'):
+    def __init__(self, value, num='#', invert='!'):
         self.value = value
         self.symbol = num
+        self.invert = invert
 
     def __format__(self, formatter):
         try: # python3
@@ -829,11 +854,19 @@ class plural:
 
         x = self.value
         number = len(x) if isinstance(x, Sized) else self.value
+        if formatter[0:1] == self.invert:
+            formatter = formatter[1:]
+            use_singular = number != 1
+        else:
+            use_singular = number == 1
         formatter = formatter.replace(self.symbol, str(number))
         always, _, suffixes = formatter.partition("/")
-        singular, _, plural = suffixes.rpartition("/")
+        if suffixes:
+            singular, _, plural = suffixes.rpartition("/")
+        else:
+            singular, plural = '', 's'
 
-        return "{}{}".format(always, singular if number == 1 else plural)
+        return "{}{}".format(always, singular if use_singular else plural)
 
 
 # full_stop {{{2

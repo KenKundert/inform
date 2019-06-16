@@ -4,7 +4,8 @@ Releases
 **Latest development release**:
     | Version: 1.17.2
     | Released: 2019-06-11
-    - wrap now applies to codicils passed as arguments.
+    - Wrap now applies to codicils passed as arguments.
+    - Enhance :class:`inform.plural`.
 
 **1.17 (2019-05-16)**:
     - Added :func:`inform.is_mapping()`

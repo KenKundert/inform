@@ -1426,19 +1426,26 @@ plural
 
 .. py:class:: plural(count, num='#')
 
-    Used with python format strings to conditionally format a phrase depending 
+    Used with python format strings to conditionally format a phrase depending
     on whether it refers to a singular or plural number of things.
 
-    The format specification has three sections, separated by '/'.  The first 
-    section is always included, the last section is included if the given number 
-    is plural, and the middle section, which can be omitted, is included if the 
-    given number is singular.
+    The format specification has three sections, separated by '/'.  The first
+    section is always included, the last section is included if the given number
+    is plural, and the middle section, which can be omitted, is included if the
+    given number is singular.  If there is only one section, it is used as is
+    for the singular case and an 's' is added to it for the plural case.
+    If any of the sections contain a '#', it is replaced by the number of
+    things.
 
-    You may provide either a number (e.g. 0, 1, 2, ...) or any object that 
-    implements `__len__()` (e.g. list, dict, set, ...).  In the latter case, 
-    the length of the object will be used to decide whether to use the singular 
-    of plural form.  Only 1 is considered to be singular; every other number is 
+    You may provide either a number (e.g. 0, 1, 2, ...) or any object that
+    implements `__len__()` (e.g. list, dict, set, ...).  In the latter case,
+    the length of the object will be used to decide whether to use the singular
+    of plural form.  Only 1 is considered to be singular; every other number is
     considered plural.
+
+    If the format string starts with '!' then it is removed and the sense of
+    plurality is reversed (the plural form is used for one thing, and the
+    singular form is used otherwise). This is useful when pluralizing verbs.
 
     Here is a typical usage::
 
@@ -1453,10 +1460,17 @@ plural
         'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
 
     The count can be inserted into the output by placing # into the format 
-    specification. If using '#' is inconvenient, you can specify a different 
-    string to use to trigger the substitution.
+    specification.
+
+    If using '#' or '!' is inconvenient, you can change them by specifying the 
+    *num* or *invert* to *plural()*.
 
     Examples::
+
+        >>> f"{plural(1):# thing}"
+        '1 thing'
+        >>> f"{plural(2):# thing}"
+        '2 things'
 
         >>> f"{plural(1):# thing/s}"
         '1 thing'
@@ -1468,10 +1482,20 @@ plural
         >>> f"{plural(2):/a cactus/# cacti}"
         '2 cacti'
 
+        >>> f"{plural(1):# /is/are}"
+        '1 is'
+        >>> f"{plural(2):# /is/are}"
+        '2 are'
+
         >>> f"{plural([]):# thing/s}"
         '0 things'
         >>> f"{plural([0]):# thing/s}"
         '1 thing'
+
+        >>> f"{plural(1):!agree}"
+        'agrees'
+        >>> f"{plural(2):!agree}"
+        'agree'
 
     The original implementation is from `Veedrac
     <http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.
