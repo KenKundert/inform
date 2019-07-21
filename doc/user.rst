@@ -57,9 +57,9 @@ flush = *False*:
 culprit = *None*:
    A string that is added to the beginning of the message that identifies the 
    culprit (the object for which the problem being reported was found). May also 
-   number or a tuple that contains strings and numbers. If *culprit* is a tuple, 
-   the members are converted to strings and joined with *culprit_sep* (default 
-   is ', ').
+   be a number or a tuple that contains strings and numbers. If *culprit* is 
+   a tuple, the members are converted to strings and joined with *culprit_sep* 
+   (default is ', ').
 
 codicil = *None*:
    A string or a collection of strings that contain messages that are printed 
