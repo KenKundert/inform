@@ -58,7 +58,7 @@ stable version of the code from `PyPI <https://pypi.python.org>`_ using::
 You can find the latest development version of the source code on
 `Github <https://github.com/KenKundert/inform>`_.
 
-Supported in Python2.7, Python3.3, Python3.4, Python3.5, and Python3.6.
+Supported in Python2.7, Python3.5, Python3.6, Python3.7 and Python3.8.
 
 
 Introduction

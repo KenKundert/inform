@@ -27,7 +27,7 @@ setup(
     install_requires=dependencies.split(),
     setup_requires='pytest-runner>=2.0'.split(),
     tests_require='pytest pytest-cov'.split(),
-    #python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*',
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*',
     keywords='inform logging printing'.split(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -36,11 +36,10 @@ setup(
         'Natural Language :: English',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Utilities',
     ],
 )
