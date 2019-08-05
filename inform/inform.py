@@ -727,8 +727,8 @@ def os_error(err):
     filenames = ' -> '.join(
         cull([err.filename, getattr(err, 'filename2', None)])
     )
-    text = err.strerror if err.strerror else str(err)
-    msg = ': '.join(cull([filenames, text.lower()]))
+    text = err.strerror.lower() if err.strerror else str(err)
+    msg = ': '.join(cull([filenames, text]))
     return full_stop(msg)
 
 
