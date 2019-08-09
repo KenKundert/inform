@@ -734,7 +734,7 @@ def os_error(err):
 
 # conjoin {{{2
 # Like string join method, but supports conjunction
-def conjoin(iterable, conj=' and ', sep=', '):
+def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
     """Conjunction join.
 
     Args:
@@ -745,6 +745,8 @@ def conjoin(iterable, conj=' and ', sep=', '):
             The separator used between the next to last and last values.
         sep (string):
             The separator to use when joining the strings in *iterable*.
+        fmt (string):
+            A format string used to convert each item in *iterable* to a string.
 
     Return the items of the *iterable* joined into a string, where *conj* is
     used to join the last two items in the list, and *sep* is used to join the
@@ -765,9 +767,15 @@ def conjoin(iterable, conj=' and ', sep=', '):
         >>> display(conjoin(['a', 'b', 'c']))
         a, b and c
 
+        >>> display(conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}'))
+        $10.10, $32.50 and $16.90
+
     """
-    lst = [str(m) for m in iterable]
-    if conj is not None and len(lst) > 1:
+    if fmt:
+        lst = [fmt.format(m) for m in iterable]
+    else:
+        lst = [str(m) for m in iterable]
+    if conj and len(lst) > 1:
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst)
 
@@ -2406,11 +2414,19 @@ class Error(Exception):
 
     The exception accepts both unnamed and named arguments.
     All are recorded and available for later use.
+
+    *template* may be added to the class as an attribute, in which case it acts
+    as the default template for the exception (used to format the exception
+    arguments into an error message).
     """
 
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+        if 'template' not in kwargs:
+            template = getattr(self, 'template', None)
+            if template:
+                self.kwargs.update(dict(template=template))
 
     def get_message(self, template=None):
         """Get exception message.

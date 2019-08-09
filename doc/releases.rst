@@ -4,8 +4,11 @@ Releases
 **Latest development release**:
     | Version: 1.17.4
     | Released: 2019-07-20
+
     - Wrap now applies to codicils passed as arguments.
-    - Enhance :class:`inform.plural`.
+    - Enhance :class:`inform.plural` (now supports pluralizing verbs).
+    - Add *fmt* argument to :func:`inform.conjoin()`.
+    - Support *template* attribute on subclasses of :class:`inform.Error`.
 
 **1.17 (2019-05-16)**:
     - Added :func:`inform.is_mapping()`

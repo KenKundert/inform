@@ -285,6 +285,42 @@ def test_pardon():
             assert join_culprit(err.get_culprit(('a', 'b'))) == 'a, b, nutz, 347'
             assert str(err) == 'nutz, 347: hey now'
 
+def test_abase():
+    with messenger() as (msg, stdout, stderr, logfile):
+        class MyError0(Error):
+            pass
+
+        class MyError1(Error):
+            template = 'bad mojo'
+
+        class MyError2(Error):
+            template = 'bad mojo: {}'
+
+        try:
+            raise MyError0('hey now!')
+            assert False
+        except Error as err:
+            assert err.get_message() == 'hey now!'
+            assert str(err) == 'hey now!'
+            assert err.render() == 'hey now!'
+            assert err.render(template='msg: {}') == 'msg: hey now!'
+
+        try:
+            raise MyError1('hey now!')
+            assert False
+        except Error as err:
+            assert err.get_message() == 'bad mojo'
+            assert err.render() == 'bad mojo'
+            assert err.render(template='msg: {}') == 'msg: hey now!'
+
+        try:
+            raise MyError2('hey now!')
+            assert False
+        except Error as err:
+            assert err.get_message() == 'bad mojo: hey now!'
+            assert err.render() == 'bad mojo: hey now!'
+            assert err.render(template='msg: {}') == 'msg: hey now!'
+
 def test_possess():
     with messenger(stream_policy='header') as (msg, stdout, stderr, logfile):
         out = [

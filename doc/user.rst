@@ -873,6 +873,63 @@ Also available is :meth:`inform.Error.get_codicil()`, which behaves similarly
 except with codicils rather than culprits and the argument is added after the 
 codicil from the exception rather than before.
 
+
+Subclassing Error
+"""""""""""""""""
+
+When creating subclasses of :class:`inform.Error` you can add a template to the 
+subclass as a way of specifying the error message or messages that are to be 
+used for that exception. For example:
+
+.. code-block:: python
+
+    >>> class InvalidValueError(Error):
+    ...     template = 'invalid value.'
+
+    >>> try:
+    ...     raise InvalidValueError()
+    ... except Error as e:
+    ...     e.report()
+    myprog error: invalid value.
+
+You can include named and unnamed arguments of the exception in the template:
+
+.. code-block:: python
+
+    >>> class InvalidValueError(Error):
+    ...     template = 'must not be {}.'
+
+    >>> try:
+    ...     raise InvalidValueError('negative', culprit='rate')
+    ... except Error as e:
+    ...     e.report()
+    myprog error: rate: must not be negative.
+
+You can also specify a list of templates that are tried in order, the first for 
+which all arguments are specified is used:
+
+.. code-block:: python
+
+    >>> class InvalidValueError(Error):
+    ...     template = [
+    ...         '{} must fall between {min} and {max}.',
+    ...         '{} must be greater than {min}.',
+    ...         '{} must be less than {max}.',
+    ...         '{} must not be {illegal}.',
+    ...         '{} must be {legal}.',
+    ...         '{} is invalid.',
+    ...         'invalid value.',
+    ...     ]
+
+    >>> rate = -1.0
+    >>> try:
+    ...     if rate < 0:
+    ...         raise InvalidValueError(rate, illegal='negative', culprit='rate')
+    ... except Error as e:
+    ...     e.report()
+    myprog error: rate: -1.0 must not be negative.
+
+
 Utilities
 ---------
 
@@ -977,7 +1034,7 @@ This example prints out the phonetic alphabet:
 conjoin
 """""""
 
-.. py:function:: conjoin(iterable, conj=' and ', sep=', ')
+.. py:function:: conjoin(iterable, conj=' and ', sep=', ', fmt=None)
 
 :func:`inform.conjoin` is like ''.join(), but allows you to specify 
 a conjunction that is placed between the last two elements. For example:
@@ -997,6 +1054,14 @@ If you prefer the use of the Oxford comma, you can add it as follow:
 
     >>> conjoin(['a', 'b', 'c'], conj=', and ')
     'a, b, and c'
+
+You can specify a format string that is applied to every item in the list before 
+they are joined:
+
+.. code-block:: python
+
+    >>> conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}')
+    '$10.10, $32.50 and $16.90'
 
 
 .. _cull desc:
