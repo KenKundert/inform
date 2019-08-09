@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.17.4
-    | Released: 2019-07-20
+    | Version: 1.17.5
+    | Released: 2019-08-09
 
     - Wrap now applies to codicils passed as arguments.
     - Enhance :class:`inform.plural` (now supports pluralizing verbs).
