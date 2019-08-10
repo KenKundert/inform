@@ -2418,6 +2418,10 @@ class Error(Exception):
     *template* may be added to the class as an attribute, in which case it acts
     as the default template for the exception (used to format the exception
     arguments into an error message).
+
+    The idea of allowing *template* to be an attribute to *Error* was originally
+    proposed on the Python Ideas mailing list by Ryan Fox
+    (https://pypi.org/project/exception-template/).
     """
 
     def __init__(self, *args, **kwargs):

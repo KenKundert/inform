@@ -104,13 +104,20 @@ Culprits
 """"""""
 
 *culprit* is used to identify the target of the message. If the message is 
-pointing out a problem the *culprit* is generally the source of the problem.
+pointing out a problem, the *culprit* is generally the source of the problem.
 
-Here is an example that demonstrates the wrap and composite culprit features:
+Here is a simple example:
 
 ..  code-block:: python
 
    >>> from inform import error
+
+   >>> error('file not found.', culprit='now-playing')
+   error: now-playing: file not found.
+
+Here is an example that demonstrates the wrap and composite culprit features:
+
+..  code-block:: python
 
    >>> value = -1
    >>> error(
@@ -239,18 +246,6 @@ informants using :class:`inform.InformantFactory`.
 
 All of the informants except :ref:`panic` and :ref:`debug` do not produce any 
 output if *mute* is set.
-
-If you do not care for the default behavior for the predefined informants, you 
-can customize them by overriding their attributes. For example, in many cases 
-you might prefer that normal program output is not logged, either because it is 
-voluminous or because it is sensitive. In that case you can simply override the 
-*log* attributes for the *display* and *output* informants like so:
-
-.. code-block:: python
-
-   from inform import display, output
-   display.log = False
-   output.log = False
 
 
 .. _log:
@@ -535,13 +530,16 @@ Modifying Existing Informants
 """""""""""""""""""""""""""""
 
 You may adjust the behavior of existing informants by overriding the attributes 
-that were passed in when they were created. For example, normally *display* logs 
-its messages. That can be turned off as follows:
+that were passed in when they were created.  For example, in many cases you 
+might prefer that normal program output is not logged, either because it is 
+voluminous or because it is sensitive. In that case you can simply override the 
+*log* attributes for the *display* and *output* informants like so:
 
 .. code-block:: python
 
-    from inform import display
-    display.log = False
+   from inform import display, output
+   display.log = False
+   output.log = False
 
 Any attribute that can be passed into :class:`inform.InformantFactory` when 
 creating an informant can be overridden. However, when overriding a color you 
@@ -906,7 +904,7 @@ You can include named and unnamed arguments of the exception in the template:
     myprog error: rate: must not be negative.
 
 You can also specify a list of templates that are tried in order, the first for 
-which all arguments are specified is used:
+which all arguments are available is used:
 
 .. code-block:: python
 
