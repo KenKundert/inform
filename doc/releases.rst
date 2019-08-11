@@ -5,6 +5,7 @@ Releases
     | Version: 1.17.5
     | Released: 2019-08-09
 
+**1.18 (2019-08-10)**:
     - Wrap now applies to codicils passed as arguments.
     - Enhance :class:`inform.plural` (now supports pluralizing verbs).
     - Add *fmt* argument to :func:`inform.conjoin()`.
