@@ -119,6 +119,9 @@ def test_conjoin():
     assert conjoin(items, conj=', or ') == 'a, b, or c'
     assert conjoin(items, conj=' or ', sep='; ') == 'a; b or c'
 
+    items = [.14, 6.78, 9]
+    assert conjoin(items, fmt='${:0.2f}', conj=None) == '$0.14, $6.78, $9.00'
+
 def test_cull():
     assert cull([0, 1, 2]) == [1, 2]
     assert cull([False, 1, 2]) == [1, 2]
@@ -394,9 +397,15 @@ def test_plural():
     assert '{:cart/s}'.format(plural(0)) == 'carts'
     assert '{:cart/s}'.format(plural(1)) == 'cart'
     assert '{:cart/s}'.format(plural(2)) == 'carts'
+    assert '{:cart}'.format(plural(0)) == 'carts'
+    assert '{:cart}'.format(plural(1)) == 'cart'
+    assert '{:cart}'.format(plural(2)) == 'carts'
     assert '{:# cart/s}'.format(plural(0)) == '0 carts'
     assert '{:# cart/s}'.format(plural(1)) == '1 cart'
     assert '{:# cart/s}'.format(plural(2)) == '2 carts'
+    assert '{:# cart}'.format(plural(0)) == '0 carts'
+    assert '{:# cart}'.format(plural(1)) == '1 cart'
+    assert '{:# cart}'.format(plural(2)) == '2 carts'
     assert '{:/baby/babies}'.format(plural(0)) == 'babies'
     assert '{:bab/y/ies}'.format(plural(0)) == 'babies'
     assert '{:/baby/babies}'.format(plural(1)) == 'baby'
@@ -415,6 +424,37 @@ def test_plural():
     assert '{:# boy/s}'.format(plural(range(0))) == '0 boys'
     assert '{:# boy/s}'.format(plural(range(1))) == '1 boy'
     assert '{:# boy/s}'.format(plural(range(2))) == '2 boys'
+
+    assert '{:!cart/s}'.format(plural(0)) == 'cart'
+    assert '{:!cart/s}'.format(plural(1)) == 'carts'
+    assert '{:!cart/s}'.format(plural(2)) == 'cart'
+    assert '{:!cart}'.format(plural(0)) == 'cart'
+    assert '{:!cart}'.format(plural(1)) == 'carts'
+    assert '{:!cart}'.format(plural(2)) == 'cart'
+    assert '{:!# cart/s}'.format(plural(0)) == '0 cart'
+    assert '{:!# cart/s}'.format(plural(1)) == '1 carts'
+    assert '{:!# cart/s}'.format(plural(2)) == '2 cart'
+    assert '{:!# cart}'.format(plural(0)) == '0 cart'
+    assert '{:!# cart}'.format(plural(1)) == '1 carts'
+    assert '{:!# cart}'.format(plural(2)) == '2 cart'
+    assert '{:!/baby/babies}'.format(plural(0)) == 'baby'
+    assert '{:!bab/y/ies}'.format(plural(0)) == 'baby'
+    assert '{:!/baby/babies}'.format(plural(1)) == 'babies'
+    assert '{:!bab/y/ies}'.format(plural(1)) == 'babies'
+    assert '{:!/baby/babies}'.format(plural(2)) == 'baby'
+    assert '{:!bab/y/ies}'.format(plural(2)) == 'baby'
+    assert '{:!# /baby/babies}'.format(plural(0)) == '0 baby'
+    assert '{:!# bab/y/ies}'.format(plural(0)) == '0 baby'
+    assert '{:!# /baby/babies}'.format(plural(1)) == '1 babies'
+    assert '{:!# bab/y/ies}'.format(plural(1)) == '1 babies'
+    assert '{:!# /baby/babies}'.format(plural(2)) == '2 baby'
+    assert '{:!# bab/y/ies}'.format(plural(2)) == '2 baby'
+    assert '{:!# boy/s}'.format(plural(''.split())) == '0 boy'
+    assert '{:!# boy/s}'.format(plural('carl'.split())) == '1 boys'
+    assert '{:!# boy/s}'.format(plural('carl george'.split())) == '2 boy'
+    assert '{:!# boy/s}'.format(plural(range(0))) == '0 boy'
+    assert '{:!# boy/s}'.format(plural(range(1))) == '1 boys'
+    assert '{:!# boy/s}'.format(plural(range(2))) == '2 boy'
 
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
