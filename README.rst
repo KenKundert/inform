@@ -251,6 +251,9 @@ is_iterable:
 is_collection:
     Returns *True* if its argument is iterable but is not a string.
 
+is_mapping:
+    Returns *True* if its argument is a mapping (are dictionary like).
+
 For example:
 
 .. code-block:: python
