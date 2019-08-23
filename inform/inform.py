@@ -918,9 +918,9 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
         pagewidth (int):
             The number of characters available for each line.
 
-        alignment ('<' or '>'):
-            Whether to left ('<') or right ('>') align the *array* items in
-            their columns.
+        alignment ('<', '^', or '>'):
+            Whether to left ('<'), center ('^'), or right ('>') align the
+            *array* items in their columns.
 
         leader (str):
             The string to prepend to each line.
