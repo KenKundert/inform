@@ -944,6 +944,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
             Delta     Hotel     Lima      Papa      Tango     X-ray
 
     """
+    array = list(array)
     textwidth = pagewidth - len(leader)
     width = max([len(e) for e in array])+1
     numcols = max(1, textwidth//(width+1))
