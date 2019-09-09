@@ -1076,9 +1076,9 @@ returned with the undesirable values removed.
 
 By default, :func:`inform.cull` strips values that would be *False* when cast to 
 a Boolean (0, *False*, *None*, '', (), [], etc.).  A particular value may be 
-specified using the *remove* as a keyword argument.  The value of remove may be 
-a collection, in which case any value in the collection is removed, or it may be 
-a function, in which case it takes a single item as an argument and returns 
+specified using the *remove* as a keyword argument.  The value of *remove* may 
+be a collection, in which case any value in the collection is removed, or it may 
+be a function, in which case it takes a single item as an argument and returns 
 *True* if that item should be removed from the list.
 
 .. code-block:: python
