@@ -616,7 +616,7 @@ def render(obj, sort=None, level=None, tab='    '):
             endcaps = '{}( )'.format(obj.__class__.__name__)
             content = (
                 [render(v, sort, level+1) for v in args] +
-                [n + ' = ' + render(v, sort, level+1) for n, v in kwargs.items()]
+                [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
             )
         elif is_str(obj) and '\n' in obj:
             endcaps = None
