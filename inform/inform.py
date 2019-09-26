@@ -397,6 +397,8 @@ class Info(object):
         return {k:v for k, v in self.__dict__.items() if not k.startswith('_')}
 
     def __getattr__(self, name):
+        if name.startswith('_'):
+            raise  AttributeError(name)
         return self.__dict__.get(name)
 
     def __repr__(self):
@@ -614,7 +616,7 @@ def render(obj, sort=None, level=None, tab='    '):
             endcaps = '{}( )'.format(obj.__class__.__name__)
             content = (
                 [render(v, sort, level+1) for v in args] +
-                [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
+                [n + ' = ' + render(v, sort, level+1) for n, v in kwargs.items()]
             )
         elif is_str(obj) and '\n' in obj:
             endcaps = None
