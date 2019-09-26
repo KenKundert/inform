@@ -18,8 +18,8 @@ Inform — Print & Logging Utilities
         :target: https://pypi.python.org/pypi/inform/
 
 :Author: Ken Kundert
-:Version: 1.18.1
-:Released: 2019-08-22
+:Version: 1.19.0
+:Released: 2019-09-25
 
 A light-weight package with few dependencies that provides specialized print 
 functions that are used when communicating with the user. It allows you to 
