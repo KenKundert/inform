@@ -913,7 +913,7 @@ def full_stop(sentence):
 def columns(array, pagewidth=79, alignment='<', leader='    '):
     """Distribute array over enough columns to fill the screen.
 
-    Returns a list of strings, one for each line.
+    Returns a multiline string.
 
     Args:
         array (collection of strings):
@@ -932,7 +932,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
     Example::
 
         >>> from inform import columns, display, full_stop
-        >>> title = 'Display the NATO phonetic alphabet'
+        >>> title = 'The NATO phonetic alphabet:'
         >>> words = '''
         ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett
         ...     Kilo Lima Mike November Oscar Papa Quebec Romeo Sierra Tango
@@ -940,8 +940,8 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
         ... '''.split()
         >>> newline = '''
         ... '''
-        >>> display(full_stop(title), columns(words), sep=newline)
-        Display the NATO phonetic alphabet.
+        >>> display(title, columns(words), sep=newline)
+        The NATO phonetic alphabet:
             Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
             Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
             Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
