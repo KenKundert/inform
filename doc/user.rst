@@ -1326,10 +1326,10 @@ the *sep*, *template* and *wrap* keyword arguments to combine the arguments.
 
     >>> accounts = dict(checking=1100.16, savings=13948.78, brokerage=0)
     >>> lines = []
-    >>> for name, amount in accounts.items():
-    ...     lines.append(join(name, amount, template='{:>10s}: ${:,.2f}'))
+    >>> for name in sorted(accounts):
+    ...     lines.append(join(name, accounts[name], template='{:>10s}: ${:,.2f}'))
 
-    display(lines, sep='\n')
+    >>> display(*lines, sep='\n')
      brokerage: $0.00
       checking: $1,100.16
        savings: $13,948.78
