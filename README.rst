@@ -13,9 +13,6 @@ Inform — Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/pyversions/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
-.. IGNORE: pypi statistics are broken and unlikely to be fixed
-    .. image:: https://img.shields.io/pypi/dd/inform.svg
-        :target: https://pypi.python.org/pypi/inform/
 
 :Author: Ken Kundert
 :Version: 1.19.0

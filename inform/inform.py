@@ -608,7 +608,8 @@ def render(obj, sort=None, level=None, tab='    '):
             endcaps = '{ }'
             content = [render(v, sort, level+1) for v in order(obj)]
         elif hasattr(obj, '_inform_get_args') or hasattr(obj, '_inform_get_kwargs'):
-            args = kwargs = []
+            args = []
+            kwargs = {}
             if hasattr(obj, '_inform_get_args') and obj._inform_get_args:
                 args = obj._inform_get_args()
             if hasattr(obj, '_inform_get_kwargs') and obj._inform_get_kwargs:
@@ -622,7 +623,7 @@ def render(obj, sort=None, level=None, tab='    '):
             endcaps = None
             content = [
                 '"""',
-                indent(dedent(obj.strip()), leader(1)),
+                indent(dedent(obj).strip(), leader(1)),
                 leader(0) + '"""'
             ]
         else:
@@ -740,7 +741,7 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
     """Conjunction join.
 
     Args:
-        iterable (exception):
+        iterable (list or generator of strings):
             The collection of items to be joined. All items are converted to
             strings.
         conj (string):
@@ -884,7 +885,8 @@ def full_stop(sentence):
     """Add period to end of string if it is needed.
 
     A full stop (a period) is added if there is no terminating punctuation at the
-    end of the string.
+    end of the string.  Any white space at the end of the string is removed
+    before looking for terminal punctuation.
 
     Examples::
 
@@ -899,7 +901,7 @@ def full_stop(sentence):
         'Is the file is out of date?'
 
     """
-    sentence = str(sentence)
+    sentence = str(sentence).rstrip()
     try:
         return sentence if sentence[-1] in '.?!' else sentence + '.'
     except:
