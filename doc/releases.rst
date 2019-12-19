@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.19.1
-    | Released: 2019-10-17
+    | Version: 1.19.2
+    | Released: 2019-12-18
 
     - Add *format* method to :class:`inform.plural`.
 
