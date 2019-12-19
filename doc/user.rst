@@ -13,9 +13,11 @@ Using Informants
 ----------------
 
 This package defines a collection of 'print' functions that are referred to as 
-informants.  They include include :ref:`log`, :ref:`comment`, :ref:`codicil`, 
-:ref:`narrate`, :ref:`display`, :ref:`output`, :ref:`notify`, :ref:`debug`, 
-:ref:`warn`, :ref:`error`, :ref:`fatal` and :ref:`panic`.
+informants.  They include include :ref:`log informant`, :ref:`comment 
+informant`, :ref:`codicil informant`, :ref:`narrate informant`, :ref:`display 
+informant`, :ref:`output informant`, :ref:`notify informant`, :ref:`debug 
+informant`, :ref:`warn informant`, :ref:`error informant`, :ref:`fatal 
+informant` and :ref:`panic informant`.
 
 They all take arguments in a manner that is a generalization of Python's 
 built-in print function.  Each of the informants is used for a specific purpose, 
@@ -244,11 +246,11 @@ Predefined Informants
 The following informants are predefined in *Inform*. You can create custom 
 informants using :class:`inform.InformantFactory`.
 
-All of the informants except :ref:`panic` and :ref:`debug` do not produce any 
-output if *mute* is set.
+All of the informants except :ref:`panic informant` and :ref:`debug informant` 
+do not produce any output if *mute* is set.
 
 
-.. _log:
+.. _log informant:
 
 log
 """
@@ -263,7 +265,7 @@ log
 Saves a message to the log file without displaying it.
 
 
-.. _comment:
+.. _comment informant:
 
 comment
 """""""
@@ -283,7 +285,7 @@ Comments are generally used to document unusual occurrences that might warrant
 the user's attention.
 
 
-.. _codicil:
+.. _codicil informant:
 
 codicil
 """""""
@@ -307,7 +309,7 @@ a header, that header is not output and instead the message is indented.
         skipping
 
 
-.. _narrate:
+.. _narrate informant:
 
 narrate
 """""""
@@ -329,7 +331,7 @@ Distinguishing narration from comments allows them to colored differently and
 controlled separately.
 
 
-.. _display:
+.. _display informant:
 
 display
 """""""
@@ -350,7 +352,7 @@ Displays a message if *quiet* is not set. Logs the message.
     We the people ...
 
 
-.. _output:
+.. _output informant:
 
 output
 """"""
@@ -373,7 +375,7 @@ has asked for quiet.
     The sky is falling!
 
 
-.. _notify:
+.. _notify informant:
 
 notify
 """"""
@@ -394,7 +396,7 @@ urgency of the notification. Its value must 'low', 'normal', or 'critical' or it
 will be ignored.
 
 
-.. _debug:
+.. _debug informant:
 
 debug
 """""
@@ -423,7 +425,7 @@ available debugging functions: :func:`inform.aaa()`, :func:`inform.ddd()`,
 :func:`inform.ppp()`, :func:`inform.sss()` and :func:`inform.vvv()`.
 
 
-.. _warn:
+.. _warn informant:
 
 warn
 """"
@@ -448,7 +450,7 @@ to the message. The header is colored yellow when writing to the console.
     myprog warning: ghost: file not found, skipping.
 
 
-.. _error:
+.. _error informant:
 
 error
 """""
@@ -474,7 +476,7 @@ the message. The header is colored red when writing to the console.
     myprog error: count: invalid value specified, expected a number.
 
 
-.. _fatal:
+.. _fatal informant:
 
 fatal
 """""
@@ -505,7 +507,7 @@ is terminated with an exit status of 1.
     myprog error: config: file not found
         Cannot continue.
 
-.. _panic:
+.. _panic informant:
 
 panic
 """""
@@ -723,7 +725,7 @@ in green and the failures in red. In addition, the success informant may be
 configured to suppress the messages if the user asks for quiet.  In that case, 
 only the failures would be displayed.
 
-.. _exceptions:
+.. _inform exceptions:
 
 Exceptions
 ----------
@@ -1559,6 +1561,12 @@ plural
         'agrees'
         >>> f"{plural(2):!agree}"
         'agree'
+
+    Finally, you can use the *format* method to directly produce a descriptive 
+    string::
+
+        >>> plural(2).format("/a cactus/# cacti")
+        '2 cacti'
 
     The original implementation is from `Veedrac
     <http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.

@@ -1,8 +1,8 @@
 .. Initialize Inform and suppress outputting of program name
 
-    >>> from inform import Inform, error
+    >>> from inform import Inform, error, fatal
     >>> inform = Inform(prog_name=False)
-    >>> fatal = error
+    >>> fatal.terminate = False
 
 
 Inform: Print & Logging Utilities
@@ -22,17 +22,21 @@ simply and cleanly print different types of messages.  For example:
 
 .. code-block:: python
 
-    >>> from inform import display, warn, error
+    >>> from inform import display, error, os_error
     >>> display('This is a plain message.')
     This is a plain message.
 
-    >>> error('this is an error message.')
-    error: this is an error message.
+    >>> try:
+    ...     with open('config') as f:
+    ...         config = f.read()
+    ... except OSError as e:
+    ...     error(os_error(e))
+    error: config: no such file or directory.
 
-These functions behave in a way that is very similar to the *print* function 
-that is built-in to Python3, but they also provide some additional features as 
-well. For example, they can be configured to log their messages and they can be 
-disabled en masse.
+The *display* and *error* functions are referred to as informants. They behave 
+in a way that is very similar to the *print* function that is built-in to 
+Python3, but they also provide some additional features as well.  For example, 
+they can be configured to log their messages and they can be disabled en masse.
 
 Finally, *Inform* provides a generic exception and a collection of small 
 utilities that are useful when creating messages.
@@ -91,12 +95,15 @@ Informants
 
 *Inform* defines a collection of *print*-like functions that have different 
 roles.  These functions are referred to as 'informants' and include 
-:ref:`display`, :ref:`warn`, :ref:`error`, and :ref:`fatal`.  All of them take 
-arguments in the same manner as Python's built-in print function and all of them 
-write the desired message to standard output, with the last three adding 
-a header to the message that indicates the type of message.  For example:
+:ref:`display informant`, :ref:`warn informant`, :ref:`error informant`, and 
+:ref:`fatal informant`.  All of them take arguments in the same manner as 
+Python's built-in print function and all of them write the desired message to 
+standard output, with the last three adding a header to the message that 
+indicates the type of message.  For example:
 
 .. code-block:: python
+
+    >>> from inform import display, error, fatal, warn
 
     >>> display('ice', 9)
     ice 9
@@ -189,8 +196,9 @@ together:
     config, 5: syntax error.
 
 Besides the four informants already described, *Inform* provides several others, 
-including :ref:`log`, :ref:`codicil`, :ref:`comment`, :ref:`narrate`, 
-:ref:`output`, :ref:`notify`, :ref:`debug` and :ref:`panic`.  Informants in 
+including :ref:`log informant`, :ref:`codicil informant`, :ref:`comment 
+informant`, :ref:`narrate informant`, :ref:`output informant`, :ref:`notify 
+informant`, :ref:`debug informant` and :ref:`panic informant`.  Informants in 
 general can write to the log file, to the standard output, or to a notifier.  
 They can add headers and specify the color of the header and the message. They 
 can also continue the previous message or they can terminate the program.  Each 

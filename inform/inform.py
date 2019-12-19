@@ -857,6 +857,9 @@ class plural:
         self.symbol = num
         self.invert = invert
 
+    def format(self, formatter):
+        return self.__format__(formatter)
+
     def __format__(self, formatter):
         try: # python3
             from collections.abc import Sized
