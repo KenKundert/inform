@@ -6,7 +6,7 @@
 # Documentation can be found at inform.readthedocs.io.
 
 # License {{{1
-# Copyright (c) 2014-2019 Kenneth S. Kundert
+# Copyright (c) 2014-2020 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
