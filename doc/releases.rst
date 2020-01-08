@@ -5,6 +5,7 @@ Releases
     | Version: 1.19.3
     | Released: 2020-01-08
 
+**1.20 (2020-01-08)**:
     - Add *format* method to :class:`inform.plural`.
 
 **1.19 (2019-09-25)**:

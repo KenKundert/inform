@@ -2244,8 +2244,8 @@ class Inform:
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
             warning: setup.py, 5: empty line.
-            warning: setup.py, 8: empty line.
-            warning: setup.py, 13: empty line.
+            warning: setup.py, 9: empty line.
+            warning: setup.py, 14: empty line.
 
         """
         return self.CulpritContextManager(self, culprit, append=False)
