@@ -1013,7 +1013,8 @@ class ProgressBar:
 
         informant (informant):
             Which informant to use when outputting the progress bar.  By
-            default, :func:`inform.display()` is used.
+            default, :func:`inform.display()` is used.  Passing *None* or
+            *False* as *informant* suppresses the display of the progress bar.
 
     There are three typical use cases.
     First, use to illustrate the progress through an iterator:
@@ -1049,7 +1050,7 @@ class ProgressBar:
     """
 
     # constructor {{{3
-    def __init__(self, stop, start=0, log=False, prefix=None, width=79, informant=None):
+    def __init__(self, stop, start=0, log=False, prefix=None, width=79, informant=True):
         self.major = width//10
         self.width = 10*self.major
 
@@ -1074,7 +1075,7 @@ class ProgressBar:
         self.stop = stop
         self.log = log
         self.prefix = prefix
-        self.informant = informant if informant else display
+        self.informant = display if informant is True else informant
 
         self.prev_index = 0
         self.started = False
@@ -1118,7 +1119,8 @@ class ProgressBar:
         if self.started:
             # complete the bar if it was actually started
             self._draw(self.width)
-            self.informant(0, continuing=True)
+            if self.informant:
+                self.informant(0, continuing=True)
         self.finished = True
 
     # escape() {{{3
@@ -1126,11 +1128,14 @@ class ProgressBar:
         """Terminate the progress bar without completing it."""
         if self.finished:
             return
-        self.informant(continuing=True)
+        if self.informant:
+            self.informant(continuing=True)
         self.finished = True
 
     # _draw {{{3
     def _draw(self, index):
+        if not self.informant:
+            return
         stream_info = self.informer.get_stream_info(self.informant)
         if self.prefix:
             if stream_info.interrupted or not self.started:
@@ -2243,7 +2248,7 @@ class Inform:
             >>> with open(filename) as f, set_culprit(filename):
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
-            warning: setup.py, 5: empty line.
+            warning: setup.py, 6: empty line.
             warning: setup.py, 9: empty line.
             warning: setup.py, 14: empty line.
 
