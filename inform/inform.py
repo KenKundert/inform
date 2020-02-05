@@ -858,6 +858,20 @@ class plural:
         self.invert = invert
 
     def format(self, formatter):
+        """
+        Expand plural to a string.
+
+        You can use this method to directly expand plural to a string without
+        needing to use f-strings or the string format method.
+
+        Examples::
+
+            >>> plural(1).format('thing')
+            'thing'
+            >>> plural(3).format('/a cactus/# cacti')
+            '3 cacti'
+
+        """
         return self.__format__(formatter)
 
     def __format__(self, formatter):

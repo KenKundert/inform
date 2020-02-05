@@ -87,6 +87,7 @@ User Utilities
 .. autofunction:: inform.os_error
 
 .. autoclass:: inform.plural
+    :members:
 
 .. autofunction:: inform.render
 

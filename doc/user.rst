@@ -1925,16 +1925,19 @@ site-packages directory:
     except ImportError:  # python2
         import __builtin__ as builtins
 
-    from inform import aaa, ddd, ppp, sss, vvv
-    builtins.aaa = aaa
-    builtins.ddd = ddd
-    builtins.ppp = ppp
-    builtins.sss = sss
-    builtins.vvv = vvv
+    try:
+        from inform import aaa, ddd, ppp, sss, vvv
+        builtins.aaa = aaa
+        builtins.ddd = ddd
+        builtins.ppp = ppp
+        builtins.sss = sss
+        builtins.vvv = vvv
+    except ImportError:
+        pass
 
 The path of this file is typically 
-*.../lib/pythonN.M/site-packages/usercustomize.py* where *M.N* is the version 
-number of your python.
+*~/.local/lib/pythonN.M/site-packages/usercustomize.py* where *M.N* is the 
+version number of your python.
 
 
 Inform Helper Functions
