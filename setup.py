@@ -15,7 +15,7 @@ else:
 
 setup(
     name='inform',
-    version='1.20.1',
+    version='1.20.2',
     description='print & logging utilities for communicating with user',
     long_description=readme,
     author="Ken Kundert",
