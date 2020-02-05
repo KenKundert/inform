@@ -455,6 +455,9 @@ def test_plural():
     assert '{:!# boy/s}'.format(plural(range(0))) == '0 boy'
     assert '{:!# boy/s}'.format(plural(range(1))) == '1 boys'
     assert '{:!# boy/s}'.format(plural(range(2))) == '2 boy'
+    assert '{:~@ cart|s}'.format(plural(0, invert='~', num='@', slash='|')) == '0 cart'
+    assert '{:~@ cart|s}'.format(plural(1, invert='~', num='@', slash='|')) == '1 carts'
+    assert '{:~@ cart|s}'.format(plural(2, invert='~', num='@', slash='|')) == '2 cart'
 
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
@@ -1322,3 +1325,15 @@ def test_oblong():
         assert render_bar(0.11, 25) == '██▊'
         assert render_bar(0.66, 25) == '████████████████▌'
 
+
+if __name__ == '__main__':
+    # As a debugging aid allow the tests to be run on their own, outside pytest.
+    # This makes it easier to see and interpret and textual output.
+
+    defined = dict(globals())
+    for k, v in defined.items():
+        if callable(v) and k.startswith('test_'):
+            print()
+            print('Calling:', k)
+            print((len(k)+9)*'=')
+            v()

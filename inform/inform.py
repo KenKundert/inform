@@ -852,10 +852,11 @@ class plural:
     http://stackoverflow.com/questions/21872366/plural-string-formatting
     """
 
-    def __init__(self, value, num='#', invert='!'):
+    def __init__(self, value, num='#', invert='!', slash='/'):
         self.value = value
         self.symbol = num
         self.invert = invert
+        self.slash = slash
 
     def format(self, formatter):
         """
@@ -888,9 +889,9 @@ class plural:
         else:
             use_singular = number == 1
         formatter = formatter.replace(self.symbol, str(number))
-        always, _, suffixes = formatter.partition("/")
+        always, _, suffixes = formatter.partition(self.slash)
         if suffixes:
-            singular, _, plural = suffixes.rpartition("/")
+            singular, _, plural = suffixes.rpartition(self.slash)
         else:
             singular, plural = '', 's'
 

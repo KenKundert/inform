@@ -5,7 +5,8 @@ Releases
     | Version: 1.20.1
     | Released: 2020-01-18
 
-    - Allow :class:`inform.ProgressBar` output to be supressed.
+    - Allow :class:`inform.ProgressBar` output to be suppressed.
+    - Allow ``/`` to be overridden in :class:`inform.plural`
 
 **1.20 (2020-01-08)**:
     - Add *format* method to :class:`inform.plural`.
