@@ -7,8 +7,8 @@ from .inform import (
     Color, Info,
 
     # user utility functions and classes
-    columns, conjoin, fmt, full_stop, os_error, plural, ProgressBar,
-    render, render_bar,
+    columns, conjoin, did_you_mean, fmt, full_stop, os_error, plural, 
+    ProgressBar, render, render_bar,
 
     # debug functions
     aaa, ppp, ddd, vvv, sss,
