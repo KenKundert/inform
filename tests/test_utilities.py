@@ -1,10 +1,10 @@
 # encoding: utf8
 
 from inform import (
-    Color, columns, conjoin, comment, cull, display, done, error, Error, fatal,
-    fmt, full_stop, indent, Inform, is_collection, is_iterable, is_mapping,
-    is_str, join, get_prog_name, get_informer, narrate, os_error, output,
-    plural, render, terminate, warn, ddd, ppp, sss, vvv, ProgressBar,
+    Color, columns, conjoin, did_you_mean, comment, cull, display, done, error, 
+    Error, fatal, fmt, full_stop, indent, Inform, is_collection, is_iterable, 
+    is_mapping, is_str, join, get_prog_name, get_informer, narrate, os_error, 
+    output, plural, render, terminate, warn, ddd, ppp, sss, vvv, ProgressBar,
 )
 from textwrap import dedent
 import sys
@@ -121,6 +121,12 @@ def test_conjoin():
 
     items = [.14, 6.78, 9]
     assert conjoin(items, fmt='${:0.2f}', conj=None) == '$0.14, $6.78, $9.00'
+
+def test_did_you_mean():
+    assert did_you_mean('abc', ['bcd']) == 'bcd'
+    assert did_you_mean('abc', ['cde']) == 'cde'
+    assert did_you_mean('abc', ['bcd', 'cde']) == 'bcd'
+    assert did_you_mean('abc', ['cde', 'bcd']) == 'bcd'
 
 def test_cull():
     assert cull([0, 1, 2]) == [1, 2]

@@ -782,6 +782,29 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst)
 
+# did_you_mean {{{2
+def did_you_mean(invalid_str, valid_strs):
+    """
+    Given an invalid string from the user, return the valid string with the 
+    most similarity.
+    
+    Args:
+        invalid_str (string):
+            The invalid string given by the user.
+        valid_strs (iterable):
+            The set of valid strings that the user was expected to choose from.
+
+    Examples:
+        
+        >>> from inform import did_you_mean
+        >>> did_you_mean('car', ['cat', 'dog'])
+        'cat'
+        >>> did_you_mean('car', {'cat': 1, 'dog': 2})
+        'cat'
+    """
+    from difflib import SequenceMatcher
+    similarity = lambda x: SequenceMatcher(a=invalid_str, b=x).ratio()
+    return max(valid_strs, key=similarity)
 
 # plural {{{2
 class plural:
@@ -896,6 +919,7 @@ class plural:
             singular, plural = '', 's'
 
         return "{}{}".format(always, singular if use_singular else plural)
+
 
 
 # full_stop {{{2
