@@ -1096,6 +1096,35 @@ be a function, in which case it takes a single item as an argument and returns
        savings: $13,948.78
 
 
+.. _did_you_mean desc:
+
+did_you_mean
+""""""""""""
+
+.. py:function:: did_you_mean(candidate, choices)
+
+    Given a candidate string from the user, return the closest valid choice.
+
+    This function requires that the *difflib* package be installed before it can 
+    be used.
+
+    Args:
+        candidate (string):
+            The string given by the user.
+        choices (iterable):
+            The set of valid strings that the user was expected to choose from.
+
+    Examples:
+
+        >>> from inform import did_you_mean
+        >>> did_you_mean('cat', ['cat', 'dog'])
+        'cat'
+        >>> did_you_mean('car', ['cat', 'dog'])
+        'cat'
+        >>> did_you_mean('car', {'cat': 1, 'dog': 2})
+        'cat'
+
+
 .. _fmt desc:
 
 fmt

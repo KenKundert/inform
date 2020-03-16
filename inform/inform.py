@@ -787,7 +787,7 @@ def did_you_mean(invalid_str, valid_strs):
     """
     Given an invalid string from the user, return the valid string with the 
     most similarity.
-    
+
     Args:
         invalid_str (string):
             The invalid string given by the user.
@@ -795,12 +795,15 @@ def did_you_mean(invalid_str, valid_strs):
             The set of valid strings that the user was expected to choose from.
 
     Examples:
-        
+
         >>> from inform import did_you_mean
+        >>> did_you_mean('cat', ['cat', 'dog'])
+        'cat'
         >>> did_you_mean('car', ['cat', 'dog'])
         'cat'
         >>> did_you_mean('car', {'cat': 1, 'dog': 2})
         'cat'
+
     """
     from difflib import SequenceMatcher
     similarity = lambda x: SequenceMatcher(a=invalid_str, b=x).ratio()
