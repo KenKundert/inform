@@ -30,9 +30,13 @@ pip-log.txt
 .tox
 .test*.sum
 generated_settings/**
+.hypothesis
 
 #Translations
 *.mo
 
 #Mr Developer
 .mr.developer.cfg
+
+# Sphinx
+.build

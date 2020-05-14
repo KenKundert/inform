@@ -784,10 +784,9 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
 
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
-    """
-    Given an invalid string from the user, return the valid string with the 
+    """Given an invalid string from the user, return the valid string with the 
     most similarity.
-    
+
     Args:
         invalid_str (string):
             The invalid string given by the user.
@@ -795,7 +794,7 @@ def did_you_mean(invalid_str, valid_strs):
             The set of valid strings that the user was expected to choose from.
 
     Examples:
-        
+
         >>> from inform import did_you_mean
         >>> did_you_mean('car', ['cat', 'dog'])
         'cat'
@@ -806,10 +805,138 @@ def did_you_mean(invalid_str, valid_strs):
     similarity = lambda x: SequenceMatcher(a=invalid_str, b=x).ratio()
     return max(valid_strs, key=similarity)
 
+# parse_range {{{2
+def parse_range(
+        items_str,
+        cast=int,
+        range=lambda a, b: range(a, b+1),
+        block_delim=',',
+        range_delim='-'
+):
+    """Parse a set of values from a string where commas can be used to separate 
+    individual items and hyphens can be used to specify ranges of items.
+
+    Args:
+        items_str (str):
+            The string to parse.
+
+        cast (callable):
+            A function that converts items from the given string to a sensible 
+            type.  It will be given a single argument, which will be a string, 
+            and should return that same value in the appropriate type.  Note 
+            that the casted values will also be used as the inputs for the 
+            *range()* function.
+
+        range (callable):
+            A function that produces the values implied by a range.  It will be 
+            given two arguments: the start and end of a range.  Both arguments 
+            will have already been transformed by the *cast()* function, and 
+            the first argument is guaranteed to be less than the second.  The 
+            function should return an iterable containing all the values in 
+            that range, including the start and end values.
+            
+        block_delim (str):
+            The character used to separate items and ranges.
+
+        range_delim (str):
+            The character used to indicate a range.
+
+    Return:
+        set: All of the values specified by the given string.
+
+    Examples:
+
+        >>> from inform import parse_range
+        >>> parse_range('1-3,5')
+        {1, 2, 3, 5}
+    """
+    blocks = items_str.split(block_delim)
+    indices = set()
+
+    for block in blocks:
+        block = block.strip()
+
+        if not block:
+            continue
+
+        if range_delim and range_delim in block:
+            begin, end = sorted(cast(x) for x in block.split(range_delim))
+            indices.update(range(begin, end))
+
+        else:
+            indices.add(cast(block))
+
+    return indices
+
+
+# format_range {{{2
+def format_range(
+        items,
+        diff=lambda a, b: b - a,
+        key=None,
+        str=str,
+        block_delim=',',
+        range_delim='-',
+):
+    """Create a string that succinctly represents the given set of items.  
+    Groups of consecutive items are succinctly displayed as a range, and other 
+    items are listed individually.
+
+    Args:
+        items:
+            An iterable containing the values to format.  Any type of iterable 
+            can be given, but it will always be treated as a set (e.g. order 
+            doesn't matter, duplicates are ignored).  By default, the items in 
+            the iterable must be non-negative integers, but by customizing the 
+            other arguments, almost any type can be used (as long as ranges 
+            still make sense).
+
+        key (callable or None):
+            A key function used to sort the given values, or None if the values 
+            can be sorted directly.
+
+        str (callable):
+            A function that can be used to convert an individual value from 
+            *items* into a string.
+
+        block_delim (str):
+            The character used to separate individual items and ranges in the 
+            formatted string.
+
+        range_delim (str):
+            The character used to indicate ranges in the formatted string.
+
+    Examples:
+
+        >>> from inform import format_range
+        >>> format_range([1, 2, 3, 5])
+        '1-3,5'
+    """
+    blocks = []
+    current_seq = []
+
+    def make_block(seq):
+        if len(seq) == 0:
+            return []
+        elif len(seq) == 1:
+            return [str(seq[0])]
+        elif len(seq) == 2:
+            return [str(seq[0]), str(seq[1])]
+        else:
+            return ['{}{}{}'.format(seq[0], range_delim, seq[-1])]
+
+    for x in sorted(set(items), key=key):
+        if current_seq and diff(current_seq[-1], x) != 1:
+            blocks += make_block(current_seq)
+            current_seq = []
+        current_seq.append(x)
+
+    blocks += make_block(current_seq)
+    return block_delim.join(blocks)
+
 # plural {{{2
 class plural:
-    """
-    Conditionally format a phrase depending on whether it refers to a singular 
+    """Conditionally format a phrase depending on whether it refers to a singular 
     or plural number of things.
 
     The format string has three sections, separated by '/'.  The first section 
@@ -829,7 +956,7 @@ class plural:
     sense of plurality is reversed (the plural form is used for one thing, and
     the singular form is used otherwise). This is useful when pluralizing verbs.
 
-    Examples::
+    Examples:
 
         >>> from inform import plural
 
@@ -882,8 +1009,7 @@ class plural:
         self.slash = slash
 
     def format(self, formatter):
-        """
-        Expand plural to a string.
+        """Expand plural to a string.
 
         You can use this method to directly expand plural to a string without
         needing to use f-strings or the string format method.
@@ -1056,7 +1182,7 @@ class ProgressBar:
             *False* as *informant* suppresses the display of the progress bar.
 
     There are three typical use cases.
-    First, use to illustrate the progress through an iterator:
+    First, use to illustrate the progress through an iterator::
 
         for item in ProgressBar(items):
             process(item)
