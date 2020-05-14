@@ -796,10 +796,13 @@ def did_you_mean(invalid_str, valid_strs):
     Examples:
 
         >>> from inform import did_you_mean
+        >>> did_you_mean('cat', ['cat', 'dog'])
+        'cat'
         >>> did_you_mean('car', ['cat', 'dog'])
         'cat'
         >>> did_you_mean('car', {'cat': 1, 'dog': 2})
         'cat'
+
     """
     from difflib import SequenceMatcher
     similarity = lambda x: SequenceMatcher(a=invalid_str, b=x).ratio()
@@ -1838,13 +1841,13 @@ class Inform:
                 'termination':
                     stderr is used for the final termination message.
                     stdout is used otherwise.
-                    This is generally used for programs are not filters (the
-                    output is largely status rather than data that might be fed
-                    into another program through a pipeline).
+                    This is generally used for programs that are not filters
+                    (the output is largely status rather than data that might be
+                    fed into another program through a pipeline).
                 'header':
                     stderr is used for all messages with headers/severities.
                     stdout is used otherwise.
-                    This is generally used for programs are filters (the
+                    This is generally used for programs that act as filters (the
                     output is largely data that might be fed into another
                     program through a pipeline). In this case stderr is used for
                     error messages so they do not pollute the data stream.
