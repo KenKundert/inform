@@ -371,7 +371,7 @@ class Color:
 
 
 # Info class {{{2
-class Info(object):
+class Info:
     """Generic Class
 
     When instantiated, it converts the provided keyword arguments to attributes.  
@@ -400,6 +400,9 @@ class Info(object):
         if name.startswith('_'):
             raise  AttributeError(name)
         return self.__dict__.get(name)
+
+    def render(self, template):
+        return template.format(**self.__dict__)
 
     def __repr__(self):
         return render(self)
@@ -871,8 +874,8 @@ class plural:
         >>> f"{plural(2):!agree}"
         'agree'
 
-    If '#' or '!' are inconvenient, you can change them by passing the *num* and
-    *invert* arguments to plural().
+    If '/', '#', or '!' are inconvenient, you can change them by passing the
+    *slash*, *num* and *invert* arguments to plural().
 
     The original implementation is from Veedrac on Stack Overflow: 
     http://stackoverflow.com/questions/21872366/plural-string-formatting
