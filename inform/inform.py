@@ -372,7 +372,7 @@ class Color:
 
 # Info class {{{2
 class Info:
-    """Generic Class
+    """Generic Data Structure Class
 
     When instantiated, it converts the provided keyword arguments to attributes.  
     Unknown attributes evaluate to None.
@@ -380,9 +380,13 @@ class Info:
     >>> class Orwell(Info):
     ...     pass
 
-    >>> george = Orwell(peace='war', truth='lies')
+    >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
     >>> print(str(george))
-    Orwell(peace='war', truth='lies')
+    Orwell(
+        peace='war',
+        freedom='slavery',
+        ignorance='strength',
+    )
 
     >>> george.peace
     'war'
@@ -402,6 +406,18 @@ class Info:
         return self.__dict__.get(name)
 
     def render(self, template):
+        """Render class to a string
+
+        Args:
+            template (str):
+                The template string is returned with any instances of {name}
+                replaced by the value of the corresponding attribute.
+
+        >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
+        'Peace is war. Freedom is slavery. Ignorance is strength.'
+
+        """
+
         return template.format(**self.__dict__)
 
     def __repr__(self):
