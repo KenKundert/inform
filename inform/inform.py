@@ -756,7 +756,7 @@ def os_error(err):
 
 # conjoin {{{2
 # Like string join method, but supports conjunction
-def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
+def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
     """Conjunction join.
 
     Args:
@@ -767,6 +767,8 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
             The separator used between the next to last and last values.
         sep (string):
             The separator to use when joining the strings in *iterable*.
+        end (string):
+            Is added to the end of the returned string.
         fmt (string):
             A format string used to convert each item in *iterable* to a string.
 
@@ -776,7 +778,7 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
 
     Examples:
 
-        >>> from inform import conjoin, display
+        >>> from inform import conjoin, display, Info
         >>> display(conjoin([], ' or '))
         <BLANKLINE>
 
@@ -792,6 +794,42 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
         >>> display(conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}'))
         $10.10, $32.50 and $16.90
 
+        >>> characters = dict(
+        ...     bob = 'bob@btca.com',
+        ...     ted = 'ted@btca.com',
+        ...     carol = 'carol@btca.com',
+        ...     alice = 'alice@btca.com',
+        ... )
+        >>> display(conjoin(characters.items(), fmt='{0[0]:>7} : <{0[1]}>', conj='\n', sep='\n'))
+            bob : <bob@btca.com>
+            ted : <ted@btca.com>
+          carol : <carol@btca.com>
+          alice : <alice@btca.com>
+
+        >>> characters = [
+        ...     dict(name='bob', email='bob@btca.com'),
+        ...     dict(name='ted', email='ted@btca.com'),
+        ...     dict(name='carol', email='carol@btca.com'),
+        ...     dict(name='alice', email='alice@btca.com'),
+        ... ]
+        >>> display(conjoin(characters, fmt="{0[name]:>7} : <{0[email]}>", conj=', or\n', sep=',\n', end='.'))
+            bob : <bob@btca.com>,
+            ted : <ted@btca.com>,
+          carol : <carol@btca.com>, or
+          alice : <alice@btca.com>.
+
+        >>> characters = [
+        ...     Info(name='bob', email='bob@btca.com'),
+        ...     Info(name='ted', email='ted@btca.com'),
+        ...     Info(name='carol', email='carol@btca.com'),
+        ...     Info(name='alice', email='alice@btca.com'),
+        ... ]
+        >>> display(conjoin(characters, fmt='{0.name:>7} : <{0.email}>', conj='; &\n', sep=';\n', end='.'))
+            bob : <bob@btca.com>;
+            ted : <ted@btca.com>;
+          carol : <carol@btca.com>; &
+          alice : <alice@btca.com>.
+
     """
     if fmt:
         lst = [fmt.format(m) for m in iterable]
@@ -799,7 +837,7 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
         lst = [str(m) for m in iterable]
     if conj and len(lst) > 1:
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
-    return sep.join(lst)
+    return sep.join(lst) + end
 
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
@@ -2051,7 +2089,7 @@ class Inform:
     # _render_culprit {{{2
     def _render_culprit(self, kwargs):
         culprit = kwargs.get('culprit')
-        if culprit:
+        if culprit is not None:
             if is_collection(culprit):
                 return self.culprit_sep.join(str(c) for c in culprit if c is not None)
             return str(culprit)

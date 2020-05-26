@@ -1,10 +1,11 @@
 # encoding: utf8
 
 from inform import (
-    Color, columns, conjoin, did_you_mean, comment, cull, display, done, error, 
-    Error, fatal, fmt, full_stop, indent, Inform, is_collection, is_iterable, 
-    is_mapping, is_str, join, get_prog_name, get_informer, narrate, os_error, 
-    output, plural, render, terminate, warn, ddd, ppp, sss, vvv, ProgressBar,
+    Color, Info, columns, conjoin, did_you_mean, comment, cull, display, done,
+    error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
+    is_iterable, is_mapping, is_str, join, get_prog_name, get_informer, narrate,
+    os_error, output, plural, render, terminate, warn, ddd, ppp, sss, vvv,
+    ProgressBar,
 )
 from textwrap import dedent
 import sys
@@ -28,7 +29,7 @@ def test_debug(capsys):
     ddd(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 28, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 29, test_utilities.test_debug():
             'a'
             'b'
             'c'
@@ -37,7 +38,7 @@ def test_debug(capsys):
     ddd(a=a, b=b, c=c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 37, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 38, test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -46,13 +47,13 @@ def test_debug(capsys):
     ppp(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 46, test_utilities.test_debug(): a b c
+        DEBUG: test_utilities.py, 47, test_utilities.test_debug(): a b c
     """).lstrip()
 
     vvv(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 52, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 53, test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -60,7 +61,7 @@ def test_debug(capsys):
 
     sss()
     captured = capsys.readouterr()
-    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 61, test_utilities.test_debug():"
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 62, test_utilities.test_debug():"
 
 def test_indent():
     text=dedent('''
@@ -121,6 +122,56 @@ def test_conjoin():
 
     items = [.14, 6.78, 9]
     assert conjoin(items, fmt='${:0.2f}', conj=None) == '$0.14, $6.78, $9.00'
+
+    assert conjoin([], ' or ') == ''
+    assert conjoin(['a'], ' or ') == 'a'
+
+    assert conjoin(['a', 'b'], ' or ') == 'a or b'
+
+    assert conjoin(['a', 'b', 'c']) == 'a, b and c'
+
+    assert conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}') == '$10.10, $32.50 and $16.90'
+
+    characters = dict(
+        bob = 'bob@btca.com',
+        ted = 'ted@btca.com',
+        carol = 'carol@btca.com',
+        alice = 'alice@btca.com',
+    )
+    assert conjoin(characters.items(), fmt='{0[0]} : <{0[1]}>', conj='\n', sep='\n') == dedent('''
+        bob : <bob@btca.com>
+        ted : <ted@btca.com>
+        carol : <carol@btca.com>
+        alice : <alice@btca.com>
+    ''').strip()
+
+    characters = [
+        dict(name='bob', email='bob@btca.com'),
+        dict(name='ted', email='ted@btca.com'),
+        dict(name='carol', email='carol@btca.com'),
+        dict(name='alice', email='alice@btca.com'),
+    ]
+    assert conjoin(characters, fmt="{0[name]} : <{0[email]}>", conj=' and\n', sep=',\n') == dedent('''
+        bob : <bob@btca.com>,
+        ted : <ted@btca.com>,
+        carol : <carol@btca.com> and
+        alice : <alice@btca.com>
+    ''').strip()
+
+    characters = [
+        Info(name='bob', email='bob@btca.com'),
+        Info(name='ted', email='ted@btca.com'),
+        Info(name='carol', email='carol@btca.com'),
+        Info(name='alice', email='alice@btca.com'),
+    ]
+    assert conjoin(characters, fmt='{0.name} : <{0.email}>', conj='; &\n', sep=';\n', end='.') == dedent('''
+        bob : <bob@btca.com>;
+        ted : <ted@btca.com>;
+        carol : <carol@btca.com>; &
+        alice : <alice@btca.com>.
+    ''').strip()
+
+
 
 def test_did_you_mean():
     assert did_you_mean('abc', ['bcd']) == 'bcd'
