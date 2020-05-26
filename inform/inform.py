@@ -771,7 +771,9 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
             Is added to the end of the returned string.
         fmt (string):
             A format string used to convert each item in *iterable* to a string.
-            If not given, str() is used.
+            May be a function, in which case it called on each member of
+            *iterable* and must return a string.
+            If *fmt* is not given, str() is used.
 
     Return the items of the *iterable* joined into a string, where *conj* is
     used to join the last two items in the list, and *sep* is used to join the
@@ -831,9 +833,18 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
           carol : <carol@btca.com>; &
           alice : <alice@btca.com>.
 
+        >>> display(conjoin(characters, fmt=lambda a: f'{a.name:>7} : <{a.email}>', conj='\n', sep='\n'))
+            bob : <bob@btca.com>
+            ted : <ted@btca.com>
+          carol : <carol@btca.com>
+          alice : <alice@btca.com>
+
     """
     if fmt:
-        lst = [fmt.format(m) for m in iterable]
+        if callable(fmt):
+            lst = [fmt(m) for m in iterable]
+        else:
+            lst = [fmt.format(m) for m in iterable]
     else:
         lst = [str(m) for m in iterable]
     if conj and len(lst) > 1:

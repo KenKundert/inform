@@ -172,7 +172,12 @@ def test_conjoin():
         alice : <alice@btca.com>.
     ''').strip()
 
-
+    assert conjoin(characters, fmt=lambda a: a.render('{name} : <{email}>'), conj='\n', sep='\n') == dedent('''
+        bob : <bob@btca.com>
+        ted : <ted@btca.com>
+        carol : <carol@btca.com>
+        alice : <alice@btca.com>
+    ''').strip()
 
 def test_did_you_mean():
     assert did_you_mean('abc', ['bcd']) == 'bcd'

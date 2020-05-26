@@ -7,6 +7,7 @@ Releases
 
     - Allow :class:`inform.ProgressBar` output to be suppressed.
     - Allow ``/`` to be overridden in :class:`inform.plural`
+    - Various enhancements to :func:`inform.conjoin` and :func:`inform.full_stop`.
 
 **1.20 (2020-01-08)**:
     - Add *format* method to :class:`inform.plural`.
