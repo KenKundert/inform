@@ -132,18 +132,19 @@ def test_conjoin():
 
     assert conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}') == '$10.10, $32.50 and $16.90'
 
-    characters = dict(
-        bob = 'bob@btca.com',
-        ted = 'ted@btca.com',
-        carol = 'carol@btca.com',
-        alice = 'alice@btca.com',
-    )
-    assert conjoin(characters.items(), fmt='{0[0]} : <{0[1]}>', conj='\n', sep='\n') == dedent('''
-        bob : <bob@btca.com>
-        ted : <ted@btca.com>
-        carol : <carol@btca.com>
-        alice : <alice@btca.com>
-    ''').strip()
+    if sys.version_info >= (3, 6):
+        characters = dict(
+            bob = 'bob@btca.com',
+            ted = 'ted@btca.com',
+            carol = 'carol@btca.com',
+            alice = 'alice@btca.com',
+        )
+        assert conjoin(characters.items(), fmt='{0[0]} : <{0[1]}>', conj='\n', sep='\n') == dedent('''
+            bob : <bob@btca.com>
+            ted : <ted@btca.com>
+            carol : <carol@btca.com>
+            alice : <alice@btca.com>
+        ''').strip()
 
     characters = [
         dict(name='bob', email='bob@btca.com'),
