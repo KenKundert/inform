@@ -1,4 +1,4 @@
-__version__ = '1.20.4'
+__version__ = '1.20.5'
 __released__ = '2020-05-26'
 
 from .inform import (
