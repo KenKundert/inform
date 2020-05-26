@@ -771,6 +771,7 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
             Is added to the end of the returned string.
         fmt (string):
             A format string used to convert each item in *iterable* to a string.
+            If not given, str() is used.
 
     Return the items of the *iterable* joined into a string, where *conj* is
     used to join the last two items in the list, and *sep* is used to join the
@@ -983,7 +984,7 @@ class plural:
 
 
 # full_stop {{{2
-def full_stop(sentence):
+def full_stop(sentence, end='.', allow='.?!'):
     """Add period to end of string if it is needed.
 
     A full stop (a period) is added if there is no terminating punctuation at the
@@ -1002,10 +1003,16 @@ def full_stop(sentence):
         >>> full_stop('Is the file is out of date?')
         'Is the file is out of date?'
 
+    You can override the allowed endings and desired ending.
+
+        >>> cases = '1, 3 9, 12.'.split()
+        >>> print(*[full_stop(c, end=',', allow=',.') for c in cases])
+        1, 3, 9, 12.
+
     """
     sentence = str(sentence).rstrip()
     try:
-        return sentence if sentence[-1] in '.?!' else sentence + '.'
+        return sentence if sentence[-1] in allow else sentence + end
     except:
         # this occurs when sentence is empty string
         return sentence
@@ -1233,7 +1240,7 @@ class ProgressBar:
 
     # _draw {{{3
     def _draw(self, index):
-        if not self.informant:
+        if not self.informant:  # pragma: no cover
             return
         stream_info = self.informer.get_stream_info(self.informant)
         if self.prefix:

@@ -516,6 +516,7 @@ def test_plural():
     assert '{:~@ cart|s}'.format(plural(0, invert='~', num='@', slash='|')) == '0 cart'
     assert '{:~@ cart|s}'.format(plural(1, invert='~', num='@', slash='|')) == '1 carts'
     assert '{:~@ cart|s}'.format(plural(2, invert='~', num='@', slash='|')) == '2 cart'
+    assert plural(2, invert='~', num='@', slash='|').format('~@ cart|s') == '2 cart'
 
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
@@ -523,6 +524,8 @@ def test_full_stop():
     assert full_stop('hey now?') == 'hey now?'
     assert full_stop('hey now!') == 'hey now!'
     assert full_stop('') == ''
+    cases = '1, 2, 3, 5 7, 11 13 17.'.split()
+    assert ' '.join(full_stop(c, end=',', allow=',.') for c in cases) == '1, 2, 3, 5, 7, 11, 13, 17.'
 
 def test_os_error():
     try:
@@ -1368,6 +1371,7 @@ def test_orwell():
     assert george.peace == 'war'
     assert george.truth == 'lies'
     assert george.happiness is None
+    assert george.render(template='peace={peace}, truth={truth}') == 'peace=war, truth=lies'
 
 def test_oblong():
     from inform import render_bar
