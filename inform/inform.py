@@ -757,7 +757,7 @@ def os_error(err):
 # conjoin {{{2
 # Like string join method, but supports conjunction
 def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
-    """Conjunction join.
+    r"""Conjunction join.
 
     Args:
         iterable (list or generator of strings):
