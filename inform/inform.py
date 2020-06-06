@@ -999,8 +999,9 @@ def full_stop(sentence, end='.', allow='.?!'):
     """Add period to end of string if it is needed.
 
     A full stop (a period) is added if there is no terminating punctuation at the
-    end of the string.  Any white space at the end of the string is removed
-    before looking for terminal punctuation.
+    end of the string.  The argument is first converted to a string, and then
+    any white space at the end of the string is removed before looking for
+    terminal punctuation.  The return value is always a string.
 
     Examples::
 
@@ -1014,7 +1015,7 @@ def full_stop(sentence, end='.', allow='.?!'):
         >>> full_stop('Is the file is out of date?')
         'Is the file is out of date?'
 
-    You can override the allowed endings and desired ending.
+    You can override the allowed and desired endings.
 
         >>> cases = '1, 3 9, 12.'.split()
         >>> print(*[full_stop(c, end=',', allow=',.') for c in cases])

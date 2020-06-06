@@ -331,7 +331,7 @@ user.
     >>> try:
     ...     with open(filename) as f:
     ...         config = f.read()
-    ... except (OSError, IOError) as e:
+    ... except OSError as e:
     ...     error(os_error(e))
     error: config: no such file or directory.
 
@@ -352,7 +352,7 @@ used when reporting errors:
     ...     try:
     ...         with open(filename) as f:
     ...             config = f.read()
-    ...     except (OSError, IOError) as e:
+    ...     except OSError as e:
     ...         raise Error(os_error(e))
 
     >>> try:

@@ -1382,7 +1382,7 @@ os_error
     >>> try:
     ...     with open('temperatures.csv') as f:
     ...         contents = f.read()
-    ... except (OSError, IOError) as e:
+    ... except OSError as e:
     ...     error(os_error(e))
     myprog error: temperatures.csv: no such file or directory.
 
