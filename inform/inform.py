@@ -824,11 +824,11 @@ def parse_range(
             The string to parse.
 
         cast (callable):
-            A function that converts items from the given string to a sensible 
-            type.  It will be given a single argument, which will be a string, 
-            and should return that same value in the appropriate type.  Note 
-            that the casted values will also be used as the inputs for the 
-            *range()* function.
+            A function that converts items from the given string to the type 
+            that will be returned.  The function will be given a single 
+            argument, which will be a string, and should return that same value 
+            casted into the desired type.  Note that the casted values will 
+            also be used as the inputs for the *range()* function.
 
         range (callable):
             A function that produces the values implied by a range.  It will be 
@@ -837,7 +837,7 @@ def parse_range(
             the first argument is guaranteed to be less than the second.  The 
             function should return an iterable containing all the values in 
             that range, including the start and end values.
-            
+
         block_delim (str):
             The character used to separate items and ranges.
 
@@ -852,6 +852,10 @@ def parse_range(
         >>> from inform import parse_range
         >>> parse_range('1-3,5')
         {1, 2, 3, 5}
+        >>> abc_range = lambda a, b: [chr(x) for x in range(ord(a), ord(b) + 1)]
+        >>> parse_range('A-C,E', cast=str, range=abc_range)  # doctest: +SKIP
+        {'B', 'E', 'C', 'A'}
+
     """
     blocks = items_str.split(block_delim)
     indices = set()
@@ -891,8 +895,8 @@ def format_range(
             can be given, but it will always be treated as a set (e.g. order 
             doesn't matter, duplicates are ignored).  By default, the items in 
             the iterable must be non-negative integers, but by customizing the 
-            other arguments, almost any type can be used (as long as ranges 
-            still make sense).
+            other arguments, it is possible to support any discrete, ordered 
+            type.
 
         key (callable or None):
             A key function used to sort the given values, or None if the values 
@@ -914,6 +918,10 @@ def format_range(
         >>> from inform import format_range
         >>> format_range([1, 2, 3, 5])
         '1-3,5'
+        >>> abc_diff = lambda a, b: ord(b) - ord(a)
+        >>> format_range('ACDE', diff=abc_diff)
+        'A,C-E'
+
     """
     blocks = []
     current_seq = []

@@ -15,7 +15,7 @@ matrix:
       sudo: true
 install:
   - pip install .
-  - pip install coveralls
+  - pip install coveralls hypothesis
 script:
   - ./test --coverage
   - coverage run -m py.test
