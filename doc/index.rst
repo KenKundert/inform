@@ -8,8 +8,8 @@
 Inform: Print & Logging Utilities
 =================================
 
-| Version: 1.20.3
-| Released: 2020-03-15
+| Version: 1.20.5
+| Released: 2020-05-26
 | Please post all bugs and suggestions at
   `Inform Issues <https://github.com/KenKundert/inform/issues>`_
   (or contact me directly at
@@ -331,7 +331,7 @@ user.
     >>> try:
     ...     with open(filename) as f:
     ...         config = f.read()
-    ... except (OSError, IOError) as e:
+    ... except OSError as e:
     ...     error(os_error(e))
     error: config: no such file or directory.
 
@@ -352,7 +352,7 @@ used when reporting errors:
     ...     try:
     ...         with open(filename) as f:
     ...             config = f.read()
-    ...     except (OSError, IOError) as e:
+    ...     except OSError as e:
     ...         raise Error(os_error(e))
 
     >>> try:

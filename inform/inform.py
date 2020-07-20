@@ -371,8 +371,8 @@ class Color:
 
 
 # Info class {{{2
-class Info(object):
-    """Generic Class
+class Info:
+    """Generic Data Structure Class
 
     When instantiated, it converts the provided keyword arguments to attributes.  
     Unknown attributes evaluate to None.
@@ -380,9 +380,13 @@ class Info(object):
     >>> class Orwell(Info):
     ...     pass
 
-    >>> george = Orwell(peace='war', truth='lies')
+    >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
     >>> print(str(george))
-    Orwell(peace='war', truth='lies')
+    Orwell(
+        peace='war',
+        freedom='slavery',
+        ignorance='strength',
+    )
 
     >>> george.peace
     'war'
@@ -400,6 +404,21 @@ class Info(object):
         if name.startswith('_'):
             raise  AttributeError(name)
         return self.__dict__.get(name)
+
+    def render(self, template):
+        """Render class to a string
+
+        Args:
+            template (str):
+                The template string is returned with any instances of {name}
+                replaced by the value of the corresponding attribute.
+
+        >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
+        'Peace is war. Freedom is slavery. Ignorance is strength.'
+
+        """
+
+        return template.format(**self.__dict__)
 
     def __repr__(self):
         return render(self)
@@ -737,8 +756,8 @@ def os_error(err):
 
 # conjoin {{{2
 # Like string join method, but supports conjunction
-def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
-    """Conjunction join.
+def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
+    r"""Conjunction join.
 
     Args:
         iterable (list or generator of strings):
@@ -748,8 +767,13 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
             The separator used between the next to last and last values.
         sep (string):
             The separator to use when joining the strings in *iterable*.
+        end (string):
+            Is added to the end of the returned string.
         fmt (string):
             A format string used to convert each item in *iterable* to a string.
+            May be a function, in which case it called on each member of
+            *iterable* and must return a string.
+            If *fmt* is not given, str() is used.
 
     Return the items of the *iterable* joined into a string, where *conj* is
     used to join the last two items in the list, and *sep* is used to join the
@@ -757,7 +781,7 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
 
     Examples:
 
-        >>> from inform import conjoin, display
+        >>> from inform import conjoin, display, Info
         >>> display(conjoin([], ' or '))
         <BLANKLINE>
 
@@ -773,14 +797,59 @@ def conjoin(iterable, conj=' and ', sep=', ', fmt=None):
         >>> display(conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}'))
         $10.10, $32.50 and $16.90
 
+        >>> characters = dict(
+        ...     bob = 'bob@btca.com',
+        ...     ted = 'ted@btca.com',
+        ...     carol = 'carol@btca.com',
+        ...     alice = 'alice@btca.com',
+        ... )
+        >>> display(conjoin(characters.items(), fmt='{0[0]:>7} : <{0[1]}>', conj='\n', sep='\n'))
+            bob : <bob@btca.com>
+            ted : <ted@btca.com>
+          carol : <carol@btca.com>
+          alice : <alice@btca.com>
+
+        >>> characters = [
+        ...     dict(name='bob', email='bob@btca.com'),
+        ...     dict(name='ted', email='ted@btca.com'),
+        ...     dict(name='carol', email='carol@btca.com'),
+        ...     dict(name='alice', email='alice@btca.com'),
+        ... ]
+        >>> display(conjoin(characters, fmt="{0[name]:>7} : <{0[email]}>", conj=', or\n', sep=',\n', end='.'))
+            bob : <bob@btca.com>,
+            ted : <ted@btca.com>,
+          carol : <carol@btca.com>, or
+          alice : <alice@btca.com>.
+
+        >>> characters = [
+        ...     Info(name='bob', email='bob@btca.com'),
+        ...     Info(name='ted', email='ted@btca.com'),
+        ...     Info(name='carol', email='carol@btca.com'),
+        ...     Info(name='alice', email='alice@btca.com'),
+        ... ]
+        >>> display(conjoin(characters, fmt='{0.name:>7} : <{0.email}>', conj='; &\n', sep=';\n', end='.'))
+            bob : <bob@btca.com>;
+            ted : <ted@btca.com>;
+          carol : <carol@btca.com>; &
+          alice : <alice@btca.com>.
+
+        >>> display(conjoin(characters, fmt=lambda a: f'{a.name:>7} : <{a.email}>', conj='\n', sep='\n'))
+            bob : <bob@btca.com>
+            ted : <ted@btca.com>
+          carol : <carol@btca.com>
+          alice : <alice@btca.com>
+
     """
     if fmt:
-        lst = [fmt.format(m) for m in iterable]
+        if callable(fmt):
+            lst = [fmt(m) for m in iterable]
+        else:
+            lst = [fmt.format(m) for m in iterable]
     else:
         lst = [str(m) for m in iterable]
     if conj and len(lst) > 1:
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
-    return sep.join(lst)
+    return sep.join(lst) + end
 
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
@@ -1006,8 +1075,8 @@ class plural:
         >>> f"{plural(2):!agree}"
         'agree'
 
-    If '#' or '!' are inconvenient, you can change them by passing the *num* and
-    *invert* arguments to plural().
+    If '/', '#', or '!' are inconvenient, you can change them by passing the
+    *slash*, *num* and *invert* arguments to plural().
 
     The original implementation is from Veedrac on Stack Overflow: 
     http://stackoverflow.com/questions/21872366/plural-string-formatting
@@ -1060,12 +1129,13 @@ class plural:
 
 
 # full_stop {{{2
-def full_stop(sentence):
+def full_stop(sentence, end='.', allow='.?!'):
     """Add period to end of string if it is needed.
 
     A full stop (a period) is added if there is no terminating punctuation at the
-    end of the string.  Any white space at the end of the string is removed
-    before looking for terminal punctuation.
+    end of the string.  The argument is first converted to a string, and then
+    any white space at the end of the string is removed before looking for
+    terminal punctuation.  The return value is always a string.
 
     Examples::
 
@@ -1079,10 +1149,16 @@ def full_stop(sentence):
         >>> full_stop('Is the file is out of date?')
         'Is the file is out of date?'
 
+    You can override the allowed and desired endings.
+
+        >>> cases = '1, 3 9, 12.'.split()
+        >>> print(*[full_stop(c, end=',', allow=',.') for c in cases])
+        1, 3, 9, 12.
+
     """
     sentence = str(sentence).rstrip()
     try:
-        return sentence if sentence[-1] in '.?!' else sentence + '.'
+        return sentence if sentence[-1] in allow else sentence + end
     except:
         # this occurs when sentence is empty string
         return sentence
@@ -1310,7 +1386,7 @@ class ProgressBar:
 
     # _draw {{{3
     def _draw(self, index):
-        if not self.informant:
+        if not self.informant:  # pragma: no cover
             return
         stream_info = self.informer.get_stream_info(self.informant)
         if self.prefix:
@@ -2166,7 +2242,7 @@ class Inform:
     # _render_culprit {{{2
     def _render_culprit(self, kwargs):
         culprit = kwargs.get('culprit')
-        if culprit:
+        if culprit is not None:
             if is_collection(culprit):
                 return self.culprit_sep.join(str(c) for c in culprit if c is not None)
             return str(culprit)

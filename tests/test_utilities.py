@@ -1,11 +1,11 @@
 # encoding: utf8
 
 from inform import (
-    Color, columns, conjoin, did_you_mean, parse_range, format_range, comment, 
-    cull, display, done, error, Error, fatal, fmt, full_stop, indent, Inform, 
-    is_collection, is_iterable, is_mapping, is_str, join, get_prog_name, 
-    get_informer, narrate, os_error, output, plural, render, terminate, warn, 
-    ddd, ppp, sss, vvv, ProgressBar,
+    Color, Info, columns, conjoin, did_you_mean, comment, cull, display, done,
+    error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
+    is_iterable, is_mapping, is_str, join, get_prog_name, get_informer, narrate,
+    os_error, output, plural, render, terminate, warn, ddd, ppp, sss, vvv,
+    ProgressBar, parse_range, format_range
 )
 from textwrap import dedent
 import sys
@@ -122,6 +122,62 @@ def test_conjoin():
 
     items = [.14, 6.78, 9]
     assert conjoin(items, fmt='${:0.2f}', conj=None) == '$0.14, $6.78, $9.00'
+
+    assert conjoin([], ' or ') == ''
+    assert conjoin(['a'], ' or ') == 'a'
+
+    assert conjoin(['a', 'b'], ' or ') == 'a or b'
+
+    assert conjoin(['a', 'b', 'c']) == 'a, b and c'
+
+    assert conjoin([10.1, 32.5, 16.9], fmt='${:0.2f}') == '$10.10, $32.50 and $16.90'
+
+    if sys.version_info >= (3, 6):
+        characters = dict(
+            bob = 'bob@btca.com',
+            ted = 'ted@btca.com',
+            carol = 'carol@btca.com',
+            alice = 'alice@btca.com',
+        )
+        assert conjoin(characters.items(), fmt='{0[0]} : <{0[1]}>', conj='\n', sep='\n') == dedent('''
+            bob : <bob@btca.com>
+            ted : <ted@btca.com>
+            carol : <carol@btca.com>
+            alice : <alice@btca.com>
+        ''').strip()
+
+    characters = [
+        dict(name='bob', email='bob@btca.com'),
+        dict(name='ted', email='ted@btca.com'),
+        dict(name='carol', email='carol@btca.com'),
+        dict(name='alice', email='alice@btca.com'),
+    ]
+    assert conjoin(characters, fmt="{0[name]} : <{0[email]}>", conj=' and\n', sep=',\n') == dedent('''
+        bob : <bob@btca.com>,
+        ted : <ted@btca.com>,
+        carol : <carol@btca.com> and
+        alice : <alice@btca.com>
+    ''').strip()
+
+    characters = [
+        Info(name='bob', email='bob@btca.com'),
+        Info(name='ted', email='ted@btca.com'),
+        Info(name='carol', email='carol@btca.com'),
+        Info(name='alice', email='alice@btca.com'),
+    ]
+    assert conjoin(characters, fmt='{0.name} : <{0.email}>', conj='; &\n', sep=';\n', end='.') == dedent('''
+        bob : <bob@btca.com>;
+        ted : <ted@btca.com>;
+        carol : <carol@btca.com>; &
+        alice : <alice@btca.com>.
+    ''').strip()
+
+    assert conjoin(characters, fmt=lambda a: a.render('{name} : <{email}>'), conj='\n', sep='\n') == dedent('''
+        bob : <bob@btca.com>
+        ted : <ted@btca.com>
+        carol : <carol@btca.com>
+        alice : <alice@btca.com>
+    ''').strip()
 
 def test_did_you_mean():
     assert did_you_mean('abc', ['bcd']) == 'bcd'
@@ -607,6 +663,7 @@ def test_plural():
     assert '{:~@ cart|s}'.format(plural(0, invert='~', num='@', slash='|')) == '0 cart'
     assert '{:~@ cart|s}'.format(plural(1, invert='~', num='@', slash='|')) == '1 carts'
     assert '{:~@ cart|s}'.format(plural(2, invert='~', num='@', slash='|')) == '2 cart'
+    assert plural(2, invert='~', num='@', slash='|').format('~@ cart|s') == '2 cart'
 
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
@@ -614,6 +671,8 @@ def test_full_stop():
     assert full_stop('hey now?') == 'hey now?'
     assert full_stop('hey now!') == 'hey now!'
     assert full_stop('') == ''
+    cases = '1, 2, 3, 5 7, 11 13 17.'.split()
+    assert ' '.join(full_stop(c, end=',', allow=',.') for c in cases) == '1, 2, 3, 5, 7, 11, 13, 17.'
 
 def test_os_error():
     try:
@@ -1459,6 +1518,7 @@ def test_orwell():
     assert george.peace == 'war'
     assert george.truth == 'lies'
     assert george.happiness is None
+    assert george.render(template='peace={peace}, truth={truth}') == 'peace=war, truth=lies'
 
 def test_oblong():
     from inform import render_bar
