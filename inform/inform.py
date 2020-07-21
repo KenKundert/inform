@@ -54,8 +54,7 @@ These are used to configure inform for doctests:
 # Inform Utilities {{{1
 # indent {{{2
 def indent(text, leader='    ', first=0, stops=1, sep='\n'):
-    r"""
-    Add indentation.
+    r"""Add indentation.
 
     Args:
         leader (string):
@@ -520,8 +519,7 @@ def _join(args, kwargs):
 _level = 0
 _sort = None
 def render(obj, sort=None, level=None, tab='    '):
-    """
-    Recursively convert object to string with reasonable formatting.
+    """Recursively convert object to string with reasonable formatting.
 
     Args:
         obj:
@@ -674,8 +672,7 @@ def render(obj, sort=None, level=None, tab='    '):
 
 # fmt {{{2
 def fmt(message, *args, **kwargs):
-    """
-    Similar to ''.format(), but it can pull arguments from the local scope.
+    """Similar to ''.format(), but it can pull arguments from the local scope.
 
     Convert a message with embedded attributes to a string. The values for the
     attributes can come from the argument list, as with ''.format(), or they
@@ -853,8 +850,8 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
 
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
-    """Given an invalid string from the user, return the valid string with the 
-    most similarity.
+
+    """Given an invalid string from the user, return the valid string with the most similarity.
 
     Args:
         invalid_str (string):
@@ -1016,8 +1013,7 @@ def format_range(
 
 # plural {{{2
 class plural:
-    """Conditionally format a phrase depending on whether it refers to a singular 
-    or plural number of things.
+    """Conditionally format a phrase depending on whether it refers to a singular or plural number of things.
 
     The format string has three sections, separated by '/'.  The first section 
     is always included, the last section is included if the given number is 
@@ -1583,7 +1579,8 @@ def sss():
 # whereas the print functions returned from InformantFactory are referred to
 # as informants.
 class InformantFactory:
-    """
+    """Create informants.
+
     An object of InformantFactory is referred to as an informant. It is
     generally treated as a function that is called to produce the desired
     output.
