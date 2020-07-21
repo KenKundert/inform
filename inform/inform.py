@@ -340,19 +340,21 @@ class Color:
             stream (stream):
                 Stream to test.  If not given, *stdout* is used as the stream.
 
-        >>> from inform import Color, display
-        >>> import sys, re
+        **Example**::
 
-        >>> if Color.isTTY(sys.stdout):
-        ...     emphasize = Color('magenta')
-        ... else:
-        ...     emphasize = str.upper
+            >>> from inform import Color, display
+            >>> import sys, re
 
-        >>> def highlight(matchobj):
-        ...     return emphasize(matchobj.group(0))
+            >>> if Color.isTTY(sys.stdout):
+            ...     emphasize = Color('magenta')
+            ... else:
+            ...     emphasize = str.upper
 
-        >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
-        Imagine YOUR city without cars.
+            >>> def highlight(matchobj):
+            ...     return emphasize(matchobj.group(0))
+
+            >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
+            Imagine YOUR city without cars.
 
         """
         try:
@@ -376,21 +378,23 @@ class Info:
     When instantiated, it converts the provided keyword arguments to attributes.  
     Unknown attributes evaluate to None.
 
-    >>> class Orwell(Info):
-    ...     pass
+    **Example**::
 
-    >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
-    >>> print(str(george))
-    Orwell(
-        peace='war',
-        freedom='slavery',
-        ignorance='strength',
-    )
+        >>> class Orwell(Info):
+        ...     pass
 
-    >>> george.peace
-    'war'
+        >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
+        >>> print(str(george))
+        Orwell(
+            peace='war',
+            freedom='slavery',
+            ignorance='strength',
+        )
 
-    >>> george.happiness
+        >>> george.peace
+        'war'
+
+        >>> george.happiness
 
     """
     def __init__(self, **kwargs):
@@ -412,8 +416,10 @@ class Info:
                 The template string is returned with any instances of {name}
                 replaced by the value of the corresponding attribute.
 
-        >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
-        'Peace is war. Freedom is slavery. Ignorance is strength.'
+        **Example**::
+
+            >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
+            'Peace is war. Freedom is slavery. Ignorance is strength.'
 
         """
 
@@ -1144,7 +1150,7 @@ def full_stop(sentence, end='.', allow='.?!'):
         >>> full_stop('Is the file is out of date?')
         'Is the file is out of date?'
 
-    You can override the allowed and desired endings.
+    You can override the allowed and desired endings::
 
         >>> cases = '1, 3 9, 12.'.split()
         >>> print(*[full_stop(c, end=',', allow=',.') for c in cases])
@@ -1634,7 +1640,7 @@ class InformantFactory:
             specified, the stream to use will be determine by stream policy of
             active informer.
 
-    **Example**::
+    **Example**:
 
         The following generates two informants, *passes*, which prints its
         messages in green, and *fails*, which prints its messages in red.  Output
@@ -1653,7 +1659,7 @@ class InformantFactory:
             ...     message_color='red',
             ... )
 
-        *pass*  and *fail* are both informants. Once created, the can be used to
+        *pass* and *fail* are both informants. Once created, the can be used to
         give messages to the user::
 
             >>> results = [
@@ -2482,7 +2488,9 @@ class Inform:
         meant to be used with Python's *with* statement. It temporarily replaces
         any existing saved culprit, but that culprit in reinstated upon exiting the
         *with* statement. Once a culprit is saved, :meth:`inform.Inform.get_culprit`
-        is used to access it.  For example::
+        is used to access it.
+
+        **Example**::
 
             >>> from inform import get_culprit, set_culprit, warn
 
