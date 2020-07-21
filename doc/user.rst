@@ -1152,6 +1152,23 @@ argument list because if *fmt* does not find a named argument in its argument
 list, it will look for a variable of the same name in the local scope.
 
 
+.. _format_range desc:
+
+format_range
+""""""""""""
+
+.. py:function:: format_range(items)
+
+func:`inform.format_range` can be used to create a succinct, readable string 
+representing a set of numbers.
+
+.. code-block:: python
+
+    >>> from inform import format_range
+    >>> format_range({1, 2, 3, 5})
+    '1-3,5'
+
+
 .. _full_stop desc:
 
 full_stop
@@ -1399,23 +1416,6 @@ user-inputted strings.
     >>> from inform import parse_range
     >>> parse_range('1-3,5')
     {1, 2, 3, 5}
-
-
-.. _format_range desc:
-
-format_range
-""""""""""""
-
-.. py:function:: format_range(items)
-
-func:`inform.format_range` can be used to create a succinct, readable string 
-representing a set of numbers.
-
-.. code-block:: python
-
-    >>> from inform import format_range
-    >>> format_range({1, 2, 3, 5})
-    '1-3,5'
 
 
 .. _progressbar desc:
@@ -1756,6 +1756,26 @@ the line in characters.
     0.224: ███████████████▋
     0.113: ███████▉
     0.002: ▏
+
+
+.. _title_case desc:
+
+title_case
+""""""""""
+
+.. py:function:: title_case(string, exceptions=(...))
+
+:func:`inform.title_case` converts the initial letters in the words of a string 
+to upper case while maintaining any letters that are already upper case, such as 
+acronyms.  Common 'small' words are excepted and words within quotes are handled 
+properly.
+
+.. code-block:: python
+
+    >>> from inform import title_case
+    >>> headline = 'CDC warns about "aggressive" rats as coronavirus shuts down restaurants'
+    >>> display(title_case(headline))
+    CDC Warns About "Aggressive" Rats as Coronavirus Shuts Down Restaurants
 
 
 Debugging Functions

@@ -854,6 +854,75 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst) + end
 
+# title_case {{{2
+def title_case(
+    s,
+    exceptions = (
+        'and', 'or', 'nor', 'but', 'a', 'an', 'and', 'the', 'as', 'at', 'by',
+        'for', 'in', 'of', 'on', 'per', 'to'
+    )
+):
+    """Convert to title case
+
+    This is an attempt to provide an alternative to ''.title() that works with 
+    acronyms.
+
+    There are several tricky cases to worry about in typical order of importance:
+
+    0. Upper case first letter of each word that is not an 'minor' word.
+    1. Always upper case first word.
+    2. Do not down case acronyms
+    3. Quotes
+    4. Hyphenated words: drive-in
+    5. Titles within titles: 2001 A Space Odyssey
+    6. Maintain leading spacing
+    7. Maintain given spacing: This is a test.  This is only a test.
+
+    The following code addresses 0-3 & 7.  It was felt that addressing the
+    others would add considerable complexity.  Case 2 was handled by simply
+    maintaining all upper case letters in the specified string.
+
+    **Example**::
+
+        >>> from inform import title_case
+        >>> cases = '''
+        ...     CDC warns about "aggressive" rats as coronavirus shuts down restaurants
+        ...     L.A. County opens churches, stores, pools, drive-in theaters
+        ...     UConn senior accused of killing two men was looking for young woman
+        ...     Giant asteroid that killed the dinosaurs slammed into Earth at ‘deadliest possible angle,’ study reveals
+        ...     Maintain given spacing: This is a test.  This is only a test.
+        ... '''.strip()
+
+        >>> for case in cases.splitlines():
+        ...    print(title_case(case))
+        CDC Warns About "Aggressive" Rats as Coronavirus Shuts Down Restaurants
+        L.A. County Opens Churches, Stores, Pools, Drive-in Theaters
+        UConn Senior Accused of Killing Two Men Was Looking for Young Woman
+        Giant Asteroid That Killed the Dinosaurs Slammed Into Earth at ‘Deadliest Possible Angle,’ Study Reveals
+        Maintain Given Spacing: This Is a Test.  This Is Only a Test.
+
+    """
+
+    words = s.strip().split(' ')
+        # split on single space to maintain word spacing
+        # remove leading and trailing spaces -- needed for first word casing
+
+    def upper(s):
+        if s:
+            if s[0] in '‘“"‛‟' + "'":
+                return s[0] + upper(s[1:])
+            return s[0].upper() + s[1:]
+        return ''
+
+    # always capitalize the first word
+    first = upper(words[0])
+
+    return ' '.join([first] + [
+        word if word.lower() in exceptions else upper(word)
+        for word in words[1:]
+    ])
+
+
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
     """Given an invalid string from the user, return the valid string with the most similarity.
