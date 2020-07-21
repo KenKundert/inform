@@ -1,6 +1,6 @@
 language: python
 install:
-  - pip install coveralls hypothesis difflib
+  - pip install coveralls hypothesis
 script:
   - ./test --coverage
   - coverage run -m py.test
