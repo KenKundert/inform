@@ -1,7 +1,6 @@
 language: python
 install:
-  - pip install .
-  - pip install coveralls hypothesis
+  - pip install coveralls hypothesis difflib
 script:
   - ./test --coverage
   - coverage run -m py.test
@@ -16,5 +15,6 @@ jobs:
     - python: 3.8
     - python: nightly
   allow_failures:
+    - python: 3.5
     - python: nightly
   fast_finish: true

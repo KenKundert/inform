@@ -1400,6 +1400,7 @@ user-inputted strings.
     >>> parse_range('1-3,5')
     {1, 2, 3, 5}
 
+
 .. _format_range desc:
 
 format_range
@@ -1415,6 +1416,7 @@ representing a set of numbers.
     >>> from inform import format_range
     >>> format_range({1, 2, 3, 5})
     '1-3,5'
+
 
 .. _progressbar desc:
 
@@ -1445,7 +1447,6 @@ example:
 
     >>> display('Processed:', conjoin(processed), end='.\n')
     Processed: i1, i2, i3, i4, i5, i6, i7, i8, i9 and i10.
-
 
 The second is similar to the first, except you just give an integer to indicate 
 how many iterations you wish:

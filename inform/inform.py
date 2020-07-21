@@ -850,8 +850,10 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
 
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
-
     """Given an invalid string from the user, return the valid string with the most similarity.
+
+    This function requires that the *difflib* package be installed before it can
+    be used.
 
     Args:
         invalid_str (string):
