@@ -1,6 +1,7 @@
 language: python
 install:
-  - pip install coveralls hypothesis arrow
+  - pip install .
+  - pip install coveralls hypothesis
 script:
   - ./test --coverage
   - coverage run -m py.test
