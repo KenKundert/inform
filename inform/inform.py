@@ -1295,8 +1295,23 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
 def render_bar(value, width=72):
     """Render graphic representation of a value in the form of a bar
 
-    value (real): should be normalized (fall between 0 and 1)
-    width (int): the width of the bar in characters when value is 1.
+    Args:
+        value (real): should be normalized (fall between 0 and 1)
+
+        width (int): the width of the bar in characters when value is 1.
+
+    **Examples**::
+
+        >>> from inform import render_bar
+        >>> display(render_bar(0))
+        <BLANKLINE>
+
+        >>> display(render_bar(0.5))
+        ████████████████████████████████████
+
+        >>> display(render_bar(1.0))
+        ████████████████████████████████████████████████████████████████████████
+
     """
     scaled = value*width
     if scaled > width:
