@@ -10,6 +10,7 @@ Releases
     - Allow ``/`` to be overridden in :class:`inform.plural`
     - Various enhancements to :func:`inform.conjoin` and :func:`inform.full_stop`.
     - Added :func:`inform.parse_range` and :func:`inform.format_range` functions.
+    - Added :func:`inform.title_case` function.
 
 **1.20 (2020-01-08)**:
     - Add *format* method to :class:`inform.plural`.

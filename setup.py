@@ -18,6 +18,7 @@ setup(
     version = '1.20.5',
     description = 'print & logging utilities for communicating with user',
     long_description = readme,
+    long_description_content_type = 'text/x-rst',
     author = "Ken Kundert",
     author_email = 'inform@nurdletech.com',
     url = 'https://inform.readthedocs.io',
