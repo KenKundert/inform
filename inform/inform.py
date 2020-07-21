@@ -71,7 +71,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
         sep (string):
             the string used to separate the lines
 
-    Example::
+    **Example**::
 
         >>> from inform import display, indent
         >>> display(indent('And the answer is ...\n42!', first=-1))
@@ -106,7 +106,7 @@ def cull(collection, **kwargs):
             If remove is not specified, the value is culled if its value would
             be False when cast to a boolean (0, False, None, '', (), [], {}, etc.)
 
-    Example::
+    **Example**::
 
         >>> from inform import cull, display
         >>> from collections import OrderedDict
@@ -156,7 +156,7 @@ def is_str(arg):
 
     Returns *True* if argument is a string.
 
-    Example::
+    **Example**::
 
         >>> from inform import is_str
         >>> is_str('abc')
@@ -177,7 +177,7 @@ def is_iterable(obj):
 
     Returns *True* if argument is a collecton or a string.
 
-    Example::
+    **Example**::
 
         >>> from inform import is_iterable
         >>> is_iterable('abc')
@@ -200,7 +200,7 @@ def is_collection(obj):
 
     Returns *True* if argument is a collection (tuple, list, set or dictionary).
 
-    Example::
+    **Example**::
 
         >>> from inform import is_collection
         >>> is_collection('')  # string
@@ -224,7 +224,7 @@ def is_mapping(obj):
 
     Returns *True* if argument is a mapping.
 
-    Example::
+    **Example**::
 
         >>> from inform import is_mapping
         >>> is_mapping('')  # string
@@ -264,7 +264,7 @@ class Color:
         enable (bool):
             If set to False, the colorizer does not render the text in color.
 
-    Example:
+    **Example**::
 
         >>> from inform import Color
         >>> fail = Color('red')
@@ -467,7 +467,7 @@ def join(*args, **kwargs):
             If true the string is wrapped using a width of 70. If an integer value
             is passed, is used as the width of the wrap.
 
-    Examples::
+    **Examples**::
 
         >>> from inform import join
         >>> join('a', 'b', 'c', x='x', y='y', z='z')
@@ -541,7 +541,7 @@ def render(obj, sort=None, level=None, tab='    '):
     yourself to these types, the output of render can be read by the Python
     interpreter.  Other types are converted to string with *repr()*.
 
-    Example::
+    **Example**::
 
         >>> from inform import display, render
         >>> display('result =', render({'a': (0, 1), 'b': [2, 3, 4]}))
@@ -554,7 +554,7 @@ def render(obj, sort=None, level=None, tab='    '):
 
         _inform_get_kwargs(): returns a dictionary of keyword arguments.
 
-    Example::
+    **Example**::
 
         >>> class Chimera:
         ...     def __init__(self, *args, **kwargs):
@@ -678,7 +678,7 @@ def fmt(message, *args, **kwargs):
     attributes can come from the argument list, as with ''.format(), or they
     may come from the local scope (found by introspection).
 
-    Examples::
+    **Examples**::
 
         >>> from inform import fmt
         >>> s = 'str var'
@@ -731,7 +731,7 @@ def os_error(err):
             The value of an *OSError* or *IOError* exception (in Python3 *IOError*
             is a subclass of *OSError*, so you only need to catch *OSError*).
 
-    Example::
+    **Example**::
 
         >>> from inform import display, os_error
         >>> try:
@@ -776,7 +776,7 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
     used to join the last two items in the list, and *sep* is used to join the
     others.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import conjoin, display, Info
         >>> display(conjoin([], ' or '))
@@ -858,7 +858,7 @@ def did_you_mean(invalid_str, valid_strs):
         valid_strs (iterable):
             The set of valid strings that the user was expected to choose from.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import did_you_mean
         >>> did_you_mean('cat', ['cat', 'dog'])
@@ -912,7 +912,7 @@ def parse_range(
     Return:
         set: All of the values specified by the given string.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import parse_range
         >>> parse_range('1-3,5')
@@ -978,7 +978,7 @@ def format_range(
         range_delim (str):
             The character used to indicate ranges in the formatted string.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import format_range
         >>> format_range([1, 2, 3, 5])
@@ -1031,7 +1031,7 @@ class plural:
     sense of plurality is reversed (the plural form is used for one thing, and
     the singular form is used otherwise). This is useful when pluralizing verbs.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import plural
 
@@ -1089,7 +1089,7 @@ class plural:
         You can use this method to directly expand plural to a string without
         needing to use f-strings or the string format method.
 
-        Examples::
+        **Examples**::
 
             >>> plural(1).format('thing')
             'thing'
@@ -1132,7 +1132,7 @@ def full_stop(sentence, end='.', allow='.?!'):
     any white space at the end of the string is removed before looking for
     terminal punctuation.  The return value is always a string.
 
-    Examples::
+    **Examples**::
 
         >>> from inform import full_stop
         >>> full_stop('The file is out of date')
@@ -1179,7 +1179,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
         leader (str):
             The string to prepend to each line.
 
-    Example::
+    **Example**::
 
         >>> from inform import columns, display, full_stop
         >>> title = 'The NATO phonetic alphabet:'
@@ -1634,7 +1634,7 @@ class InformantFactory:
             specified, the stream to use will be determine by stream policy of
             active informer.
 
-    Example:
+    **Example**::
 
         The following generates two informants, *passes*, which prints its
         messages in green, and *fails*, which prints its messages in red.  Output
