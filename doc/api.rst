@@ -82,13 +82,13 @@ User Utilities
 
 .. autofunction:: inform.fmt
 
+.. autofunction:: inform.format_range
+
 .. autofunction:: inform.full_stop
 
 .. autofunction:: inform.join
 
 .. autofunction:: inform.parse_range
-
-.. autofunction:: inform.format_range
 
 .. autofunction:: inform.os_error
 
@@ -96,6 +96,10 @@ User Utilities
     :members:
 
 .. autofunction:: inform.render
+
+.. autofunction:: inform.render_bar
+
+.. autofunction:: inform.title_case
 
 
 Debug Utilities
