@@ -1105,9 +1105,6 @@ did_you_mean
 
     Given a candidate string from the user, return the closest valid choice.
 
-    This function requires that the *difflib* package be installed before it can 
-    be used.
-
     Args:
         candidate (string):
             The string given by the user.
@@ -1386,6 +1383,38 @@ os_error
     ...     error(os_error(e))
     myprog error: temperatures.csv: no such file or directory.
 
+
+.. _parse_range desc:
+
+parse_range
+"""""""""""
+
+.. py:function:: parse_range(items)
+
+func:`inform.parse_range` can be used to parse sets of numbers from 
+user-inputted strings.
+
+.. code-block:: python
+
+    >>> from inform import parse_range
+    >>> parse_range('1-3,5')
+    {1, 2, 3, 5}
+
+.. _format_range desc:
+
+format_range
+""""""""""""
+
+.. py:function:: format_range(items)
+
+func:`inform.format_range` can be used to create a succinct, readable string 
+representing a set of numbers.
+
+.. code-block:: python
+
+    >>> from inform import format_range
+    >>> format_range({1, 2, 3, 5})
+    '1-3,5'
 
 .. _progressbar desc:
 

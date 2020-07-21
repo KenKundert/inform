@@ -78,11 +78,17 @@ User Utilities
 
 .. autofunction:: inform.conjoin
 
+.. autofunction:: inform.did_you_mean
+
 .. autofunction:: inform.fmt
 
 .. autofunction:: inform.full_stop
 
 .. autofunction:: inform.join
+
+.. autofunction:: inform.parse_range
+
+.. autofunction:: inform.format_range
 
 .. autofunction:: inform.os_error
 

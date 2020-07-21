@@ -5,11 +5,13 @@ from inform import (
     error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
     is_iterable, is_mapping, is_str, join, get_prog_name, get_informer, narrate,
     os_error, output, plural, render, terminate, warn, ddd, ppp, sss, vvv,
-    ProgressBar,
+    ProgressBar, parse_range, format_range
 )
 from textwrap import dedent
 import sys
 import pytest
+from hypothesis import given
+from hypothesis.strategies import iterables, integers
 
 # Before Python3.5 the dictionaries were ordered randomly, which confuses the
 # test. This is a crude fix, just sort the output, that way we will likely catch
@@ -23,9 +25,7 @@ else:
 
 def test_debug(capsys):
     Inform(colorscheme=None, prog_name=False)
-    a='a'
-    b='b'
-    c='c'
+    a, b, c = 'abc'
     ddd(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
@@ -184,6 +184,148 @@ def test_did_you_mean():
     assert did_you_mean('abc', ['cde']) == 'cde'
     assert did_you_mean('abc', ['bcd', 'cde']) == 'bcd'
     assert did_you_mean('abc', ['cde', 'bcd']) == 'bcd'
+
+@pytest.mark.parametrize(
+    'given, expected', [
+            ('',        set()),
+            (',',       set()),  # Extra commas are ok; they're not ambiguous.
+
+            ('1',       {1}),
+            ('1,1',     {1}),
+            ('1-1',     {1}),
+
+            ('1,2',     {1,2}),
+            ('2,1',     {1,2}),
+            ('1-2',     {1,2}),
+            ('2-1',     {1,2}),
+
+            ('1,3',     {1,3}),
+            ('1,3,5',   {1,3,5}),
+            ('1,3,5,6', {1,3,5,6}),
+            ('1,3,5,7', {1,3,5,7}),
+            ('1,3,5-7', {1,3,5,6,7}),
+
+            ('1-3',     {1,2,3}),
+            ('1-3,5',   {1,2,3,5}),
+            ('1-3,5,6', {1,2,3,5,6}),
+            ('1-3,5,7', {1,2,3,5,7}),
+            ('1-3,5-7', {1,2,3,5,6,7}),
+])
+def test_parse_range_123(given, expected):
+    assert parse_range(given) == expected
+
+@pytest.mark.parametrize(
+    'given, expected', [
+            ('',        set()),
+            (',',       set()),  # Extra commas are ok; they're not ambiguous.
+
+            ('A',       {'A'}),
+            ('A,A',     {'A'}),
+            ('A-A',     {'A'}),
+
+            ('A,B',     {'A','B'}),
+            ('B,A',     {'A','B'}),
+            ('A-B',     {'A','B'}),
+            ('B-A',     {'A','B'}),
+
+            ('A,C',     {'A','C'}),
+            ('A,C,E',   {'A','C','E'}),
+            ('A,C,E,F', {'A','C','E','F'}),
+            ('A,C,E,G', {'A','C','E','G'}),
+            ('A,C,E-G', {'A','C','E','F','G'}),
+
+            ('A-C',     {'A','B','C'}),
+            ('A-C,E',   {'A','B','C','E'}),
+            ('A-C,E,F', {'A','B','C','E','F'}),
+            ('A-C,E,G', {'A','B','C','E','G'}),
+            ('A-C,E-G', {'A','B','C','E','F','G'}),
+])
+def test_parse_range_abc(given, expected):
+    abc_range = lambda a, b: [chr(x) for x in range(ord(a), ord(b) + 1)]
+    assert parse_range(given, cast=str, range=abc_range) == expected
+
+@pytest.mark.parametrize(
+    'given', [
+        '-',
+        '-1', # negative numbers can't be distinguished from malformed ranges.
+        '1-1-1', 
+        '?',
+])
+def test_parse_range_err(given):
+    with pytest.raises(ValueError):
+        parse_range(given)
+
+@pytest.mark.parametrize(
+    'given, expected', [
+        ([],               ''),
+
+        ([1],              '1'),
+        ([1,1],            '1'),
+
+        ([1,2],            '1,2'),
+        ([2,1],            '1,2'),
+
+        ([1,3],            '1,3'),
+        ([3,1],            '1,3'),
+        ([1,2,3],          '1-3'),
+        ([3,1,2],          '1-3'),
+        ([2,3,1],          '1-3'),
+
+        ([1,3,5],          '1,3,5'),
+        ([1,3,5,6],        '1,3,5,6'),
+        ([1,3,5,6,7],      '1,3,5-7'),
+        ([1,3,5,7],        '1,3,5,7'),
+
+        ([1,2,3,5],        '1-3,5'),
+        ([1,2,3,5,6],      '1-3,5,6'),
+        ([1,2,3,5,6,7],    '1-3,5-7'),
+        ([1,2,3,5,7],      '1-3,5,7'),
+
+        ((1,),             '1'),
+        ({1},              '1'),
+        ({1:2},            '1'),
+])
+def test_format_range_123(given, expected):
+    format_range(given) == expected
+
+@pytest.mark.parametrize(
+    'given, expected', [
+        ([],            ''),
+
+        ('A',           'A'),
+        ('AA',          'A'),
+
+        ('AB',          'A,B'),
+        ('BA',          'A,B'),
+
+        ('AC',          'A,C'),
+        ('CA',          'A,C'),
+        ('ABC',         'A-C'),
+        ('CAB',         'A-C'),
+        ('BCA',         'A-C'),
+
+        ('ACE',         'A,C,E'),
+        ('ACEF',        'A,C,E,F'),
+        ('ACEFG',       'A,C,E-G'),
+        ('ACEG',        'A,C,E,G'),
+
+        ('ABCE',        'A-C,E'),
+        ('ABCEF',       'A-C,E,F'),
+        ('ABCEFG',      'A-C,E-G'),
+        ('ABCEG',       'A-C,E,G'),
+
+        (['A'],         'A'),
+        (('A',),        'A'),
+        ({'A'},         'A'),
+        ({'A':'B'},     'A'),
+])
+def test_format_range_abc(given, expected):
+    abc_diff = lambda a, b: ord(b) - ord(a)
+    format_range(given, diff=abc_diff) == expected
+
+@given(iterables(integers(min_value=0)))
+def test_format_and_parse_range(x):
+    assert parse_range(format_range(x)) == set(x._values)
 
 def test_cull():
     assert cull([0, 1, 2]) == [1, 2]
