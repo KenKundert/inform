@@ -397,7 +397,7 @@ def test_render():
     y=6
     a="this is a test"
     b="this is another test"
-    c=dedent('''
+    c=dedent('''\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
         quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -435,7 +435,7 @@ def test_render():
     assert render(a) == "'this is a test'"
     assert render(b) == "'this is another test'"
     assert render(c) == dedent('''\
-    """
+    """\\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
         quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -452,7 +452,7 @@ def test_render():
     {
         'a': 'this is a test',
         'b': 'this is another test',
-        'c': """
+        'c': """\\
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
             quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -469,7 +469,7 @@ def test_render():
     {
         'a': 'this is a test',
         'b': 'this is another test',
-        'c': """
+        'c': """\\
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
             quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -484,7 +484,7 @@ def test_render():
         'h': {
             'a': 'this is a test',
             'b': 'this is another test',
-            'c': """
+            'c': """\\
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
                 tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
                 quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -779,7 +779,7 @@ def test_join():
     assert join('a', 'b', 'c', sep='-') == 'a-b-c'
     assert join('a', 'b', 'c', x='x', y='y', template='{}, x={x}') == 'a, x=x'
     assert join('Lorem\nipsum\ndolor', wrap=100) == 'Lorem ipsum dolor'
-    c=dedent('''
+    c=dedent('''\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
         minim veniam, quis nostrud exercitation ullamco laboris nisi ut
