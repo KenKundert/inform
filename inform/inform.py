@@ -318,6 +318,8 @@ class Color:
     # __call__ {{{3
     def __call__(self, *args, **kwargs):
         text = _join(args, kwargs)
+        if not text:
+            return text
 
         # scheme is acting as an override, and False prevents the override.
         scheme = kwargs.get('scheme', self.scheme)
@@ -645,10 +647,11 @@ def render(obj, sort=None, level=None, tab='    '):
         elif is_str(obj) and '\n' in obj:
             endcaps = None
             content = [
-                '"""',
-                indent(dedent(obj).strip(), leader(1)),
+                '"""\\\n',
+                indent(dedent(obj), leader(1)),
                 leader(0) + '"""'
             ]
+            content = [''.join(content)]
         else:
             endcaps = None
             content = [repr(obj)]
@@ -1724,27 +1727,31 @@ class InformantFactory:
             specified, the stream to use will be determine by stream policy of
             active informer.
 
+        clone (informant):
+            Clone the attributes of the given informer. Any explicitly specified
+            arguments override those acquired through cloning.
+
     **Example**:
 
         The following generates two informants, *passes*, which prints its
         messages in green, and *fails*, which prints its messages in red.  Output
         to the standard output for both is suppressed if *quiet* is *True*::
 
-            >>> from inform import InformantFactory
+            >>> from inform import InformantFactory, display
 
-            >>> passes = InformantFactory(
-            ...     output=lambda inform: not inform.quiet,
-            ...     log=True,
-            ...     message_color='green',
+            >>> success = InformantFactory(
+            ...     clone = display,
+            ...     severity = 'Pass',
+            ...     header_color = 'green'
             ... )
-            >>> fails = InformantFactory(
-            ...     output=lambda inform: not inform.quiet,
-            ...     log=True,
-            ...     message_color='red',
+            >>> failure = InformantFactory(
+            ...     clone = display,
+            ...     severity = 'FAIL',
+            ...     header_color = 'red'
             ... )
 
-        *pass* and *fail* are both informants. Once created, the can be used to
-        give messages to the user::
+        *success* and *failure* are both informants. Once created, the can be
+        used to give messages to the user::
 
             >>> results = [
             ...     (0,   0.005, 0.025),
@@ -1753,18 +1760,18 @@ class InformantFactory:
             ... ]
             >>> for expected, measured, tolerance in results:
             ...     if abs(expected - measured) > tolerance:
-            ...         report, label = fails, 'FAIL'
+            ...         report = failure
             ...     else:
-            ...         report, label = passes, 'Pass'
+            ...         report = success
             ...     report(
-            ...         label, measured, expected, measured-expected,
-            ...         template='{}: measured = {:.3f}V, expected = {:.3f}V, diff = {:.3f}V'
+            ...         measured, expected, measured-expected,
+            ...         template='measured = {:.3f}V, expected = {:.3f}V, diff = {:.3f}V'
             ...     )
             Pass: measured = 0.005V, expected = 0.000V, diff = 0.005V
             Pass: measured = 0.512V, expected = 0.500V, diff = 0.012V
             FAIL: measured = 0.875V, expected = 1.000V, diff = -0.125V
 
-        In the console the passes are rendered in green and the failures in red.
+        In the console 'Pass' is rendered in green and 'FAIL' in red.
     """
 
     def __init__(
@@ -1779,7 +1786,10 @@ class InformantFactory:
         message_color=None,
         header_color=None,
         stream=None,
+        clone=None,
     ):
+        if clone:
+            self.__dict__.update(clone.__dict__)
         self.severity = severity
         self.is_error = is_error
         self.log = log
@@ -2777,6 +2787,7 @@ class Error(Exception):
     (https://pypi.org/project/exception-template/).
     """
 
+    # constructor {{{3
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -2785,6 +2796,7 @@ class Error(Exception):
             if template:
                 self.kwargs.update(dict(template=template))
 
+    # get_message {{{3
     def get_message(self, template=None):
         """Get exception message.
 
@@ -2809,6 +2821,7 @@ class Error(Exception):
             kwargs = self.kwargs
         return _join(self.args, kwargs)
 
+    # get_culprit {{{3
     def get_culprit(self, culprit=None, join=False):
         """Get the culprit.
 
@@ -2834,6 +2847,7 @@ class Error(Exception):
             return culprit + exception_culprit
         return exception_culprit
 
+    # get_codicil {{{3
     def get_codicil(self, codicil=None, join=False):
         """Get the codicil.
 
@@ -2859,6 +2873,7 @@ class Error(Exception):
             return exception_codicil + codicil
         return exception_codicil
 
+    # report {{{3
     def report(self, **new_kwargs):
         """Report exception.
 
@@ -2879,6 +2894,7 @@ class Error(Exception):
         informant = kwargs.get('informant', error)
         informant(*self.args, **kwargs)
 
+    # terminate {{{3
     def terminate(self, **new_kwargs):
         """Report exception and terminate.
 
@@ -2898,10 +2914,12 @@ class Error(Exception):
             kwargs = self.kwargs
         fatal(*self.args, **kwargs)
 
+    # reraise {{{3
     def reraise(self, **new_kwargs):
         self.kwargs.update(new_kwargs)
         raise
 
+    # render {{{3
     def render(self, template=None):
         """Convert exception to a string for use in an error message.
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# This is a utility function that simply runs a shell command and raises Error
+# if there was a problem. It demonstrates the ability to use the extra arguments
+# of Error to stuff it with useful information that can be used later in error
+# reporting.
 
 from inform import Error, narrate, os_error
 from subprocess import Popen, PIPE
