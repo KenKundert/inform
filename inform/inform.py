@@ -647,9 +647,9 @@ def render(obj, sort=None, level=None, tab='    '):
         elif is_str(obj) and '\n' in obj:
             endcaps = None
             content = [
-                '"""\\\n',
+                '"""' + ('\\\n' if obj[0] != '\n' else ''),
                 indent(dedent(obj), leader(1)),
-                leader(0) + '"""'
+                ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
             ]
             content = [''.join(content)]
         else:
