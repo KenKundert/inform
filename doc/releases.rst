@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.21.2
-    | Released: 2020-08-23
+    | Version: 1.22.0
+    | Released: 2020-08-24
 
 **1.21 (2020-08-24)**:
     - Added *clone* argument to :class:`inform.InformantFactory`.
