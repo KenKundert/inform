@@ -5,6 +5,7 @@ Releases
     | Version: 1.22.0
     | Released: 2020-08-24
 
+**1.23 (2020-08-26)**:
     - Strip out empty culprits and codicils.
 
 **1.22 (2020-08-24)**:
