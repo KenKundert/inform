@@ -2551,7 +2551,10 @@ class Inform:
     class CulpritContextManager:
         def __init__(self, informer, culprit, append=True):
             self.informer = informer
-            self.culprit = culprit if is_collection(culprit) else (culprit,)
+            if culprit is None:
+                self.culprit = ()
+            else:
+                self.culprit = culprit if is_collection(culprit) else (culprit,)
             self.append = append
 
         def __enter__(self):
@@ -2791,6 +2794,20 @@ class Error(Exception):
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+
+        # convert culprit, codicil to tuples while removing any Nones
+        for attr in ['culprit', 'codicil']:
+            if attr in kwargs:
+                value = kwargs.get(attr)
+                if not is_collection(value):
+                    value = (value,)
+                value = cull(value, remove=None)
+                if value:
+                    self.kwargs[attr] = value
+                else:
+                    del self.kwargs[attr]
+
+        # use template attribute from class if template is not give as argument
         if 'template' not in kwargs:
             template = getattr(self, 'template', None)
             if template:

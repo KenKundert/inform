@@ -5,6 +5,8 @@ Releases
     | Version: 1.22.0
     | Released: 2020-08-24
 
+    - Strip out empty culprits and codicils.
+
 **1.22 (2020-08-24)**:
     - Added *clone* argument to :class:`inform.InformantFactory`.
 
