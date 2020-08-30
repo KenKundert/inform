@@ -15,7 +15,7 @@ else:
 
 setup(
     name = 'inform',
-    version = '1.23.0',
+    version = '1.23.1',
     description = 'print & logging utilities for communicating with user',
     long_description = readme,
     long_description_content_type = 'text/x-rst',
