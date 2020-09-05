@@ -82,7 +82,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     # do the indent
     indented = (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
 
-    # resplit it and replace the blank lines with empty lines
+    # resplit and rejoin while replacing blank lines with empty lines
     return '\n'.join([line.rstrip() for line in indented.split('\n')])
 
 
@@ -2839,7 +2839,7 @@ class Error(Exception):
         return _join(self.args, kwargs)
 
     # get_culprit {{{3
-    def get_culprit(self, culprit=None, join=False):
+    def get_culprit(self, culprit=None):
         """Get the culprit.
 
         Return the culprit as a tuple. If a culprit is specified as an
@@ -2865,7 +2865,7 @@ class Error(Exception):
         return exception_culprit
 
     # get_codicil {{{3
-    def get_codicil(self, codicil=None, join=False):
+    def get_codicil(self, codicil=None):
         """Get the codicil.
 
         Return the codicil as a tuple. If a codicil is specified as an
