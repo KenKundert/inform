@@ -2950,6 +2950,9 @@ class Error(Exception):
                 exception is used. If there was no *template* argument, then the
                 positional arguments of the exception are joined using *sep* and
                 that is returned.
+
+        Returned:
+            The formatted message with any culprits.
         """
         message = self.get_message(template)
         culprit = join_culprit(self.get_culprit())
