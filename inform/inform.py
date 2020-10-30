@@ -1184,20 +1184,25 @@ class plural:
             from collections import Sized
 
         x = self.value
-        number = len(x) if isinstance(x, Sized) else self.value
+        number = len(x) if isinstance(x, Sized) else x
+
         if formatter[0:1] == self.invert:
             formatter = formatter[1:]
-            use_singular = number != 1
+            use_singular = (number != 1)
         else:
-            use_singular = number == 1
-        formatter = formatter.replace(self.symbol, str(number))
+            use_singular = (number == 1)
+
         always, _, suffixes = formatter.partition(self.slash)
         if suffixes:
             singular, _, plural = suffixes.rpartition(self.slash)
         else:
             singular, plural = '', 's'
 
-        return "{}{}".format(always, singular if use_singular else plural)
+        # Don't replace the symbol until the very end, because it's possible 
+        # that this step could introduce extra separators (e.g. if the number 
+        # is a fraction).
+        out = always + (singular if use_singular else plural)
+        return out.replace(self.symbol, str(number))
 
 
 
@@ -2049,7 +2054,7 @@ class Inform:
             Command used to run the notifier. The command will be called with
             two arguments, the header and the body of the message.
 
-        \**kwargs:
+        \\**kwargs:
             Any additional keyword arguments are made attributes that are
             ignored by *Inform*, but may be accessed by the informants.
     """
@@ -2897,7 +2902,7 @@ class Error(Exception):
         The :func:`inform.error` function is called with the exception arguments.
 
         Args:
-            \**kwargs:
+            \\**kwargs:
                 *report()* takes any of the normal keyword arguments normally
                 allowed on an informant (culprit, template, etc.). Any keyword
                 argument specified here overrides those that were specified when
@@ -2918,7 +2923,7 @@ class Error(Exception):
         The :func:`inform.fatal` function is called with the exception arguments.
 
         Args:
-            \**kwargs:
+            \\**kwargs:
                 *report()* takes any of the normal keyword arguments normally
                 allowed on an informant (culprit, template, etc.). Any keyword
                 argument specified here overrides those that were specified when
