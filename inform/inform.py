@@ -1953,7 +1953,7 @@ class Inform:
             Command used to run the notifier. The command will be called with
             two arguments, the header and the body of the message.
 
-        \**kwargs:
+        \\**kwargs:
             Any additional keyword arguments are made attributes that are
             ignored by *Inform*, but may be accessed by the informants.
     """
@@ -2777,7 +2777,7 @@ class Error(Exception):
         The :func:`inform.error` function is called with the exception arguments.
 
         Args:
-            \**kwargs:
+            \\**kwargs:
                 *report()* takes any of the normal keyword arguments normally
                 allowed on an informant (culprit, template, etc.). Any keyword
                 argument specified here overrides those that were specified when
@@ -2797,7 +2797,7 @@ class Error(Exception):
         The :func:`inform.fatal` function is called with the exception arguments.
 
         Args:
-            \**kwargs:
+            \\**kwargs:
                 *report()* takes any of the normal keyword arguments normally
                 allowed on an informant (culprit, template, etc.). Any keyword
                 argument specified here overrides those that were specified when
