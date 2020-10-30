@@ -1111,20 +1111,25 @@ class plural:
             from collections import Sized
 
         x = self.value
-        number = len(x) if isinstance(x, Sized) else self.value
+        number = len(x) if isinstance(x, Sized) else x
+
         if formatter[0:1] == self.invert:
             formatter = formatter[1:]
-            use_singular = number != 1
+            use_singular = (number != 1)
         else:
-            use_singular = number == 1
-        formatter = formatter.replace(self.symbol, str(number))
+            use_singular = (number == 1)
+
         always, _, suffixes = formatter.partition(self.slash)
         if suffixes:
             singular, _, plural = suffixes.rpartition(self.slash)
         else:
             singular, plural = '', 's'
 
-        return "{}{}".format(always, singular if use_singular else plural)
+        # Don't replace the symbol until the very end, because it's possible 
+        # that this step could introduce extra separators (e.g. if the number 
+        # is a fraction).
+        out = always + (singular if use_singular else plural)
+        return out.replace(self.symbol, str(number))
 
 
 

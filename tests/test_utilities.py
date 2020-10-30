@@ -665,6 +665,15 @@ def test_plural():
     assert '{:~@ cart|s}'.format(plural(2, invert='~', num='@', slash='|')) == '2 cart'
     assert plural(2, invert='~', num='@', slash='|').format('~@ cart|s') == '2 cart'
 
+def test_plural_fraction():
+    from fractions import Fraction
+
+    assert '{:# day/s}'.format(plural(Fraction(0,2))) == '0 days'
+    assert '{:# day/s}'.format(plural(Fraction(1,2))) == '1/2 days'
+    assert '{:# day/s}'.format(plural(Fraction(2,2))) == '1 day'
+    assert '{:# day/s}'.format(plural(Fraction(3,2))) == '3/2 days'
+    assert '{:# day/s}'.format(plural(Fraction(4,2))) == '2 days'
+    
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
     assert full_stop('hey now.') == 'hey now.'
