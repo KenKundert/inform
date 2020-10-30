@@ -3,6 +3,7 @@
 echo "#########"
 echo Python 2:
 echo "#########"
+pip2 install --user --upgrade .
 # python2 test.doctests.py
 python2 test.inform.py
 py.test-2
@@ -11,6 +12,7 @@ echo
 echo "#########"
 echo Python 3:
 echo "#########"
+pip3 install --user --upgrade .
 python3 test.doctests.py
 python3 test.inform.py
 py.test-3

@@ -1,5 +1,5 @@
-__version__ = '1.20.5'
-__released__ = '2020-05-26'
+__version__ = '1.23.1'
+__released__ = '2020-08-29'
 
 from .inform import (
     # inform utility functions and classes
@@ -7,8 +7,8 @@ from .inform import (
     Color, Info,
 
     # user utility functions and classes
-    columns, conjoin, did_you_mean, parse_range, format_range, fmt, full_stop, 
-    os_error, plural, ProgressBar, render, render_bar,
+    columns, conjoin, did_you_mean, fmt, format_range, full_stop, os_error,
+    parse_range, plural, ProgressBar, render, render_bar, title_case,
 
     # debug functions
     aaa, ppp, ddd, vvv, sss,

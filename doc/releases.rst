@@ -2,12 +2,21 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.20.5
-    | Released: 2020-05-26
+    | Version: 1.23.1
+    | Released: 2020-08-29
 
+**1.23 (2020-08-26)**:
+    - Strip out empty culprits and codicils.
+
+**1.22 (2020-08-24)**:
+    - Added *clone* argument to :class:`inform.InformantFactory`.
+
+**1.21 (2020-07-20)**:
     - Allow :class:`inform.ProgressBar` output to be suppressed.
     - Allow ``/`` to be overridden in :class:`inform.plural`
     - Various enhancements to :func:`inform.conjoin` and :func:`inform.full_stop`.
+    - Added :func:`inform.parse_range` and :func:`inform.format_range` functions.
+    - Added :func:`inform.title_case` function.
 
 **1.20 (2020-01-08)**:
     - Add *format* method to :class:`inform.plural`.

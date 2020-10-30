@@ -54,8 +54,7 @@ These are used to configure inform for doctests:
 # Inform Utilities {{{1
 # indent {{{2
 def indent(text, leader='    ', first=0, stops=1, sep='\n'):
-    r"""
-    Add indentation.
+    r"""Add indentation.
 
     Args:
         leader (string):
@@ -72,7 +71,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
         sep (string):
             the string used to separate the lines
 
-    Example::
+    **Example**::
 
         >>> from inform import display, indent
         >>> display(indent('And the answer is ...\n42!', first=-1))
@@ -83,7 +82,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     # do the indent
     indented = (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
 
-    # resplit it and replace the blank lines with empty lines
+    # resplit and rejoin while replacing blank lines with empty lines
     return '\n'.join([line.rstrip() for line in indented.split('\n')])
 
 
@@ -107,7 +106,7 @@ def cull(collection, **kwargs):
             If remove is not specified, the value is culled if its value would
             be False when cast to a boolean (0, False, None, '', (), [], {}, etc.)
 
-    Example::
+    **Example**::
 
         >>> from inform import cull, display
         >>> from collections import OrderedDict
@@ -157,7 +156,7 @@ def is_str(arg):
 
     Returns *True* if argument is a string.
 
-    Example::
+    **Example**::
 
         >>> from inform import is_str
         >>> is_str('abc')
@@ -178,7 +177,7 @@ def is_iterable(obj):
 
     Returns *True* if argument is a collecton or a string.
 
-    Example::
+    **Example**::
 
         >>> from inform import is_iterable
         >>> is_iterable('abc')
@@ -201,7 +200,7 @@ def is_collection(obj):
 
     Returns *True* if argument is a collection (tuple, list, set or dictionary).
 
-    Example::
+    **Example**::
 
         >>> from inform import is_collection
         >>> is_collection('')  # string
@@ -225,7 +224,7 @@ def is_mapping(obj):
 
     Returns *True* if argument is a mapping.
 
-    Example::
+    **Example**::
 
         >>> from inform import is_mapping
         >>> is_mapping('')  # string
@@ -265,7 +264,7 @@ class Color:
         enable (bool):
             If set to False, the colorizer does not render the text in color.
 
-    Example:
+    **Example**::
 
         >>> from inform import Color
         >>> fail = Color('red')
@@ -319,6 +318,8 @@ class Color:
     # __call__ {{{3
     def __call__(self, *args, **kwargs):
         text = _join(args, kwargs)
+        if not text:
+            return text
 
         # scheme is acting as an override, and False prevents the override.
         scheme = kwargs.get('scheme', self.scheme)
@@ -341,19 +342,21 @@ class Color:
             stream (stream):
                 Stream to test.  If not given, *stdout* is used as the stream.
 
-        >>> from inform import Color, display
-        >>> import sys, re
+        **Example**::
 
-        >>> if Color.isTTY(sys.stdout):
-        ...     emphasize = Color('magenta')
-        ... else:
-        ...     emphasize = str.upper
+            >>> from inform import Color, display
+            >>> import sys, re
 
-        >>> def highlight(matchobj):
-        ...     return emphasize(matchobj.group(0))
+            >>> if Color.isTTY(sys.stdout):
+            ...     emphasize = Color('magenta')
+            ... else:
+            ...     emphasize = str.upper
 
-        >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
-        Imagine YOUR city without cars.
+            >>> def highlight(matchobj):
+            ...     return emphasize(matchobj.group(0))
+
+            >>> display(re.sub('your', highlight, 'Imagine your city without cars.'))
+            Imagine YOUR city without cars.
 
         """
         try:
@@ -377,21 +380,23 @@ class Info:
     When instantiated, it converts the provided keyword arguments to attributes.  
     Unknown attributes evaluate to None.
 
-    >>> class Orwell(Info):
-    ...     pass
+    **Example**::
 
-    >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
-    >>> print(str(george))
-    Orwell(
-        peace='war',
-        freedom='slavery',
-        ignorance='strength',
-    )
+        >>> class Orwell(Info):
+        ...     pass
 
-    >>> george.peace
-    'war'
+        >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
+        >>> print(str(george))
+        Orwell(
+            peace='war',
+            freedom='slavery',
+            ignorance='strength',
+        )
 
-    >>> george.happiness
+        >>> george.peace
+        'war'
+
+        >>> george.happiness
 
     """
     def __init__(self, **kwargs):
@@ -413,8 +418,10 @@ class Info:
                 The template string is returned with any instances of {name}
                 replaced by the value of the corresponding attribute.
 
-        >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
-        'Peace is war. Freedom is slavery. Ignorance is strength.'
+        **Example**::
+
+            >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
+            'Peace is war. Freedom is slavery. Ignorance is strength.'
 
         """
 
@@ -468,7 +475,7 @@ def join(*args, **kwargs):
             If true the string is wrapped using a width of 70. If an integer value
             is passed, is used as the width of the wrap.
 
-    Examples::
+    **Examples**::
 
         >>> from inform import join
         >>> join('a', 'b', 'c', x='x', y='y', z='z')
@@ -520,8 +527,7 @@ def _join(args, kwargs):
 _level = 0
 _sort = None
 def render(obj, sort=None, level=None, tab='    '):
-    """
-    Recursively convert object to string with reasonable formatting.
+    """Recursively convert object to string with reasonable formatting.
 
     Args:
         obj:
@@ -543,7 +549,7 @@ def render(obj, sort=None, level=None, tab='    '):
     yourself to these types, the output of render can be read by the Python
     interpreter.  Other types are converted to string with *repr()*.
 
-    Example::
+    **Example**::
 
         >>> from inform import display, render
         >>> display('result =', render({'a': (0, 1), 'b': [2, 3, 4]}))
@@ -556,7 +562,7 @@ def render(obj, sort=None, level=None, tab='    '):
 
         _inform_get_kwargs(): returns a dictionary of keyword arguments.
 
-    Example::
+    **Example**::
 
         >>> class Chimera:
         ...     def __init__(self, *args, **kwargs):
@@ -641,10 +647,11 @@ def render(obj, sort=None, level=None, tab='    '):
         elif is_str(obj) and '\n' in obj:
             endcaps = None
             content = [
-                '"""',
-                indent(dedent(obj).strip(), leader(1)),
-                leader(0) + '"""'
+                '"""' + ('\\\n' if obj[0] != '\n' else ''),
+                indent(dedent(obj), leader(1)),
+                ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
             ]
+            content = [''.join(content)]
         else:
             endcaps = None
             content = [repr(obj)]
@@ -674,14 +681,13 @@ def render(obj, sort=None, level=None, tab='    '):
 
 # fmt {{{2
 def fmt(message, *args, **kwargs):
-    """
-    Similar to ''.format(), but it can pull arguments from the local scope.
+    """Similar to ''.format(), but it can pull arguments from the local scope.
 
     Convert a message with embedded attributes to a string. The values for the
     attributes can come from the argument list, as with ''.format(), or they
     may come from the local scope (found by introspection).
 
-    Examples::
+    **Examples**::
 
         >>> from inform import fmt
         >>> s = 'str var'
@@ -734,7 +740,7 @@ def os_error(err):
             The value of an *OSError* or *IOError* exception (in Python3 *IOError*
             is a subclass of *OSError*, so you only need to catch *OSError*).
 
-    Example::
+    **Example**::
 
         >>> from inform import display, os_error
         >>> try:
@@ -779,7 +785,7 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
     used to join the last two items in the list, and *sep* is used to join the
     others.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import conjoin, display, Info
         >>> display(conjoin([], ' or '))
@@ -851,10 +857,78 @@ def conjoin(iterable, conj=' and ', sep=', ', end='', fmt=None):
         lst = lst[0:-2] + [lst[-2] + conj + lst[-1]]
     return sep.join(lst) + end
 
+# title_case {{{2
+def title_case(
+    s,
+    exceptions = (
+        'and', 'or', 'nor', 'but', 'a', 'an', 'and', 'the', 'as', 'at', 'by',
+        'for', 'in', 'of', 'on', 'per', 'to'
+    )
+):
+    """Convert to title case
+
+    This is an attempt to provide an alternative to ''.title() that works with 
+    acronyms.
+
+    There are several tricky cases to worry about in typical order of importance:
+
+    0. Upper case first letter of each word that is not an 'minor' word.
+    1. Always upper case first word.
+    2. Do not down case acronyms
+    3. Quotes
+    4. Hyphenated words: drive-in
+    5. Titles within titles: 2001 A Space Odyssey
+    6. Maintain leading spacing
+    7. Maintain given spacing: This is a test.  This is only a test.
+
+    The following code addresses 0-3 & 7.  It was felt that addressing the
+    others would add considerable complexity.  Case 2 was handled by simply
+    maintaining all upper case letters in the specified string.
+
+    **Example**::
+
+        >>> from inform import title_case
+        >>> cases = '''
+        ...     CDC warns about "aggressive" rats as coronavirus shuts down restaurants
+        ...     L.A. County opens churches, stores, pools, drive-in theaters
+        ...     UConn senior accused of killing two men was looking for young woman
+        ...     Giant asteroid that killed the dinosaurs slammed into Earth at ‘deadliest possible angle,’ study reveals
+        ...     Maintain given spacing: This is a test.  This is only a test.
+        ... '''.strip()
+
+        >>> for case in cases.splitlines():
+        ...    print(title_case(case))
+        CDC Warns About "Aggressive" Rats as Coronavirus Shuts Down Restaurants
+        L.A. County Opens Churches, Stores, Pools, Drive-in Theaters
+        UConn Senior Accused of Killing Two Men Was Looking for Young Woman
+        Giant Asteroid That Killed the Dinosaurs Slammed Into Earth at ‘Deadliest Possible Angle,’ Study Reveals
+        Maintain Given Spacing: This Is a Test.  This Is Only a Test.
+
+    """
+
+    words = s.strip().split(' ')
+        # split on single space to maintain word spacing
+        # remove leading and trailing spaces -- needed for first word casing
+
+    def upper(s):
+        if s:
+            if s[0] in '‘“"‛‟' + "'":
+                return s[0] + upper(s[1:])
+            return s[0].upper() + s[1:]
+        return ''
+
+    # always capitalize the first word
+    first = upper(words[0])
+
+    return ' '.join([first] + [
+        word if word.lower() in exceptions else upper(word)
+        for word in words[1:]
+    ])
+
+
 # did_you_mean {{{2
 def did_you_mean(invalid_str, valid_strs):
-    """Given an invalid string from the user, return the valid string with the 
-    most similarity.
+    """Given an invalid string from the user, return the valid string with the most similarity.
 
     Args:
         invalid_str (string):
@@ -862,7 +936,7 @@ def did_you_mean(invalid_str, valid_strs):
         valid_strs (iterable):
             The set of valid strings that the user was expected to choose from.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import did_you_mean
         >>> did_you_mean('cat', ['cat', 'dog'])
@@ -916,7 +990,7 @@ def parse_range(
     Return:
         set: All of the values specified by the given string.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import parse_range
         >>> parse_range('1-3,5')
@@ -982,7 +1056,7 @@ def format_range(
         range_delim (str):
             The character used to indicate ranges in the formatted string.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import format_range
         >>> format_range([1, 2, 3, 5])
@@ -1016,8 +1090,7 @@ def format_range(
 
 # plural {{{2
 class plural:
-    """Conditionally format a phrase depending on whether it refers to a singular 
-    or plural number of things.
+    """Conditionally format a phrase depending on whether it refers to a singular or plural number of things.
 
     The format string has three sections, separated by '/'.  The first section 
     is always included, the last section is included if the given number is 
@@ -1036,7 +1109,7 @@ class plural:
     sense of plurality is reversed (the plural form is used for one thing, and
     the singular form is used otherwise). This is useful when pluralizing verbs.
 
-    Examples:
+    **Examples**::
 
         >>> from inform import plural
 
@@ -1094,7 +1167,7 @@ class plural:
         You can use this method to directly expand plural to a string without
         needing to use f-strings or the string format method.
 
-        Examples::
+        **Examples**::
 
             >>> plural(1).format('thing')
             'thing'
@@ -1142,7 +1215,7 @@ def full_stop(sentence, end='.', allow='.?!'):
     any white space at the end of the string is removed before looking for
     terminal punctuation.  The return value is always a string.
 
-    Examples::
+    **Examples**::
 
         >>> from inform import full_stop
         >>> full_stop('The file is out of date')
@@ -1154,7 +1227,7 @@ def full_stop(sentence, end='.', allow='.?!'):
         >>> full_stop('Is the file is out of date?')
         'Is the file is out of date?'
 
-    You can override the allowed and desired endings.
+    You can override the allowed and desired endings::
 
         >>> cases = '1, 3 9, 12.'.split()
         >>> print(*[full_stop(c, end=',', allow=',.') for c in cases])
@@ -1189,7 +1262,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
         leader (str):
             The string to prepend to each line.
 
-    Example::
+    **Example**::
 
         >>> from inform import columns, display, full_stop
         >>> title = 'The NATO phonetic alphabet:'
@@ -1230,8 +1303,23 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
 def render_bar(value, width=72):
     """Render graphic representation of a value in the form of a bar
 
-    value (real): should be normalized (fall between 0 and 1)
-    width (int): the width of the bar in characters when value is 1.
+    Args:
+        value (real): should be normalized (fall between 0 and 1)
+
+        width (int): the width of the bar in characters when value is 1.
+
+    **Examples**::
+
+        >>> from inform import render_bar
+        >>> display(render_bar(0))
+        <BLANKLINE>
+
+        >>> display(render_bar(0.5))
+        ████████████████████████████████████
+
+        >>> display(render_bar(1.0))
+        ████████████████████████████████████████████████████████████████████████
+
     """
     scaled = value*width
     if scaled > width:
@@ -1588,7 +1676,8 @@ def sss():
 # whereas the print functions returned from InformantFactory are referred to
 # as informants.
 class InformantFactory:
-    """
+    """Create informants.
+
     An object of InformantFactory is referred to as an informant. It is
     generally treated as a function that is called to produce the desired
     output.
@@ -1643,27 +1732,31 @@ class InformantFactory:
             specified, the stream to use will be determine by stream policy of
             active informer.
 
-    Example:
+        clone (informant):
+            Clone the attributes of the given informer. Any explicitly specified
+            arguments override those acquired through cloning.
+
+    **Example**:
 
         The following generates two informants, *passes*, which prints its
         messages in green, and *fails*, which prints its messages in red.  Output
         to the standard output for both is suppressed if *quiet* is *True*::
 
-            >>> from inform import InformantFactory
+            >>> from inform import InformantFactory, display
 
-            >>> passes = InformantFactory(
-            ...     output=lambda inform: not inform.quiet,
-            ...     log=True,
-            ...     message_color='green',
+            >>> success = InformantFactory(
+            ...     clone = display,
+            ...     severity = 'Pass',
+            ...     header_color = 'green'
             ... )
-            >>> fails = InformantFactory(
-            ...     output=lambda inform: not inform.quiet,
-            ...     log=True,
-            ...     message_color='red',
+            >>> failure = InformantFactory(
+            ...     clone = display,
+            ...     severity = 'FAIL',
+            ...     header_color = 'red'
             ... )
 
-        *pass*  and *fail* are both informants. Once created, the can be used to
-        give messages to the user::
+        *success* and *failure* are both informants. Once created, the can be
+        used to give messages to the user::
 
             >>> results = [
             ...     (0,   0.005, 0.025),
@@ -1672,18 +1765,18 @@ class InformantFactory:
             ... ]
             >>> for expected, measured, tolerance in results:
             ...     if abs(expected - measured) > tolerance:
-            ...         report, label = fails, 'FAIL'
+            ...         report = failure
             ...     else:
-            ...         report, label = passes, 'Pass'
+            ...         report = success
             ...     report(
-            ...         label, measured, expected, measured-expected,
-            ...         template='{}: measured = {:.3f}V, expected = {:.3f}V, diff = {:.3f}V'
+            ...         measured, expected, measured-expected,
+            ...         template='measured = {:.3f}V, expected = {:.3f}V, diff = {:.3f}V'
             ...     )
             Pass: measured = 0.005V, expected = 0.000V, diff = 0.005V
             Pass: measured = 0.512V, expected = 0.500V, diff = 0.012V
             FAIL: measured = 0.875V, expected = 1.000V, diff = -0.125V
 
-        In the console the passes are rendered in green and the failures in red.
+        In the console 'Pass' is rendered in green and 'FAIL' in red.
     """
 
     def __init__(
@@ -1698,7 +1791,10 @@ class InformantFactory:
         message_color=None,
         header_color=None,
         stream=None,
+        clone=None,
     ):
+        if clone:
+            self.__dict__.update(clone.__dict__)
         self.severity = severity
         self.is_error = is_error
         self.log = log
@@ -2460,7 +2556,10 @@ class Inform:
     class CulpritContextManager:
         def __init__(self, informer, culprit, append=True):
             self.informer = informer
-            self.culprit = culprit if is_collection(culprit) else (culprit,)
+            if culprit is None:
+                self.culprit = ()
+            else:
+                self.culprit = culprit if is_collection(culprit) else (culprit,)
             self.append = append
 
         def __enter__(self):
@@ -2491,7 +2590,9 @@ class Inform:
         meant to be used with Python's *with* statement. It temporarily replaces
         any existing saved culprit, but that culprit in reinstated upon exiting the
         *with* statement. Once a culprit is saved, :meth:`inform.Inform.get_culprit`
-        is used to access it.  For example::
+        is used to access it.
+
+        **Example**::
 
             >>> from inform import get_culprit, set_culprit, warn
 
@@ -2694,14 +2795,30 @@ class Error(Exception):
     (https://pypi.org/project/exception-template/).
     """
 
+    # constructor {{{3
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+
+        # convert culprit, codicil to tuples while removing any Nones
+        for attr in ['culprit', 'codicil']:
+            if attr in kwargs:
+                value = kwargs.get(attr)
+                if not is_collection(value):
+                    value = (value,)
+                value = cull(value, remove=None)
+                if value:
+                    self.kwargs[attr] = value
+                else:
+                    del self.kwargs[attr]
+
+        # use template attribute from class if template is not give as argument
         if 'template' not in kwargs:
             template = getattr(self, 'template', None)
             if template:
                 self.kwargs.update(dict(template=template))
 
+    # get_message {{{3
     def get_message(self, template=None):
         """Get exception message.
 
@@ -2726,7 +2843,8 @@ class Error(Exception):
             kwargs = self.kwargs
         return _join(self.args, kwargs)
 
-    def get_culprit(self, culprit=None, join=False):
+    # get_culprit {{{3
+    def get_culprit(self, culprit=None):
         """Get the culprit.
 
         Return the culprit as a tuple. If a culprit is specified as an
@@ -2751,7 +2869,8 @@ class Error(Exception):
             return culprit + exception_culprit
         return exception_culprit
 
-    def get_codicil(self, codicil=None, join=False):
+    # get_codicil {{{3
+    def get_codicil(self, codicil=None):
         """Get the codicil.
 
         Return the codicil as a tuple. If a codicil is specified as an
@@ -2776,6 +2895,7 @@ class Error(Exception):
             return exception_codicil + codicil
         return exception_codicil
 
+    # report {{{3
     def report(self, **new_kwargs):
         """Report exception.
 
@@ -2796,6 +2916,7 @@ class Error(Exception):
         informant = kwargs.get('informant', error)
         informant(*self.args, **kwargs)
 
+    # terminate {{{3
     def terminate(self, **new_kwargs):
         """Report exception and terminate.
 
@@ -2815,10 +2936,12 @@ class Error(Exception):
             kwargs = self.kwargs
         fatal(*self.args, **kwargs)
 
+    # reraise {{{3
     def reraise(self, **new_kwargs):
         self.kwargs.update(new_kwargs)
         raise
 
+    # render {{{3
     def render(self, template=None):
         """Convert exception to a string for use in an error message.
 
@@ -2832,6 +2955,9 @@ class Error(Exception):
                 exception is used. If there was no *template* argument, then the
                 positional arguments of the exception are joined using *sep* and
                 that is returned.
+
+        Returned:
+            The formatted message with any culprits.
         """
         message = self.get_message(template)
         culprit = join_culprit(self.get_culprit())

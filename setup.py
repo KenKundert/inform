@@ -15,9 +15,10 @@ else:
 
 setup(
     name = 'inform',
-    version = '1.20.5',
+    version = '1.23.1',
     description = 'print & logging utilities for communicating with user',
     long_description = readme,
+    long_description_content_type = 'text/x-rst',
     author = "Ken Kundert",
     author_email = 'inform@nurdletech.com',
     url = 'https://inform.readthedocs.io',
@@ -41,6 +42,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Utilities',
     ],
 )

@@ -4,8 +4,8 @@ from inform import (
     Color, Info, columns, conjoin, did_you_mean, comment, cull, display, done,
     error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
     is_iterable, is_mapping, is_str, join, get_prog_name, get_informer, narrate,
-    os_error, output, plural, render, terminate, warn, ddd, ppp, sss, vvv,
-    ProgressBar, parse_range, format_range
+    os_error, output, plural, render, terminate, title_case, warn, ddd, ppp,
+    sss, vvv, ProgressBar, parse_range, format_range
 )
 from textwrap import dedent
 import sys
@@ -184,6 +184,26 @@ def test_did_you_mean():
     assert did_you_mean('abc', ['cde']) == 'cde'
     assert did_you_mean('abc', ['bcd', 'cde']) == 'bcd'
     assert did_you_mean('abc', ['cde', 'bcd']) == 'bcd'
+
+def test_title_case():
+    cases = [(
+        'CDC warns about "aggressive" rats as coronavirus shuts down restaurants',
+        'CDC Warns About "Aggressive" Rats as Coronavirus Shuts Down Restaurants'
+    ), (
+        'L.A. County opens churches, stores, pools, drive-in theaters',
+        'L.A. County Opens Churches, Stores, Pools, Drive-in Theaters'
+    ), (
+        'UConn senior accused of killing two men was looking for young woman',
+        'UConn Senior Accused of Killing Two Men Was Looking for Young Woman'
+    ), (
+        'Giant asteroid that killed the dinosaurs slammed into Earth at ‘deadliest possible angle,’ study reveals',
+        'Giant Asteroid That Killed the Dinosaurs Slammed Into Earth at ‘Deadliest Possible Angle,’ Study Reveals'
+    ), (
+        'Maintain given spacing: This is a test.  This is only a test.',
+        'Maintain Given Spacing: This Is a Test.  This Is Only a Test.'
+    )]
+    for test, expected in cases:
+        assert title_case(test) == expected
 
 @pytest.mark.parametrize(
     'given, expected', [
@@ -377,7 +397,7 @@ def test_render():
     y=6
     a="this is a test"
     b="this is another test"
-    c=dedent('''
+    c=dedent('''\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
         quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -415,7 +435,7 @@ def test_render():
     assert render(a) == "'this is a test'"
     assert render(b) == "'this is another test'"
     assert render(c) == dedent('''\
-    """
+    """\\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
         quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -432,7 +452,7 @@ def test_render():
     {
         'a': 'this is a test',
         'b': 'this is another test',
-        'c': """
+        'c': """\\
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
             quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -449,7 +469,7 @@ def test_render():
     {
         'a': 'this is a test',
         'b': 'this is another test',
-        'c': """
+        'c': """\\
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
             quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -464,7 +484,7 @@ def test_render():
         'h': {
             'a': 'this is a test',
             'b': 'this is another test',
-            'c': """
+            'c': """\\
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
                 tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
                 quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -768,7 +788,7 @@ def test_join():
     assert join('a', 'b', 'c', sep='-') == 'a-b-c'
     assert join('a', 'b', 'c', x='x', y='y', template='{}, x={x}') == 'a, x=x'
     assert join('Lorem\nipsum\ndolor', wrap=100) == 'Lorem ipsum dolor'
-    c=dedent('''
+    c=dedent('''\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
         minim veniam, quis nostrud exercitation ullamco laboris nisi ut
