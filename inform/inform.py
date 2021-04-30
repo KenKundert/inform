@@ -1183,8 +1183,8 @@ class plural:
         except ImportError: # python2               # pragma: no cover
             from collections import Sized
 
-        x = self.value
-        number = len(x) if isinstance(x, Sized) else x
+        value = self.value
+        number = len(value) if isinstance(value, Sized) else value
 
         if formatter[0:1] == self.invert:
             formatter = formatter[1:]
@@ -2569,7 +2569,7 @@ class Inform:
             if culprit is None:
                 self.culprit = ()
             else:
-                self.culprit = culprit if is_collection(culprit) else (culprit,)
+                self.culprit = tuple(culprit) if is_collection(culprit) else (culprit,)
             self.append = append
 
         def __enter__(self):
@@ -2668,7 +2668,7 @@ class Inform:
         See :meth:`Inform.set_culprit` for an example use of this method.
         """
         if culprit:
-            culprit = culprit if is_collection(culprit) else (culprit,)
+            culprit = tuple(culprit) if is_collection(culprit) else (culprit,)
             return self.culprit + culprit
         return self.culprit
 

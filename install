@@ -9,7 +9,7 @@
 #
 # Requires Python2.7 or Python 3.3.
 cmd=inform
-pythons=(python2 python3)
+pythons=(python3)
     # Add the versions of python you would like to install to above
 
 # clean out the existing installed versions
