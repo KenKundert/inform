@@ -751,6 +751,21 @@ def test_stripy():
             {expected}
         ''').strip().format(expected=expected)
 
+def test_capsys_out(capsys):
+    output('hello world')
+    cap = capsys.readouterr()
+    assert cap.out == 'hello world\n'
+
+def test_capsys_err(capsys):
+    try:
+        fatal('goodbye world')
+    except SystemExit:
+        pass
+    cap = capsys.readouterr()
+    assert 'goodbye world' in cap.err
+
+
+    
 
 if __name__ == '__main__':
     # As a debugging aid allow the tests to be run on their own, outside pytest.

@@ -2089,8 +2089,8 @@ class Inform:
         self.termination_callback = termination_callback
         self.error_status = error_status
         self.flush = flush
-        self.stdout = stdout if stdout else sys.stdout
-        self.stderr = stderr if stderr else sys.stderr
+        self._stdout = stdout
+        self._stderr = stderr
         self.__dict__.update(kwargs)
         self.previous_action = None
         self.logfile = None
@@ -2146,6 +2146,16 @@ class Inform:
         if name.startswith('__'):
             raise AttributeError(name)
         return self.__dict__.get(name)
+
+    # stdout {{{2
+    @property
+    def stdout(self):
+        return self._stdout or sys.stdout
+
+    # stderr {{{2
+    @property
+    def stderr(self):
+        return self._stderr or sys.stderr
 
     # suppress_output {{{2
     def suppress_output(self, mute=True):
