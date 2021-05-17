@@ -1,8 +1,5 @@
 import sys
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 from codecs import open
 
 with open('README.rst', encoding='utf-8') as f:

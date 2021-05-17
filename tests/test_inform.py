@@ -765,8 +765,6 @@ def test_capsys_err(capsys):
     assert 'goodbye world' in cap.err
 
 
-    
-
 if __name__ == '__main__':
     # As a debugging aid allow the tests to be run on their own, outside pytest.
     # This makes it easier to see and interpret and textual output.

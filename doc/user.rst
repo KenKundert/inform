@@ -967,11 +967,11 @@ a string, except the string is coded for the chosen color.  Uses the *sep*,
 When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
 
 The Color class has the concept of a colorscheme. There are four supported 
-schemes: *None*, *True, 'light', and 'dark'. With *None* the text is not 
+schemes: *None*, *True*, 'light', and 'dark'. With *None* the text is not 
 colored, with *True* the colorscheme of the currently active informer is used.
-In general it is best to use the 'light' colorscheme on 'dark' backgrounds and 
-the 'dark' colorscheme on light backgrounds.  You can pass in the colorscheme 
-using the *scheme* argument either to the color class or to the colorizer.
+In general it is best to use the 'light' colorscheme on dark backgrounds and the 
+'dark' colorscheme on light backgrounds.  You can pass in the colorscheme using 
+the *scheme* argument either to the color class or to the colorizer.
 
 Colorizers have one user settable attribute: *enable*. By default *enable* is 
 *True*. If you set it to *False* the colorizer no longer renders the text in 

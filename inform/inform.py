@@ -6,7 +6,7 @@
 # Documentation can be found at inform.readthedocs.io.
 
 # License {{{1
-# Copyright (c) 2014-2020 Kenneth S. Kundert
+# Copyright (c) 2014-2021 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@
 # this program.  If not, see http://www.gnu.org/licenses/.
 
 # Imports {{{1
-from __future__ import print_function
 import re
 import os
 import sys
@@ -80,7 +79,7 @@ def indent(text, leader='    ', first=0, stops=1, sep='\n'):
 
     """
     # do the indent
-    indented = (first+stops)*leader + (sep+stops*leader).join(text.split('\n'))
+    indented = (first+stops)*leader + (sep+stops*leader).join(str(text).split('\n'))
 
     # resplit and rejoin while replacing blank lines with empty lines
     return '\n'.join([line.rstrip() for line in indented.split('\n')])
@@ -616,49 +615,48 @@ def render(obj, sort=None, level=None, tab='    '):
     else:
         _level = level
 
-    try:
-        if isinstance(obj, dict):
-            endcaps = '{ }'
-            content = [
-                '%r: %s' % (k, render(obj[k], sort, level+1))
-                for k in order(obj)
-            ]
-        elif isinstance(obj, list):
-            endcaps = '[ ]'
-            content = [render(v, sort, level+1) for v in obj]
-        elif isinstance(obj, tuple):
-            endcaps = '( )'
-            content = [render(v, sort, level+1) for v in obj]
-        elif isinstance(obj, set):
-            endcaps = '{ }'
-            content = [render(v, sort, level+1) for v in order(obj)]
-        elif hasattr(obj, '_inform_get_args') or hasattr(obj, '_inform_get_kwargs'):
-            args = []
-            kwargs = {}
-            if hasattr(obj, '_inform_get_args') and obj._inform_get_args:
-                args = obj._inform_get_args()
-            if hasattr(obj, '_inform_get_kwargs') and obj._inform_get_kwargs:
-                kwargs = obj._inform_get_kwargs()
-            endcaps = '{}( )'.format(obj.__class__.__name__)
-            content = (
-                [render(v, sort, level+1) for v in args] +
-                [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
-            )
-        elif is_str(obj) and '\n' in obj:
-            endcaps = None
-            content = [
-                '"""' + ('\\\n' if obj[0] != '\n' else ''),
-                indent(dedent(obj), leader(1)),
-                ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
-            ]
-            content = [''.join(content)]
-        else:
-            endcaps = None
-            content = [repr(obj)]
-    finally:
-        # restore level and sort
-        _level = prev_level
-        _sort = prev_sort
+    if isinstance(obj, dict):
+        endcaps = '{ }'
+        content = [
+            '%r: %s' % (k, render(obj[k], sort, level+1))
+            for k in order(obj)
+        ]
+    elif isinstance(obj, list):
+        endcaps = '[ ]'
+        content = [render(v, sort, level+1) for v in obj]
+    elif isinstance(obj, tuple):
+        endcaps = '( )'
+        content = [render(v, sort, level+1) for v in obj]
+    elif isinstance(obj, set):
+        endcaps = '{ }'
+        content = [render(v, sort, level+1) for v in order(obj)]
+    elif hasattr(obj, '_inform_get_args') or hasattr(obj, '_inform_get_kwargs'):
+        args = []
+        kwargs = {}
+        if hasattr(obj, '_inform_get_args') and obj._inform_get_args:
+            args = obj._inform_get_args()
+        if hasattr(obj, '_inform_get_kwargs') and obj._inform_get_kwargs:
+            kwargs = obj._inform_get_kwargs()
+        endcaps = '{}( )'.format(obj.__class__.__name__)
+        content = (
+            [render(v, sort, level+1) for v in args] +
+            [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
+        )
+    elif is_str(obj) and '\n' in obj:
+        endcaps = None
+        content = [
+            '"""' + ('\\\n' if obj[0] != '\n' else ''),
+            indent(dedent(obj), leader(1)),
+            ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
+        ]
+        content = [''.join(content)]
+    else:
+        endcaps = None
+        content = [repr(obj)]
+
+    # restore level and sort
+    _level = prev_level
+    _sort = prev_sort
 
     if endcaps:
         endcaps = endcaps.split()
@@ -2287,7 +2285,7 @@ class Inform:
             # attach codicils to the message
             codicils = kwargs.get('codicil')
             if codicils:
-                 codicils = [codicils] if is_str(codicils) else codicils
+                 codicils = codicils if is_collection(codicils) else [codicils]
                  codicils = _join(codicils, dict(sep='\n', wrap=kwargs.get('wrap')))
                  if header:
                      codicils = indent(codicils)
@@ -2846,6 +2844,8 @@ class Error(Exception):
         Returned:
             The formatted message without the culprits.
         """
+        if not template:
+            template = getattr(self, 'template', None)
         if template:
             kwargs = self.kwargs.copy()
             kwargs.update(dict(template=template))
@@ -2896,7 +2896,7 @@ class Error(Exception):
             combination is returned. The return value is always in the form of a
             tuple even if there is only one component.
         """
-        exception_codicil = self.kwargs.get('codicil', ())
+        exception_codicil = self.kwargs.get('codicil', getattr(self, 'codicil', ()))
         if not is_collection(exception_codicil):
             exception_codicil = (exception_codicil,)
         if codicil:
