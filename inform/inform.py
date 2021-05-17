@@ -22,6 +22,7 @@
 # this program.  If not, see http://www.gnu.org/licenses/.
 
 # Imports {{{1
+from __future__ import print_function
 import re
 import os
 import sys
@@ -586,6 +587,17 @@ def render(obj, sort=None, level=None, tab='    '):
     """
     from textwrap import dedent
 
+    # In order for render to be usable in __repr__ functions it must retain the
+    # value of the sort and level arguments from previous calls, but the
+    # (sort, level) must be returned to (None, 0) after the original call.  If
+    # not, subsequent calls to render will the values of sort and level set in
+    # previous calls.  To avoid that, we must not allow without resetting the
+    # saved versions (_sort, _level) to their previous values. That naturally
+    # will not happen if the function returns normally.  In addition, it is
+    # important to guard against exceptions from allowing the function to
+    # terminate without resetting the saved version to their previous values.
+    # This is accomplished using the try/finally block.
+
     # define sort function, make it either sort or not based on sort
     global _sort
     prev_sort = _sort
@@ -615,48 +627,49 @@ def render(obj, sort=None, level=None, tab='    '):
     else:
         _level = level
 
-    if isinstance(obj, dict):
-        endcaps = '{ }'
-        content = [
-            '%r: %s' % (k, render(obj[k], sort, level+1))
-            for k in order(obj)
-        ]
-    elif isinstance(obj, list):
-        endcaps = '[ ]'
-        content = [render(v, sort, level+1) for v in obj]
-    elif isinstance(obj, tuple):
-        endcaps = '( )'
-        content = [render(v, sort, level+1) for v in obj]
-    elif isinstance(obj, set):
-        endcaps = '{ }'
-        content = [render(v, sort, level+1) for v in order(obj)]
-    elif hasattr(obj, '_inform_get_args') or hasattr(obj, '_inform_get_kwargs'):
-        args = []
-        kwargs = {}
-        if hasattr(obj, '_inform_get_args') and obj._inform_get_args:
-            args = obj._inform_get_args()
-        if hasattr(obj, '_inform_get_kwargs') and obj._inform_get_kwargs:
-            kwargs = obj._inform_get_kwargs()
-        endcaps = '{}( )'.format(obj.__class__.__name__)
-        content = (
-            [render(v, sort, level+1) for v in args] +
-            [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
-        )
-    elif is_str(obj) and '\n' in obj:
-        endcaps = None
-        content = [
-            '"""' + ('\\\n' if obj[0] != '\n' else ''),
-            indent(dedent(obj), leader(1)),
-            ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
-        ]
-        content = [''.join(content)]
-    else:
-        endcaps = None
-        content = [repr(obj)]
-
-    # restore level and sort
-    _level = prev_level
-    _sort = prev_sort
+    try:
+        if isinstance(obj, dict):
+            endcaps = '{ }'
+            content = [
+                '%r: %s' % (k, render(obj[k], sort, level+1))
+                for k in order(obj)
+            ]
+        elif isinstance(obj, list):
+            endcaps = '[ ]'
+            content = [render(v, sort, level+1) for v in obj]
+        elif isinstance(obj, tuple):
+            endcaps = '( )'
+            content = [render(v, sort, level+1) for v in obj]
+        elif isinstance(obj, set):
+            endcaps = '{ }'
+            content = [render(v, sort, level+1) for v in order(obj)]
+        elif hasattr(obj, '_inform_get_args') or hasattr(obj, '_inform_get_kwargs'):
+            args = []
+            kwargs = {}
+            if hasattr(obj, '_inform_get_args') and obj._inform_get_args:
+                args = obj._inform_get_args()
+            if hasattr(obj, '_inform_get_kwargs') and obj._inform_get_kwargs:
+                kwargs = obj._inform_get_kwargs()
+            endcaps = '{}( )'.format(obj.__class__.__name__)
+            content = (
+                [render(v, sort, level+1) for v in args] +
+                [n + '=' + render(v, sort, level+1) for n, v in kwargs.items()]
+            )
+        elif is_str(obj) and '\n' in obj:
+            endcaps = None
+            content = [
+                '"""' + ('\\\n' if obj[0] != '\n' else ''),
+                indent(dedent(obj), leader(1)),
+                ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
+            ]
+            content = [''.join(content)]
+        else:
+            endcaps = None
+            content = [repr(obj)]
+    finally:
+        # restore level and sort
+        _level = prev_level
+        _sort = prev_sort
 
     if endcaps:
         endcaps = endcaps.split()
@@ -2614,9 +2627,9 @@ class Inform:
             >>> with open(filename) as f, set_culprit(filename):
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
+            warning: setup.py, 3: empty line.
             warning: setup.py, 6: empty line.
-            warning: setup.py, 9: empty line.
-            warning: setup.py, 14: empty line.
+            warning: setup.py, 11: empty line.
 
         """
         return self.CulpritContextManager(self, culprit, append=False)

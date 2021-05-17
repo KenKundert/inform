@@ -585,6 +585,11 @@ def test_render():
     ''').strip()
     assert render(ccc, sort=True) == ccc_expected_sorted
 
+    # Render must exit with its internal _sort and _level variables at None, 0
+    # otherwise the sort and levels arguments will be retained from a previous
+    # call.  This will happen if every call is balanced with a return.  To test
+    # this, try rendering something that raises and error and see if it affects
+    # the next call to render.
     try:
         render(fff, sort=True)
     except NotImplementedError:

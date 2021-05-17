@@ -7,6 +7,8 @@ htmlcov
 .cache
 COVERAGE_ISSUE
 .pytest_cache
+.teneya.log
+
 
 # Packages
 *.egg
