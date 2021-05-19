@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.23.3
-    | Released: 2021-05-17
+    | Version: 1.24.0
+    | Released: 2021-05-18
 
 **1.24 (2021-05-18)**:
     - Defer evaluation of *stdout* and *stderr*.
