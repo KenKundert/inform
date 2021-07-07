@@ -2,15 +2,17 @@
 
 # Imports {{{1
 from inform import (
-    Inform, Error, codicil, display, done, error, errors_accrued, fatal, log,
-    output, terminate, terminate_if_errors, warn, set_culprit, add_culprit,
-    get_culprit, join_culprit
+    Inform, InformantFactory, Error, codicil, display, done, error,
+    errors_accrued, fatal, log, output, terminate, terminate_if_errors, warn,
+    set_culprit, add_culprit, get_culprit, join_culprit
 )
 from contextlib import contextmanager
 from textwrap import dedent
 import sys
 import re
 import pytest
+parametrize = pytest.mark.parametrize
+
 
 if sys.version[0] == '2':
     # io assumes unicode, which python2 does not provide by default
@@ -172,6 +174,61 @@ def test_cartwheel():
             ack: invoked on: <date>
             {expected}
         ''').strip().format(expected=expected)
+
+def test_vapor():
+    with messenger() as (msg, stdout, stderr, logfile):
+        report = InformantFactory(clone=display)
+        stimulus = 'hey now!'
+        report(stimulus)
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == stimulus
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=stimulus)
+
+def test_jumper():
+    with messenger() as (msg, stdout, stderr, logfile):
+        report = InformantFactory(clone=display, severity='forbidden', is_error=True)
+        stimulus = 'hey now!'
+        expected = f'forbidden: {stimulus}'
+        report(stimulus)
+        assert msg.errors_accrued() == 1
+        assert errors_accrued() == 1
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
+
+@parametrize(
+    'culprits, culprits_as_str', [
+        ('filename', 'filename: '),
+        (0, '0: '),
+        (('filename', 0), 'filename.0: '),
+        (None, ''),
+    ]
+)
+def test_culprits(culprits, culprits_as_str):
+    with messenger(culprit_sep='.') as (msg, stdout, stderr, logfile):
+        stimulus = 'hey now!'
+        expected = f'warning: {culprits_as_str}{stimulus}'
+        warn(stimulus, culprit=culprits)
+        assert msg.errors_accrued() == 0
+        assert errors_accrued() == 0
+        assert strip(stdout) == expected
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: invoked on: <date>
+            {expected}
+        ''').strip().format(expected=expected)
+
 
 def test_pardon():
     with messenger() as (msg, stdout, stderr, logfile):
