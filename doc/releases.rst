@@ -5,6 +5,9 @@ Releases
     | Version: 1.24.0
     | Released: 2021-05-18
 
+    - Allow culprits to be falsy.
+
+
 **1.24 (2021-05-18)**:
     - Defer evaluation of *stdout* and *stderr*.
 
