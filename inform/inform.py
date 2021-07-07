@@ -2678,7 +2678,7 @@ class Inform:
 
         See :meth:`Inform.set_culprit` for an example use of this method.
         """
-        if culprit:
+        if culprit is not None:
             culprit = tuple(culprit) if is_collection(culprit) else (culprit,)
             return self.culprit + culprit
         return self.culprit
@@ -2868,7 +2868,12 @@ class Error(Exception):
 
     # get_culprit {{{3
     def get_culprit(self, culprit=None):
-        """Get the culprit.
+        """Get the culprits.
+
+        Culprits are extra pieces of information attached
+        to an error that help to identify the source of the error. For example,
+        file name and line number where the error was found are often attached
+        as culprits.
 
         Return the culprit as a tuple. If a culprit is specified as an
         argument, it is appended to the exception's culprit without modifying it.
@@ -2886,7 +2891,7 @@ class Error(Exception):
         exception_culprit = self.kwargs.get('culprit', ())
         if not is_collection(exception_culprit):
             exception_culprit = (exception_culprit,)
-        if culprit:
+        if culprit is not None:
             if not is_collection(culprit):
                 culprit = (culprit,)
             return culprit + exception_culprit
@@ -2894,7 +2899,10 @@ class Error(Exception):
 
     # get_codicil {{{3
     def get_codicil(self, codicil=None):
-        """Get the codicil.
+        """Get the codicils.
+
+        A codicil is extra text attached to an error that can clarify the error
+        message or to give extra context.
 
         Return the codicil as a tuple. If a codicil is specified as an
         argument, it is appended to the exception's codicil without modifying it.
@@ -2920,7 +2928,9 @@ class Error(Exception):
 
     # report {{{3
     def report(self, **new_kwargs):
-        """Report exception.
+        """Report exception to the user.
+
+        Prints the error message on the standard output.
 
         The :func:`inform.error` function is called with the exception arguments.
 
@@ -2943,6 +2953,8 @@ class Error(Exception):
     def terminate(self, **new_kwargs):
         """Report exception and terminate.
 
+        Prints the error message on the standard output and exits the program.
+
         The :func:`inform.fatal` function is called with the exception arguments.
 
         Args:
@@ -2961,6 +2973,7 @@ class Error(Exception):
 
     # reraise {{{3
     def reraise(self, **new_kwargs):
+        "Re-raise the exception."
         self.kwargs.update(new_kwargs)
         raise
 
