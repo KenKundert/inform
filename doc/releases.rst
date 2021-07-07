@@ -2,8 +2,8 @@ Releases
 ========
 
 **Latest development release**:
-    | Version: 1.24.0
-    | Released: 2021-05-18
+    | Version: 1.24.1
+    | Released: 2021-07-07
 
     - Allow culprits to be falsy.
 
