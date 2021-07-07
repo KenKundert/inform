@@ -194,7 +194,7 @@ def test_jumper():
     with messenger() as (msg, stdout, stderr, logfile):
         report = InformantFactory(clone=display, severity='forbidden', is_error=True)
         stimulus = 'hey now!'
-        expected = f'forbidden: {stimulus}'
+        expected = 'forbidden: {}'.format(stimulus)
         report(stimulus)
         assert msg.errors_accrued() == 1
         assert errors_accrued() == 1
@@ -217,7 +217,7 @@ def test_jumper():
 def test_culprits(culprits, culprits_as_str):
     with messenger(culprit_sep='.') as (msg, stdout, stderr, logfile):
         stimulus = 'hey now!'
-        expected = f'warning: {culprits_as_str}{stimulus}'
+        expected = 'warning: {}{}'.format(culprits_as_str, stimulus)
         warn(stimulus, culprit=culprits)
         assert msg.errors_accrued() == 0
         assert errors_accrued() == 0
