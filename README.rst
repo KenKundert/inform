@@ -1,6 +1,9 @@
 Inform - Print & Logging Utilities
 ==================================
 
+.. image:: https://pepy.tech/badge/inform/month
+    :target: https://pepy.tech/project/inform
+
 .. image:: https://img.shields.io/travis/KenKundert/inform/master.svg
     :target: https://travis-ci.org/KenKundert/inform
 
