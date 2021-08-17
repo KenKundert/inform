@@ -1254,7 +1254,7 @@ def full_stop(sentence, end='.', allow='.?!'):
 
 
 # columns {{{2
-def columns(array, pagewidth=79, alignment='<', leader='    '):
+def columns(array, pagewidth=79, alignment='<', leader='    ', min_sep_width=2):
     """Distribute array over enough columns to fill the screen.
 
     Returns a multiline string.
@@ -1272,6 +1272,9 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
 
         leader (str):
             The string to prepend to each line.
+
+        min_sep_width (int):
+            The minimum number of spaces between columns.  Default is 2.
 
     **Example**::
 
@@ -1294,7 +1297,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    '):
     """
     array = list(array)
     textwidth = pagewidth - len(leader)
-    width = max([len(e) for e in array])+1
+    width = max([len(e) for e in array]) + min_sep_width - 1
     numcols = max(1, textwidth//(width+1))
     stride = len(array)//numcols + 1
     fmt = '{{:{align}{width}s}}'.format(align=alignment, width=width)
