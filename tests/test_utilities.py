@@ -1,17 +1,19 @@
 # encoding: utf8
 
 from inform import (
-    Color, Info, columns, conjoin, did_you_mean, comment, cull, display, done,
-    error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
+    Color, Info, columns, conjoin, did_you_mean, comment, cull, dedent, display,
+    done, error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
     is_iterable, is_mapping, is_str, join, get_prog_name, get_informer, narrate,
     os_error, output, plural, render, terminate, title_case, warn, ddd, ppp,
     sss, vvv, ProgressBar, parse_range, format_range
 )
-from textwrap import dedent
+from textwrap import dedent as tw_dedent
 import sys
 import pytest
 from hypothesis import given
 from hypothesis.strategies import iterables, integers
+
+parametrize = pytest.mark.parametrize
 
 # Before Python3.5 the dictionaries were ordered randomly, which confuses the
 # test. This is a crude fix, just sort the output, that way we will likely catch
@@ -29,7 +31,7 @@ def test_debug(capsys):
     ddd(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 29, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 31, test_utilities.test_debug():
             'a'
             'b'
             'c'
@@ -38,7 +40,7 @@ def test_debug(capsys):
     ddd(a=a, b=b, c=c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 38, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 40, test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -47,13 +49,13 @@ def test_debug(capsys):
     ppp(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 47, test_utilities.test_debug(): a b c
+        DEBUG: test_utilities.py, 49, test_utilities.test_debug(): a b c
     """).lstrip()
 
     vvv(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 53, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 55, test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -61,7 +63,7 @@ def test_debug(capsys):
 
     sss()
     captured = capsys.readouterr()
-    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 62, test_utilities.test_debug():"
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 64, test_utilities.test_debug():"
 
 def test_indent():
     text=dedent('''
@@ -532,10 +534,10 @@ def test_render():
 
     bbb_expected_sorted = dedent('''
     {
-        'args': ('bbb'),
+        'args': ('bbb',),
         'kwargs': {
             'child': {
-                'args': ('aaa'),
+                'args': ('aaa',),
                 'kwargs': {'thisis': 'aaa'},
             },
             'thisis': 'bbb',
@@ -546,15 +548,15 @@ def test_render():
 
     ccc_expected_unsorted = dedent('''
     {
-        'args': ('ccc'),
+        'args': ('ccc',),
         'kwargs': {
             'thisis': 'ccc',
             'child': {
-                'args': ('bbb'),
+                'args': ('bbb',),
                 'kwargs': {
                     'thisis': 'bbb',
                     'child': {
-                        'args': ('aaa'),
+                        'args': ('aaa',),
                         'kwargs': {'thisis': 'aaa'},
                     },
                 },
@@ -567,13 +569,13 @@ def test_render():
 
     ccc_expected_sorted = dedent('''
     {
-        'args': ('ccc'),
+        'args': ('ccc',),
         'kwargs': {
             'child': {
-                'args': ('bbb'),
+                'args': ('bbb',),
                 'kwargs': {
                     'child': {
-                        'args': ('aaa'),
+                        'args': ('aaa',),
                         'kwargs': {'thisis': 'aaa'},
                     },
                     'thisis': 'bbb',
@@ -698,7 +700,7 @@ def test_plural_fraction():
     assert '{:# day/s}'.format(plural(Fraction(2,2))) == '1 day'
     assert '{:# day/s}'.format(plural(Fraction(3,2))) == '3/2 days'
     assert '{:# day/s}'.format(plural(Fraction(4,2))) == '2 days'
-    
+
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
     assert full_stop('hey now.') == 'hey now.'
@@ -1567,6 +1569,18 @@ def test_oblong():
         assert render_bar(1.1, 25) == '█████████████████████████'
         assert render_bar(0.11, 25) == '██▊'
         assert render_bar(0.66, 25) == '████████████████▌'
+
+
+@parametrize('given', ['a', '\na', 'a\n', '\na\n', '\na\nb\n'])
+def test_dedent_compatibility(given):
+     assert dedent(given) == tw_dedent(given)
+
+
+def test_render_tuples():
+     assert render(()) == '()'
+     assert render((0,)) == '(0,)'
+     assert render((0,1)) == '(0, 1)'
+     assert render((0,1,2)) == '(0, 1, 2)'
 
 
 if __name__ == '__main__':

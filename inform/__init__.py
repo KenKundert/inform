@@ -4,11 +4,11 @@ __released__ = '2021-07-07'
 from .inform import (
     # inform utility functions and classes
     cull, indent, is_collection, is_iterable, is_mapping, is_str, join,
-    Color, Info,
+    Color, Info, LoggingCache,
 
     # user utility functions and classes
-    columns, conjoin, did_you_mean, fmt, format_range, full_stop, os_error,
-    parse_range, plural, ProgressBar, render, render_bar, title_case,
+    columns, conjoin, dedent, did_you_mean, fmt, format_range, full_stop,
+    os_error, parse_range, plural, ProgressBar, render, render_bar, title_case,
 
     # debug functions
     aaa, ppp, ddd, vvv, sss,

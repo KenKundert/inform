@@ -37,7 +37,7 @@ lorum_ipsum = dedent('''
 
 # Utilities {{{1
 invokeExecutableRegex = r"(?<=ack: invoked as: )[^\n]+(?=\n)"
-invokeTimeRegex = r"(?<=ack: invoked on: )[^\n]+(?=\n)"
+invokeTimeRegex = r"(?<=ack: log opened on )[^\n]+(?=\n)"
 def strip(stringio):
     return stringio.getvalue().strip()
 
@@ -74,7 +74,7 @@ def test_grove():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=stimulus)
 
@@ -95,7 +95,7 @@ def test_billfold():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -116,7 +116,7 @@ def test_wring():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -147,7 +147,7 @@ def test_fabricate():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -171,7 +171,7 @@ def test_cartwheel():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -186,7 +186,7 @@ def test_vapor():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=stimulus)
 
@@ -202,7 +202,7 @@ def test_jumper():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -225,7 +225,7 @@ def test_culprits(culprits, culprits_as_str):
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -700,7 +700,7 @@ def test_envoy():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -727,7 +727,7 @@ def test_jaguar():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -750,7 +750,7 @@ def test_birthmark():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -777,7 +777,7 @@ def test_currant():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 
@@ -804,7 +804,7 @@ def test_stripy():
         assert strip(stderr) == ''
         assert log_strip(logfile) == dedent('''
             ack: invoked as: <exe>
-            ack: invoked on: <date>
+            ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
 

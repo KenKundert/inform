@@ -23,10 +23,13 @@
 
 # Imports {{{1
 from __future__ import print_function
-import re
+import arrow
+import io
 import os
+import re
 import sys
 from codecs import open
+from textwrap import dedent as tw_dedent
 
 # Globals {{{1
 INFORMER = None
@@ -372,63 +375,49 @@ class Color:
             return cls.COLOR_CODE_REGEX.sub('', text)
         return text
 
+# CachingLogger class {{{2
+class LoggingCache:
+    # description {{{3
+    """LoggingCache
 
-# Info class {{{2
-class Info:
-    """Generic Data Structure Class
-
-    When instantiated, it converts the provided keyword arguments to attributes.  
-    Unknown attributes evaluate to None.
+    Use as logfile if you cannot know the desired location of the logfile until
+    after log messages have been emitted.
 
     **Example**::
 
-        >>> class Orwell(Info):
-        ...     pass
+        >>> from inform import Inform, LoggingCache, log, indent
+        >>> with Inform(logfile=LoggingCache()) as inform:
+        ...     log("This message is cached.")
+        ...     inform.set_logfile(".mylog")
+        ...     log("This message is not cached.")
 
-        >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
-        >>> print(str(george))
-        Orwell(
-            peace='war',
-            freedom='slavery',
-            ignorance='strength',
-        )
-
-        >>> george.peace
-        'war'
-
-        >>> george.happiness
+        >>> with open(".mylog") as f:
+        ...     print("Contents of logfile:")
+        ...     print(indent(f.read()), end='')  # +ELLIPSIS
+        Contents of logfile:
+            ...: invoked as: ...
+            ...: log opened on ...
+            This message is cached.
+            This message is not cached.
 
     """
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
 
-    def _inform_get_kwargs(self):
-        return {k:v for k, v in self.__dict__.items() if not k.startswith('_')}
+    # methods {{{3
+    def open(self, mode='w', encoding='utf-8'):
+        self.log = io.StringIO()
+        return self
 
-    def __getattr__(self, name):
-        if name.startswith('_'):
-            raise  AttributeError(name)
-        return self.__dict__.get(name)
+    def write(self, text):
+        self.log.write(text)
 
-    def render(self, template):
-        """Render class to a string
+    def flush(self):
+        pass
 
-        Args:
-            template (str):
-                The template string is returned with any instances of {name}
-                replaced by the value of the corresponding attribute.
+    def drain(self):
+        return self.log.getvalue()
 
-        **Example**::
-
-            >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
-            'Peace is war. Freedom is slavery. Ignorance is strength.'
-
-        """
-
-        return template.format(**self.__dict__)
-
-    def __repr__(self):
-        return render(self)
+    def close(self):
+        self.log.close()
 
 
 # User Utilities {{{1
@@ -585,8 +574,6 @@ def render(obj, sort=None, level=None, tab='    '):
         )
 
     """
-    from textwrap import dedent
-
     # In order for render to be usable in __repr__ functions it must retain the
     # value of the sort and level arguments from previous calls, but the
     # (sort, level) must be returned to (None, 0) after the original call.  If
@@ -638,7 +625,7 @@ def render(obj, sort=None, level=None, tab='    '):
             endcaps = '[ ]'
             content = [render(v, sort, level+1) for v in obj]
         elif isinstance(obj, tuple):
-            endcaps = '( )'
+            endcaps = '( ,)' if len(obj) == 1 else '( )'
             content = [render(v, sort, level+1) for v in obj]
         elif isinstance(obj, set):
             endcaps = '{ }'
@@ -659,7 +646,7 @@ def render(obj, sort=None, level=None, tab='    '):
             endcaps = None
             content = [
                 '"""' + ('\\\n' if obj[0] != '\n' else ''),
-                indent(dedent(obj), leader(1)),
+                indent(tw_dedent(obj), leader(1)),
                 ('' if obj[-1] == '\n' else '\\\n') + leader(0) + '"""'
             ]
             content = [''.join(content)]
@@ -738,6 +725,79 @@ def fmt(message, *args, **kwargs):
     attrs.update(kwargs)
 
     return message.format(*args, **attrs)
+
+
+# dedent {{{2
+def dedent(text, bolm=None, strip_nl=None):
+    """
+    Removes indentation that is common to all lines.
+
+    Without its named arguments, dedent behaves just like, and is a equivalent
+    replacement for, textwrap.dedent.
+
+    The beginning of line mark (bolm) is replaced by a space after the 
+    indent is removed.  It must be the first character after the initial 
+    newline.  Normally bolm is a single character, often '|', but it may be
+    contain multiple characters, all of which are replaced by spaces.
+
+    strip_nl is used to strip off a single leading or trailing newline.
+    strip_nl may be None, 's', 'e', or 'b' representing none, start, end, 
+    or both.
+
+    >>> from inform import dedent
+
+    >>> print(dedent('''
+    ...     ◊   Diaspar
+    ...         Lys
+    ... ''', bolm='◊'))
+    <BLANKLINE>
+        Diaspar
+        Lys
+    <BLANKLINE>
+
+    >>> print(dedent('''
+    ...     |   Diaspar
+    ...     |   Lys
+    ... ''', bolm='|', strip_nl='e'))
+    <BLANKLINE>
+        Diaspar
+    |   Lys
+
+    >>> print(dedent('''
+    ...     ||  Diaspar
+    ...         Lys
+    ... ''', bolm='||', strip_nl='s'))
+        Diaspar
+        Lys
+    <BLANKLINE>
+
+    >>> print(dedent('''
+    ...         Diaspar
+    ...         Lys
+    ... ''', strip_nl='b'))
+    Diaspar
+    Lys
+
+    """
+
+    # perform normal dedent
+    dedented = tw_dedent(text)
+
+    # remove beginning-of-line-marker if present
+    if bolm is not None:
+        l = len(bolm) + 1
+        if dedented[0:l] == '\n' + bolm:
+            dedented = '\n' + ' '*len(bolm) + dedented[l:]
+
+    # remove leading newline if desired
+    if strip_nl in ['s', 'b'] and dedented[0] == '\n':
+        dedented = dedented[1:]
+
+    # remove trailing newline if desired
+    if strip_nl in ['e', 'b'] and dedented[-1] == '\n':
+        dedented = dedented[:-1]
+
+    return dedented
 
 
 # os_error {{{2
@@ -1344,6 +1404,64 @@ def render_bar(value, width=72):
     frac = int((NUM_BAR_CHARS*scaled) % NUM_BAR_CHARS)
     extra = BAR_CHARS[frac-1:frac]
     return buckets*BAR_CHARS[-1] + extra
+
+
+# Info class {{{2
+class Info:
+    """Generic Data Structure Class
+
+    When instantiated, it converts the provided keyword arguments to attributes.  
+    Unknown attributes evaluate to None.
+
+    **Example**::
+
+        >>> class Orwell(Info):
+        ...     pass
+
+        >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
+        >>> print(str(george))
+        Orwell(
+            peace='war',
+            freedom='slavery',
+            ignorance='strength',
+        )
+
+        >>> george.peace
+        'war'
+
+        >>> george.happiness
+
+    """
+    def __init__(self, **kwargs):
+        self.__dict__ = kwargs
+
+    def _inform_get_kwargs(self):
+        return {k:v for k, v in self.__dict__.items() if not k.startswith('_')}
+
+    def __getattr__(self, name):
+        if name.startswith('_'):
+            raise  AttributeError(name)
+        return self.__dict__.get(name)
+
+    def render(self, template):
+        """Render class to a string
+
+        Args:
+            template (str):
+                The template string is returned with any instances of {name}
+                replaced by the value of the corresponding attribute.
+
+        **Example**::
+
+            >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
+            'Peace is war. Freedom is slavery. Ignorance is strength.'
+
+        """
+
+        return template.format(**self.__dict__)
+
+    def __repr__(self):
+        return render(self)
 
 
 # ProgressBar class {{{2
@@ -2201,15 +2319,15 @@ class Inform:
                 The encoding to use when writing the file.
         """
         try:
-            if self.logfile:
-                self.logfile.close()
+            cached = self.logfile.drain()
         except:
-            pass
+            cached = None
+        self.close_logfile()
 
         if logfile is True:
             logfile = '.%s.log' % self.prog_name if self.prog_name else '.log'
 
-        if self.logfile_copied and prev_logfile_suffix:
+        if prev_logfile_suffix and not self.logfile_copied:
             try:
                 prev_logfile = logfile + prev_logfile_suffix
                 if os.path.exists(prev_logfile) and os.path.isfile(prev_logfile):
@@ -2239,14 +2357,15 @@ class Inform:
         if not logfile:
             return
 
-        # write header to log file
+        # if previous logger was a cache, copy its contents to new logfile
+        if cached:
+            log(cached, end='')
+            return
+
+        # otherwise write header to log file
         if self.prog_name and self.version:
-            log('version %s' % self.version, culprit=self.prog_name)
-        try:
-            import arrow
-            now = arrow.now().strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
-        except:                                        # pragma: no cover
-            now = ""
+            log('version: %s' % self.version, culprit=self.prog_name)
+        now = arrow.now().strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
         if self.argv is None:
             # self.argv may be None, False or a list. None implies that argv was
             # not available when inform was first loaded (as when loaded from
@@ -2255,13 +2374,32 @@ class Inform:
         if self.argv:
             log("invoked as: %s" % ' '.join(self.argv), culprit=self.prog_name)
         if now:
-            log("invoked on: %s" % now, culprit=self.prog_name)
+            log("log opened on %s." % now, culprit=self.prog_name)
 
     # flush_logfile {{{2
     def flush_logfile(self):
         "Flush the logfile."
         if self.logfile:
             self.logfile.flush()
+
+    # close_logfile {{{2
+    def close_logfile(self, status=None):
+        """Close logfile
+
+        If status is given, it is taken to be the exit message or exit status.
+        """
+        if not self.logfile:
+            return
+        prog_name = self.prog_name if self.prog_name else sys.argv[0]
+        if is_str(status):
+            log(status, culprit=prog_name)
+        elif status is not None:
+            assert 0 <= status < 128
+            log('terminates with status {}.'.format(status), culprit=prog_name)
+        now = arrow.now().strftime("on %A, %-d %B %Y at %-I:%M:%S %p %Z")
+        log('log closed {}.'.format(now), culprit=prog_name)
+        self.logfile.close()
+        self.logfile = None
 
     # set_stream_policy {{{2
     def set_stream_policy(self, stream_policy):
@@ -2424,13 +2562,7 @@ class Inform:
         """
         if self.termination_callback:
             self.termination_callback()
-        if self.prog_name:
-            log('%s: terminates normally.' % self.prog_name)
-        else:
-            log('program terminates normally.')
-        if self.logfile:
-            self.logfile.close()
-            self.logfile = None
+        self.close_logfile('terminates normally.')
         if exit:
             raise SystemExit(0)
         else:
@@ -2472,23 +2604,13 @@ class Inform:
             status = self.error_status if self.errors_accrued() else 0
         elif status is True:
             status = self.error_status
-        prog_name = self.prog_name if self.prog_name else sys.argv[0]
         if self.termination_callback:
             self.termination_callback()
         if is_str(status):
             log(status)
             print(status, file=sys.stderr)
             status = self.error_status
-        try:
-            import arrow
-            now = arrow.now().strftime(" on %A, %-d %B %Y at %-I:%M:%S %p %Z")
-        except:
-            now = ""
-        log('terminates with status %s%s.' % (status, now), culprit=prog_name)
-        assert 0 <= status < 128
-        if self.logfile:
-            self.logfile.close()
-            self.logfile = None
+        self.close_logfile(status)
         if exit:
             raise SystemExit(status)
         else:
