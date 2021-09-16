@@ -54,6 +54,8 @@ Inform Utilities
 .. autoclass:: inform.Color
     :members:
 
+.. autoclass:: inform.LoggingCache
+
 .. autofunction:: inform.cull
 
 .. autofunction:: inform.indent
@@ -79,6 +81,8 @@ User Utilities
 .. autofunction:: inform.columns
 
 .. autofunction:: inform.conjoin
+
+.. autofunction:: inform.dedent
 
 .. autofunction:: inform.did_you_mean
 

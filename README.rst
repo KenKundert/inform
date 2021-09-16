@@ -24,10 +24,9 @@ Inform - Print & Logging Utilities
 :Version: 1.25.1
 :Released: 2021-09-15
 
-A light-weight package with few dependencies that provides specialized print 
-functions that are used when communicating with the user. It allows you to 
-easily print attractive, informative, and consistent error messages.  For 
-example:
+A package that provides specialized print functions that are used when 
+communicating with the user. It allows you to easily print attractive, 
+informative, and consistent error messages.  For example:
 
 .. code-block:: python
 

@@ -652,7 +652,7 @@ a logfile is created and named *./<prog_name>.log*.  If *False*, no logfile is
 created.  In addition, if you want to defer the decision on what should be the 
 logfile without losing the log messages that occur before the ultimate 
 destination of those messages is set, you can use an instance of 
-:class:`LoggingCache`, which simply saves the messages in memory until it is 
+:class:`LoggingCache`, which simply saves the messages in memory until it is
 replaced, at which point they are transferred to the new logfile.  For example:
 
 .. code-block:: python
