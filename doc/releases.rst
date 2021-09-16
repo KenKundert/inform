@@ -6,7 +6,7 @@ Releases
 Latest development release
 --------------------------
 
-    | Version: 1.25.1
+    | Version: 1.26.0
     | Released: 2021-09-15
 
 - Added :func:`dedent`.
