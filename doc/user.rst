@@ -1,3 +1,5 @@
+.. currentmodule:: inform
+
 .. Initialize Inform and suppress outputting of program name
 
     >>> from inform import Inform
@@ -134,10 +136,9 @@ Here is an example that demonstrates the wrap and composite culprit features:
 
 Occasionally the actual culprits are not available where the messages are 
 printed.  In this case you can use culprit caching.  Simply cache the culprits 
-in you informer using :func:`inform.set_culprit` or :func:`inform.add_culprit` 
-and then recall them when needed using :func:`inform.get_culprit`.  Both 
-*set_culprit* and *add_culprit* are designed to be used with Python's *with* 
-statement.
+in you informer using :func:`set_culprit` or :func:`add_culprit` and then recall 
+them when needed using :func:`get_culprit`.  Both *set_culprit* and 
+*add_culprit* are designed to be used with Python's *with* statement.
 
 The following example illustrates the used of culprit caching. Here, the code is 
 spread over several functions, and the various culprits are known locally but 
@@ -203,17 +204,17 @@ keys are available is used.  For example;
 
     >>> for name in sorted(colors.keys()):
     ...     code, desc = colors[name]
-    ...     display(name, code, desc, template=('{:>5s} = {}  -- {}', '{:>5s} = {}'))
+    ...     display(name, code, desc, template=('{:>5s} = {}  — {}', '{:>5s} = {}'))
      blue = 3346ff
-    green = 4fff33  -- success
-      red = ff5733  -- failure
+    green = 4fff33  — success
+      red = ff5733  — failure
 
     >>> for name in sorted(colors.keys()):
     ...     code, desc = colors[name]
-    ...     display(k=name, v=code, d=desc, template=('{k:>5s} = {v}  -- {d}', '{k:>5s} = {v}'))
+    ...     display(k=name, v=code, d=desc, template=('{k:>5s} = {v}  — {d}', '{k:>5s} = {v}'))
      blue = 3346ff
-    green = 4fff33  -- success
-      red = ff5733  -- failure
+    green = 4fff33  — success
+      red = ff5733  — failure
 
 The first loop interpolates positional (unnamed) arguments, the second 
 interpolates the keyword (named) arguments.
@@ -244,7 +245,7 @@ Predefined Informants
 ---------------------
 
 The following informants are predefined in *Inform*. You can create custom 
-informants using :class:`inform.InformantFactory`.
+informants using :class:`InformantFactory`.
 
 All of the informants except :ref:`panic informant` and :ref:`debug informant` 
 do not produce any output if *mute* is set.
@@ -421,8 +422,8 @@ to the message and the header is colored magenta.
     myprog DEBUG: HERE!
 
 Generally one does not use the *debug* informant directly. Instead one uses the 
-available debugging functions: :func:`inform.aaa()`, :func:`inform.ddd()`, 
-:func:`inform.ppp()`, :func:`inform.sss()` and :func:`inform.vvv()`.
+available debugging functions: :func:`aaa()`, :func:`ddd()`, :func:`ppp()`, 
+:func:`sss()` and :func:`vvv()`.
 
 
 .. _warn informant:
@@ -543,9 +544,9 @@ voluminous or because it is sensitive. In that case you can simply override the
    display.log = False
    output.log = False
 
-Any attribute that can be passed into :class:`inform.InformantFactory` when 
-creating an informant can be overridden. However, when overriding a color you 
-must use a colorizer rather than a color name:
+Any attribute that can be passed into :class:`InformantFactory` when creating an 
+informant can be overridden. However, when overriding a color you must use 
+a colorizer rather than a color name:
 
 .. code-block:: python
 
@@ -559,8 +560,8 @@ Informant Control
 -----------------
 
 For more control of the informants, you can import and instantiate the 
-:class:`inform.Inform` class along with the desired informants.  This gives you 
-the ability to specify options:
+:class:`Inform` class along with the desired informants.  This gives you the 
+ability to specify options:
 
 .. code-block:: python
 
@@ -641,6 +642,39 @@ access the normally printed output of your code:
     'running test'
 
 
+Logfiles
+""""""""
+
+To configure *Inform* to generate a logfile you can specify the logfile to 
+:class:`Inform` or to :meth:`Inform.set_logfile`.  The logfile can be specified 
+as a string, a *pathlib.Path*, an open stream, or as a Boolean. If *True*, 
+a logfile is created and named *./<prog_name>.log*.  If *False*, no logfile is 
+created.  In addition, if you want to defer the decision on what should be the 
+logfile without losing the log messages that occur before the ultimate 
+destination of those messages is set, you can use an instance of 
+:class:`LoggingCache`, which simply saves the messages in memory until it is 
+replaced, at which point they are transferred to the new logfile.  For example:
+
+.. code-block:: python
+
+    >>> from inform import Inform, LoggingCache, log, indent
+    >>> with Inform(logfile=LoggingCache()) as inform:
+    ...     log("This message is cached.")
+    ...     inform.set_logfile(".mylog")
+    ...     log("This message is not cached.")
+
+    >>> with open(".mylog") as f:
+    ...     print("Contents of logfile:")
+    ...     print(indent(f.read()), end='')  # +ELLIPSIS
+    Contents of logfile:
+        ...
+        This message is cached.
+        This message is not cached.
+
+An existing logfile will be renamed before creating the logfile if you specify 
+*prev_logfile_suffix* to :class:`Inform`.
+
+
 Message Destination
 """""""""""""""""""
 
@@ -672,7 +706,7 @@ messages are sent to the notifier if the standard output is not a TTY.
 User Defined Informants
 -----------------------
 
-You can create your own informants using :class:`inform.InformantFactory`. One 
+You can create your own informants using :class:`InformantFactory`. One 
 application of this is to support multiple levels of verbosity. To do this, an 
 informant would be created for each level of verbosity, as follows:
 
@@ -699,8 +733,8 @@ informant would be created for each level of verbosity, as follows:
     Second level of verbosity.
 
 The argument *verbosity* is not an explicitly supported argument of 
-:class:`inform.Inform`.  In this case *Inform* simply saves the value and makes 
-it available as an attribute, and it is this attribute that is queried by the 
+:class:`Inform`.  In this case *Inform* simply saves the value and makes it 
+available as an attribute, and it is this attribute that is queried by the 
 lambda function passed to *InformantFactory* when creating the informants.
 
 Another use for user-defined informants is to create print functions that output 
@@ -730,13 +764,12 @@ only the failures would be displayed.
 Exceptions
 ----------
 
-An exception, :class:`inform.Error`, is provided that takes the same arguments 
-as an informant.  This allows you to catch the exception and handle it if you 
-like.  Any arguments you pass into the exception are retained and are available 
-when processing the exception.  The exception provides the 
-:meth:`inform.Error.report` and :meth:`inform.Error.terminate` methods that 
-processes the exception as an error or fatal error if you find that you can do 
-nothing else with the exception.
+An exception, :class:`Error`, is provided that takes the same arguments as an 
+informant.  This allows you to catch the exception and handle it if you like.  
+Any arguments you pass into the exception are retained and are available when 
+processing the exception.  The exception provides the :meth:`Error.report` and 
+:meth:`Error.terminate` methods that processes the exception as an error or 
+fatal error if you find that you can do nothing else with the exception.
 
 .. code-block:: python
 
@@ -780,19 +813,19 @@ example:
     ...     e.report()
     myprog warning: worlds: missing.
 
-:class:`inform.Error` also provides :meth:`inform.Error.get_message()` and 
-:meth:`inform.Error.get_culprit()` methods, which return the message and the 
-culprit.  You can also cast the exception to a string or call the 
-:meth:`inform.Error.render()` method to get a string that contains both the 
-message and the culprit formatted so that it can be shown to the user.
+:class:`Error` also provides :meth:`Error.get_message()` and 
+:meth:`Error.get_culprit()` methods, which return the message and the culprit.  
+You can also cast the exception to a string or call the :meth:`Error.render()` 
+method to get a string that contains both the message and the culprit formatted 
+so that it can be shown to the user.
 
 All positional arguments are available in *e.args* and any keyword arguments 
 provided are available in *e.kwargs*.
 
-One common approach to using :class:`inform.Error` is to pass all the arguments 
-that make up the error message as arguments and then assemble them into the 
-message by providing a template.  In that way the arguments are directly 
-available to the handler if needed. For example:
+One common approach to using :class:`Error` is to pass all the arguments that 
+make up the error message as arguments and then assemble them into the message 
+by providing a template.  In that way the arguments are directly available to 
+the handler if needed. For example:
 
 .. code-block:: python
 
@@ -818,11 +851,10 @@ be useful when processing the exception even though it is not incorporated into
 the message.
 
 You can override the template by passing a new one to 
-:meth:`inform.Error.get_message()` or :meth:`inform.Error.render()`.  With
-:meth:`inform.Error.report()` or :meth:`inform.Error.terminate()` you can 
-override any named argument, such as *template* or *culprit*.  This can be 
-helpful if you need to translate a message or change it to make it more 
-meaningful to the end user:
+:meth:`Error.get_message()` or :meth:`Error.render()`.  With
+:meth:`Error.report()` or :meth:`Error.terminate()` you can override any named 
+argument, such as *template* or *culprit*.  This can be helpful if you need to 
+translate a message or change it to make it more meaningful to the end user:
 
 .. code-block:: python
 
@@ -832,8 +864,8 @@ meaningful to the end user:
     ...     e.report(template="'{}' ist nicht definiert.")
     myprog error: 'alfa' ist nicht definiert.
 
-You can catch an :class:`inform.Error` exception and then reraise it after
-modifying its named arguments using :meth:`inform.Error.reraise()`.  This is
+You can catch an :class:`Error` exception and then reraise it after
+modifying its named arguments using :meth:`Error.reraise()`.  This is
 helpful when all the information needed for the error message is not available
 where the initial exception is detected. Typically new culprits or codicils are
 added. For example, in the following the filename is added to the exception
@@ -864,20 +896,20 @@ using *reraise* in *parse_file*:
     ...     e.report()
     myprog error: swallows, 2: syntax error.
 
-This example uses :meth:`inform.Error.get_culprit()` to access the existing 
-culprit or culprits of the exception. Regardless of how many there are, they are 
-always returned as a culprit. It also accepts a culprit as an argument, which is 
+This example uses :meth:`Error.get_culprit()` to access the existing culprit or 
+culprits of the exception. Regardless of how many there are, they are always 
+returned as a culprit. It also accepts a culprit as an argument, which is 
 returned along with and before the culprit from the exception.
 
-Also available is :meth:`inform.Error.get_codicil()`, which behaves similarly 
-except with codicils rather than culprits and the argument is added after the 
-codicil from the exception rather than before.
+Also available is :meth:`Error.get_codicil()`, which behaves similarly except 
+with codicils rather than culprits and the argument is added after the codicil 
+from the exception rather than before.
 
 
 Subclassing Error
 """""""""""""""""
 
-When creating subclasses of :class:`inform.Error` you can add a template to the 
+When creating subclasses of :class:`Error` you can add a template to the 
 subclass as a way of specifying the error message or messages that are to be 
 used for that exception. For example:
 
@@ -942,9 +974,9 @@ helpful when creating messages.
 Color Class
 """""""""""
 
-The :class:`inform.Color` class creates colorizers, which are functions used to 
-render text in a particular color.  They combine their arguments in a manner 
-very similar to an :ref:`informant <using informants>` and returns the result as 
+The :class:`Color` class creates colorizers, which are functions used to render 
+text in a particular color.  They combine their arguments in a manner very 
+similar to an :ref:`informant <using informants>` and returns the result as 
 a string, except the string is coded for the chosen color.  Uses the *sep*, 
 *template* and *wrap* keyword arguments to combine the arguments.
 
@@ -988,8 +1020,8 @@ color:
    This will not be yellow.
 
 Alternatively, you can enable or disable the colorizer when creating it. This 
-example uses the :meth:`inform.Color.isTTY()` method to determine whether the 
-output stream, the standard output by default, is a console.
+example uses the :meth:`Color.isTTY()` method to determine whether the output 
+stream, the standard output by default, is a console.
 
 .. code-block:: python
 
@@ -1004,9 +1036,10 @@ columns
 """""""
 
 .. py:function:: columns(array, pagewidth=79, alignment='<', leader='    ')
+   :noindex:
 
-:func:`inform.columns` distributes the values of an array over enough columns to 
-fill the screen.
+:func:`columns` distributes the values of an array over enough columns to fill 
+the screen.
 
 This example prints out the phonetic alphabet:
 
@@ -1035,9 +1068,10 @@ conjoin
 """""""
 
 .. py:function:: conjoin(iterable, conj=' and ', sep=', ', fmt=None)
+   :noindex:
 
-:func:`inform.conjoin` is like ''.join(), but allows you to specify 
-a conjunction that is placed between the last two elements. For example:
+:func:`conjoin` is like ''.join(), but allows you to specify a conjunction that 
+is placed between the last two elements. For example:
 
 .. code-block:: python
 
@@ -1070,13 +1104,14 @@ cull
 """"
 
 .. py:function:: cull(collection, [remove])
+   :noindex:
 
-:func:`inform.cull` strips items from a collection that have a particular value.  
-The collection may be list-like (*list*, *tuple*, *set*, etc.) or 
-a dictionary-like (*dict*, *OrderedDict*).  A new collection of the same type is 
-returned with the undesirable values removed.
+:func:`cull` strips items from a collection that have a particular value.  The 
+collection may be list-like (*list*, *tuple*, *set*, etc.) or a dictionary-like 
+(*dict*, *OrderedDict*).  A new collection of the same type is returned with the 
+undesirable values removed.
 
-By default, :func:`inform.cull` strips values that would be *False* when cast to 
+By default, :func:`cull` strips values that would be *False* when cast to 
 a Boolean (0, *False*, *None*, '', (), [], etc.).  A particular value may be 
 specified using the *remove* as a keyword argument.  The value of *remove* may 
 be a collection, in which case any value in the collection is removed, or it may 
@@ -1102,6 +1137,7 @@ did_you_mean
 """"""""""""
 
 .. py:function:: did_you_mean(candidate, choices)
+   :noindex:
 
     Given a candidate string from the user, return the closest valid choice.
 
@@ -1128,9 +1164,10 @@ fmt
 """
 
 .. py:function:: fmt(msg, \*args, \**kwargs)
+   :noindex:
 
-:func:`inform.fmt` is similar to ''.format(), but it can pull arguments from the 
-local scope.
+:func:`fmt` is similar to ''.format(), but it can pull arguments from the local 
+scope.
 
 .. code-block:: python
 
@@ -1158,8 +1195,9 @@ format_range
 """"""""""""
 
 .. py:function:: format_range(items)
+   :noindex:
 
-func:`inform.format_range` can be used to create a succinct, readable string 
+func:`format_range` can be used to create a succinct, readable string 
 representing a set of numbers.
 
 .. code-block:: python
@@ -1175,11 +1213,12 @@ full_stop
 """""""""
 
 .. py:function:: full_stop(string)
+   :noindex:
 
-:func:`inform.full_stop` adds a period to the end of the string if needed (if 
-the last character is not a period, question mark or exclamation mark). It 
-applies str() to its argument, so it is generally a suitable replacement for str 
-in str(exception) when trying extract an error message from an exception.
+:func:`full_stop` adds a period to the end of the string if needed (if the last 
+character is not a period, question mark or exclamation mark). It applies str() 
+to its argument, so it is generally a suitable replacement for str in 
+str(exception) when trying extract an error message from an exception.
 
 This is generally useful if you need to print a string that should have 
 punctuation, but may not.
@@ -1206,12 +1245,13 @@ indent
 """"""
 
 .. py:function:: indent(text, leader='    ',  first=0, stops=1, sep='\\n')
+   :noindex:
 
-:func:`inform.indent` indents *text*. Multiples of *leader* are added to the 
-beginning of the lines to indent.  *first* is the number of indentations used 
-for the first line relative to the others (may be negative but (first + stops) 
-should not be.  *stops* is the default number of indentations to use. *sep* is 
-the string used to separate the lines.
+:func:`indent` indents *text*. Multiples of *leader* are added to the beginning 
+of the lines to indent.  *first* is the number of indentations used for the 
+first line relative to the others (may be negative but (first + stops) should 
+not be.  *stops* is the default number of indentations to use. *sep* is the 
+string used to separate the lines.
 
 .. code-block:: python
 
@@ -1235,7 +1275,7 @@ the string used to separate the lines.
 Info Class
 """"""""""
 
-The :class:`inform.Info` class is intended to be used as a helper class.  When 
+The :class:`Info` class is intended to be used as a helper class.  When 
 instantiated, it converts provided keyword arguments to attributes. Unknown 
 attributes evaluate to None. *Info* can be used directly, or it can be used as 
 a base class.
@@ -1263,10 +1303,11 @@ is_collection
 """""""""""""
 
 .. py:function:: is_collection(obj)
+   :noindex:
 
-:func:`inform.is_collection` returns *True* if its argument is a collection.  
-This includes objects such as lists, tuples, sets, dictionaries, etc.  It does 
-not include strings.
+:func:`is_collection` returns *True* if its argument is a collection.  This 
+includes objects such as lists, tuples, sets, dictionaries, etc.  It does not 
+include strings.
 
 .. code-block:: python
 
@@ -1290,9 +1331,9 @@ is_iterable
 """""""""""
 
 .. py:function:: is_iterable(obj)
+   :noindex:
 
-:func:`inform.is_iterable` returns *True* if its argument is a collection or 
-a string.
+:func:`is_iterable` returns *True* if its argument is a collection or a string.
 
 .. code-block:: python
 
@@ -1311,8 +1352,9 @@ is_mapping
 """"""""""
 
 .. py:function:: is_mapping(obj)
+   :noindex:
 
-:func:`inform.is_collection` returns *True* if its argument is a mapping.  This 
+:func:`is_collection` returns *True* if its argument is a mapping.  This 
 includes dictionary and other dictionary-like objects.
 
 .. code-block:: python
@@ -1338,8 +1380,9 @@ is_str
 """"""
 
 .. py:function:: is_str(obj)
+   :noindex:
 
-:func:`inform.is_str` returns *True* if its argument is a string-like object.
+:func:`is_str` returns *True* if its argument is a string-like object.
 
 .. code-block:: python
 
@@ -1359,8 +1402,9 @@ join
 """"
 
 .. py:function:: join(\*args, \**kwargs)
+   :noindex:
 
-:func:`inform.join` combines the arguments in a manner very similar to an 
+:func:`join` combines the arguments in a manner very similar to an 
 :ref:`informant <using informants>` and returns the result as a string.  Uses 
 the *sep*, *template* and *wrap* keyword arguments to combine the arguments.
 
@@ -1386,8 +1430,9 @@ os_error
 """"""""
 
 .. py:function:: os_error(exception)
+   :noindex:
 
-:func:`inform.os_error` generates clean messages for operating system errors.
+:func:`os_error` generates clean messages for operating system errors.
 
 .. code-block:: python
 
@@ -1407,9 +1452,10 @@ parse_range
 """""""""""
 
 .. py:function:: parse_range(items)
+   :noindex:
 
-func:`inform.parse_range` can be used to parse sets of numbers from 
-user-inputted strings.
+func:`parse_range` can be used to parse sets of numbers from user-inputted 
+strings.
 
 .. code-block:: python
 
@@ -1423,8 +1469,8 @@ user-inputted strings.
 ProgressBar Class
 """""""""""""""""
 
-The :class:`inform.ProgressBar` class is used to draw a progress bar as a single 
-text line. The line counts down as progress is made and reaches 0 as the task 
+The :class:`ProgressBar` class is used to draw a progress bar as a single text 
+line. The line counts down as progress is made and reaches 0 as the task 
 completes.  Interruptions are handled with grace.
 
 There are three typical ways to use the progress bar. The first is used to 
@@ -1549,6 +1595,7 @@ plural
 """"""
 
 .. py:class:: plural(count, num='#')
+   :noindex:
 
     Used with python format strings to conditionally format a phrase depending
     on whether it refers to a singular or plural number of things.
@@ -1637,15 +1684,16 @@ render
 """"""
 
 .. py:function:: render(obj, sort=None, level=0, tab='    ')
+   :noindex:
 
-:func:`inform.render` recursively converts an object to a string with reasonable 
+:func:`render` recursively converts an object to a string with reasonable 
 formatting.  Has built in support for the base Python types (*None*, *bool*, 
 *int*, *float*, *str*, *set*, *tuple*, *list*, and *dict*).  If you confine 
-yourself to these types, the output of :func:`inform.render` can be read by the 
-Python interpreter. Other types are converted to string with *repr()*. The 
-dictionary keys and set values are sorted if sort is *True*. Sometimes this is 
-not possible because the values are not comparable, in which case render reverts 
-to the natural order.
+yourself to these types, the output of :func:`render` can be read by the Python 
+interpreter. Other types are converted to string with *repr()*. The dictionary 
+keys and set values are sorted if sort is *True*. Sometimes this is not possible 
+because the values are not comparable, in which case render reverts to the 
+natural order.
 
 This example prints several Python data types:
 
@@ -1734,11 +1782,12 @@ render_bar
 """"""""""
 
 .. py:function:: render_bar(normalized_value, width=72)
+   :noindex:
 
-:func:`inform.render_bar()` produces a graphic representation of a normalized 
-value in the form of a bar.  *normalized_value* is the value to render; it is 
-expected to be a value between 0 and 1.  *width* specifies the maximum width of 
-the line in characters.
+:func:`render_bar()` produces a graphic representation of a normalized value in 
+the form of a bar.  *normalized_value* is the value to render; it is expected to 
+be a value between 0 and 1.  *width* specifies the maximum width of the line in 
+characters.
 
 .. code-block:: python
 
@@ -1764,9 +1813,10 @@ title_case
 """"""""""
 
 .. py:function:: title_case(string, exceptions=(...))
+   :noindex:
 
-:func:`inform.title_case` converts the initial letters in the words of a string 
-to upper case while maintaining any letters that are already upper case, such as 
+:func:`title_case` converts the initial letters in the words of a string to 
+upper case while maintaining any letters that are already upper case, such as 
 acronyms.  Common 'small' words are excepted and words within quotes are handled 
 properly.
 
@@ -1795,11 +1845,12 @@ aaa
 """
 
 .. py:function:: aaa(arg)
+   :noindex:
 
-:func:`inform.aaa` prints and then returns its argument.  The argument may be 
-name or unnamed.  If named, the name is used as a label when printing the value 
-of the argument.  It can be used to print the value of a term within an 
-expression without being forced to replicate that term.
+:func:`aaa` prints and then returns its argument.  The argument may be name or 
+unnamed.  If named, the name is used as a label when printing the value of the 
+argument.  It can be used to print the value of a term within an expression 
+without being forced to replicate that term.
 
 In the following example, a critical statement is instrumented to show the 
 intermediate values in the computation.  In this case it would be difficult to 
@@ -1837,8 +1888,9 @@ ddd
 """
 
 .. py:function:: ddd(\*args, \*\*kwargs)
+   :noindex:
 
-:func:`inform.ddd` pretty prints all of both its unnamed and named arguments.
+:func:`ddd` pretty prints all of both its unnamed and named arguments.
 
 .. code:: python
 
@@ -1901,9 +1953,10 @@ ppp
 """
 
 .. py:function:: ppp(\*args, \*\*kwargs)
+   :noindex:
 
-:func:`inform.ppp` is very similar to the normal Python print function in that 
-it prints out the values of the unnamed arguments under the control of the named 
+:func:`ppp` is very similar to the normal Python print function in that it 
+prints out the values of the unnamed arguments under the control of the named 
 arguments. It also takes the same named arguments as ``print()``, such as 
 ``sep`` and ``end``.
 
@@ -1927,9 +1980,10 @@ sss
 """
 
 .. py:function:: sss()
+   :noindex:
 
-:func:`inform.sss` prints a stack trace, which can answer the *How did I get 
-here?* question better than a simple print function.
+:func:`sss` prints a stack trace, which can answer the *How did I get here?* 
+question better than a simple print function.
 
 .. code:: python
 
@@ -1951,10 +2005,11 @@ vvv
 """
 
 .. py:function:: vvv(\*args)
+   :noindex:
 
-:func:`inform.vvv` prints variables from the calling scope. If no arguments are 
-given, then all the variables are printed. You can optionally give specific 
-variables on the argument list and only those variables are printed.
+:func:`vvv` prints variables from the calling scope. If no arguments are given, 
+then all the variables are printed. You can optionally give specific variables 
+on the argument list and only those variables are printed.
 
 .. code:: python
 
@@ -2022,24 +2077,25 @@ version number of your python.
 Inform Helper Functions
 -----------------------
 
-An informer (an :class:`inform.Inform` object) provides a number of useful 
-methods. However, it is common that the informer is not locally available.  To 
-avoid the clutter that would be created by passing the informer around to where 
-ever  it is needed, *Inform* gives you several alternate ways of accessing these 
-methods.  Firstly is :func:`inform.get_informer()`, which simply returns the 
-currently active informer.  Secondly, *Inform* provides a collection of 
-functions that provide direct access to the corresponding methods on the 
-currently active informer. They are:
+An informer (an :class:`Inform` object) provides a number of useful methods. 
+However, it is common that the informer is not locally available.  To avoid the 
+clutter that would be created by passing the informer around to where ever  it 
+is needed, *Inform* gives you several alternate ways of accessing these methods.  
+Firstly is :func:`get_informer()`, which simply returns the currently active 
+informer.  Secondly, *Inform* provides a collection of functions that provide 
+direct access to the corresponding methods on the currently active informer. 
+They are:
 
 
 done
 """"
 
 .. py:function:: done(exit=True)
+   :noindex:
 
 
-:func:`inform.done` terminates the program with the normal exit status. It calls 
-:meth:`inform.Inform.done` for the active informer.
+:func:`done` terminates the program with the normal exit status. It calls 
+:meth:`Inform.done` for the active informer.
 
 If the *exit* argument is False, preparations are made for exiting, but 
 *sys.exit* is not called. Instead, the desired exit status is returned.
@@ -2049,9 +2105,10 @@ terminate
 """""""""
 
 .. py:function:: terminate(status=None, exit=True)
+   :noindex:
 
-:func:`inform.terminate` terminates the program with specified exit status or 
-message.  It calls :meth:`inform.Inform.terminate` for the active informer.  
+:func:`terminate` terminates the program with specified exit status or message.  
+It calls :meth:`Inform.terminate` for the active informer.  
 
 *status* may be an integer, boolean, string, or None. An exit status of 1 is 
 used if True or a string is passed in. If None is passed in then 1 is used for 
@@ -2065,10 +2122,11 @@ terminate_if_errors
 """""""""""""""""""
 
 .. py:function:: terminate_if_errors(status=None, exit=True)
+   :noindex:
 
-:func:`inform.terminate_if_errors` terminates the program with specified exit 
-status or message if an error was previously reported.  It calls 
-:meth:`inform.Inform.terminate_if_errors` for the active informer.
+:func:`terminate_if_errors` terminates the program with specified exit status or 
+message if an error was previously reported.  It calls 
+:meth:`Inform.terminate_if_errors` for the active informer.
 
 *status* may be an integer, boolean, or string. An exit status of 1 is used if 
 True or a string is passed in.
@@ -2081,11 +2139,11 @@ errors_accrued
 """"""""""""""
 
 .. py:function:: errors_accrued(reset=False)
+   :noindex:
 
 
-:func:`inform.errors_accrued` returns the number of errors that have been 
-reported.  It calls :meth:`inform.Inform.errors_accrued` for the active 
-informer.
+:func:`errors_accrued` returns the number of errors that have been reported.  It 
+calls :meth:`Inform.errors_accrued` for the active informer.
 
 If the *reset* argument is True, the error count is reset to 0.
 
@@ -2094,65 +2152,70 @@ get_prog_name
 """""""""""""
 
 .. py:function:: get_prog_name()
+   :noindex:
 
 
-:func:`inform.get_prog_name` returns the name of the program.
-It calls :meth:`inform.Inform.get_prog_name` for the active informer.
+:func:`get_prog_name` returns the name of the program.
+It calls :meth:`Inform.get_prog_name` for the active informer.
 
 
 get_informer
 """"""""""""
 
 .. py:function:: get_informer()
+   :noindex:
 
 
-:func:`inform.get_informer` returns the currently active informer.
+:func:`get_informer` returns the currently active informer.
 
 
 set_culprit
 """""""""""
 
 .. py:function:: set_culprit(culprit)
+   :noindex:
 
-:func:`inform.set_culprit` saves a culprit in the informer for later use. Any 
-existing saved culprit is temporarily moved out of the way.  It calls 
-:meth:`inform.Inform.set_culprit` for the active informer.
+:func:`set_culprit` saves a culprit in the informer for later use. Any existing 
+saved culprit is temporarily moved out of the way.  It calls 
+:meth:`Inform.set_culprit` for the active informer.
 
 A culprit is a string, number, or tuple of strings or numbers that would be 
 prepended to a message to indicate the object of the message.
 
-:meth:`inform.Inform.set_culprit` is used with Python's *with* statement. The 
-original saved culprit is restored when the *with* statement exits.
+:meth:`Inform.set_culprit` is used with Python's *with* statement. The original 
+saved culprit is restored when the *with* statement exits.
 
-See :ref:`culprits` for an example of :func:`inform.set_culprit` use.
+See :ref:`culprits` for an example of :func:`set_culprit` use.
 
 add_culprit
 """""""""""
 
 .. py:function:: add_culprit(culprit)
+   :noindex:
 
-:func:`inform.add_culprit` appends a culprit to any existing saved culprit. It 
-calls :meth:`inform.Inform.add_culprit` for the active informer.
+:func:`add_culprit` appends a culprit to any existing saved culprit. It calls 
+:meth:`Inform.add_culprit` for the active informer.
 
 A culprit is a string, number, or tuple of strings or numbers that would be 
 prepended to a message to indicate the object of the message.
 
-:meth:`inform.Inform.add_culprit` is used with Python's *with* statement. The 
-original saved culprit is restored when the *with* statement exits.
+:meth:`Inform.add_culprit` is used with Python's *with* statement. The original 
+saved culprit is restored when the *with* statement exits.
 
-See :ref:`culprits` for an example of :func:`inform.add_culprit` use.
+See :ref:`culprits` for an example of :func:`add_culprit` use.
 
 get_culprit
 """""""""""
 
 .. py:function:: get_culprit(culprit=None)
+   :noindex:
 
-:func:`inform.get_culprit` returns the specified culprit, if any, appended to 
-the end of the current culprit that is saved in the informer.  The resulting 
-culprit is always returned as a tuple. It calls 
-:meth:`inform.Inform.get_culprit` for the active informer.
+:func:`get_culprit` returns the specified culprit, if any, appended to the end 
+of the current culprit that is saved in the informer.  The resulting culprit is 
+always returned as a tuple. It calls :meth:`Inform.get_culprit` for the active 
+informer.
 
 A culprit is a string, number, or tuple of strings or numbers that would be 
 prepended to a message to indicate the object of the message.
 
-See :ref:`culprits` for an example of :func:`inform.get_culprit` use.
+See :ref:`culprits` for an example of :func:`get_culprit` use.

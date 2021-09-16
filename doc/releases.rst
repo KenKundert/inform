@@ -1,3 +1,5 @@
+.. currentmodule:: inform
+
 Releases
 ========
 
@@ -7,6 +9,8 @@ Latest development release
     | Version: 1.25.1
     | Released: 2021-09-15
 
+- Added :func:`dedent`.
+- Added :class:`LoggingCache`.
 
 1.25 (2021-07-07)
 -----------------
@@ -29,23 +33,23 @@ Latest development release
 1.22 (2020-08-24)
 -----------------
 
-- Added *clone* argument to :class:`inform.InformantFactory`.
+- Added *clone* argument to :class:`InformantFactory`.
 
 
 1.21 (2020-07-20)
 -----------------
 
-- Allow :class:`inform.ProgressBar` output to be suppressed.
-- Allow ``/`` to be overridden in :class:`inform.plural`
-- Various enhancements to :func:`inform.conjoin` and :func:`inform.full_stop`.
-- Added :func:`inform.parse_range` and :func:`inform.format_range` functions.
-- Added :func:`inform.title_case` function.
+- Allow :class:`ProgressBar` output to be suppressed.
+- Allow ``/`` to be overridden in :class:`plural`
+- Various enhancements to :func:`conjoin` and :func:`full_stop`.
+- Added :func:`parse_range` and :func:`format_range` functions.
+- Added :func:`title_case` function.
 
 
 1.20 (2020-01-08)
 -----------------
 
-- Add *format* method to :class:`inform.plural`.
+- Add *format* method to :class:`plural`.
 
 
 1.19 (2019-09-25)
@@ -58,65 +62,65 @@ Latest development release
 -----------------
 
 - Wrap now applies to codicils passed as arguments.
-- Enhance :class:`inform.plural` (now supports pluralizing verbs).
-- Add *fmt* argument to :func:`inform.conjoin()`.
-- Support *template* attribute on subclasses of :class:`inform.Error`.
+- Enhance :class:`plural` (now supports pluralizing verbs).
+- Add *fmt* argument to :func:`conjoin()`.
+- Support *template* attribute on subclasses of :class:`Error`.
 
 
 1.17 (2019-05-16)
 -----------------
 
-- Added :func:`inform.is_mapping()`
+- Added :func:`is_mapping()`
 
 
 1.16 (2019-04-27)
 -----------------
 
-- Add end support to :func:`inform.join()`.
+- Add end support to :func:`join()`.
 - Allow previous logfile to be saved.
 - Allow urgency to be specified on notifications.
-- Allow :func:`inform.render()` support in user-defined classes with addition of special methods.
+- Allow :func:`render()` support in user-defined classes with addition of special methods.
 
 
 1.15 (2019-01-16)
 -----------------
 
-- Added *error_status* argument to :class:`inform.Inform`.
-- Enhanced :class:`inform.plural`.  This enhancement is not backward 
+- Added *error_status* argument to :class:`Inform`.
+- Enhanced :class:`plural`.  This enhancement is not backward 
     compatible.
-- Enhance for :func:`inform.render()` to allow it to be used in a __repr__ function.
+- Enhance for :func:`render()` to allow it to be used in a __repr__ function.
 
 
 1.14 (2018-12-03)
 -----------------
 
-- Added :func:`inform.render_bar` utility function.
-- Added :class:`inform.ProgressBar` class.
-- Added :class:`inform.Info` class.
-- Added :meth:`inform.Inform.join_culprit` method and 
-    :func:`inform.join_culprit`.
-- Allow culprit to be passed into :meth:`inform.Error.report()` and 
-    :meth:`inform.Error.terminate()`.
-- Added :meth:`inform.Error.reraise` method.
+- Added :func:`render_bar` utility function.
+- Added :class:`ProgressBar` class.
+- Added :class:`Info` class.
+- Added :meth:`Inform.join_culprit` method and 
+    :func:`join_culprit`.
+- Allow culprit to be passed into :meth:`Error.report()` and 
+    :meth:`Error.terminate()`.
+- Added :meth:`Error.reraise` method.
 - Allow a codicil or codicils to be added to any informant.
-- Added *codicil* named argument to informants and :class:`inform.Error`.
-- Added *informant* named argument to :class:`inform.Error`.
+- Added *codicil* named argument to informants and :class:`Error`.
+- Added *informant* named argument to :class:`Error`.
 - Use colorscheme of active informer as default for colorizers.
-- :meth:`inform.Error.get_culprit` now returns a tuple rather than a string.
-- Added :meth:`inform.Error.join_culprit`.
-- Added :meth:`inform.Error.get_codicil`.
+- :meth:`Error.get_culprit` now returns a tuple rather than a string.
+- Added :meth:`Error.join_culprit`.
+- Added :meth:`Error.get_codicil`.
 
 
 1.13 (2018-08-11)
 -----------------
 
-- Added :func:`inform.aaa()` debug function.
-- Added exit argument to :func:`inform.done()`, :func:`inform.terminate()`, 
-    and :func:`inform.terminate_if_errors()`.
-- :func:`inform.terminate()` now produces an exit status of 0 if there was 
+- Added :func:`aaa()` debug function.
+- Added exit argument to :func:`done()`, :func:`terminate()`, 
+    and :func:`terminate_if_errors()`.
+- :func:`terminate()` now produces an exit status of 0 if there was 
     no errors reported.
-- Added :func:`inform.set_culprit()`, :func:`inform.add_culprit()`
-    and :func:`inform.get_culprit()`.
+- Added :func:`set_culprit()`, :func:`add_culprit()`
+    and :func:`get_culprit()`.
 
 
 1.12 (2018-02-18)
@@ -130,11 +134,11 @@ Latest development release
 -----------------
 
 - Released the documentation.
-- Added ability to override template in :class:`inform.Error`.
+- Added ability to override template in :class:`Error`.
 - Added *stream_policy* option.
 - Added *notify_if_no_tty* option.
 - Informers now stack, so disconnecting from an existing informer reinstates 
     the previous informer.
-- Generalize :func:`inform.cull()`.
+- Generalize :func:`cull()`.
 - Add support for multiple templates.
-- Added :func:`inform.join()` function.
+- Added :func:`join()` function.

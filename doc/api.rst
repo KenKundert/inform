@@ -1,3 +1,5 @@
+.. currentmodule:: inform
+
 ---------------------
 Classes and Functions
 ---------------------

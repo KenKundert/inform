@@ -1,3 +1,5 @@
+.. currentmodule:: inform
+
 Examples
 ========
 
@@ -21,8 +23,8 @@ Find Debug Functions
 
 This utility examines all python files in the current directory and all
 subdirectories looking for files that contain the various debug functions
-(:func:`inform.aaa`, :func:`inform.ddd`, :func:`inform.ppp`, :func:`inform.sss`,
-and :func:`inform.vvv`) etc.) and then it opens those files in the Vim editor.
+(:func:`aaa`, :func:`ddd`, :func:`ppp`, :func:`sss`,
+and :func:`vvv`) etc.) and then it opens those files in the Vim editor.
 This allows you to easily remove these functions after you are finished
 debugging your code.
 

@@ -1,3 +1,5 @@
+.. currentmodule:: inform
+
 .. Initialize Inform and suppress outputting of program name
 
     >>> from inform import Inform, error, fatal
@@ -211,7 +213,7 @@ Controlling Informants
 """"""""""""""""""""""
 
 For more control of the informants, you can import and instantiate the 
-:class:`inform.Inform` class yourself along with the desired informants.  This 
+:class:`Inform` class yourself along with the desired informants.  This 
 gives you the ability to specify options:
 
 .. code-block:: python
@@ -339,7 +341,7 @@ user.
 Generic Exception
 """""""""""""""""
 
-*Inform* also provides a generic exception, :class:`inform.Error`, that can be 
+*Inform* also provides a generic exception, :class:`Error`, that can be 
 used directly or can be subclassed to create your own exceptions.  It takes 
 arguments in the same manner as informants, and provides some useful methods 
 used when reporting errors:

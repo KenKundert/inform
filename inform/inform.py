@@ -375,13 +375,15 @@ class Color:
             return cls.COLOR_CODE_REGEX.sub('', text)
         return text
 
-# CachingLogger class {{{2
+# LoggingCache class {{{2
 class LoggingCache:
     # description {{{3
     """LoggingCache
 
     Use as logfile if you cannot know the desired location of the logfile until
-    after log messages have been emitted.
+    after log messages have been emitted.  It holds the log messages in memory
+    until you establish a logfile.  At that point the messages are copied into
+    the logfile.
 
     **Example**::
 
@@ -2089,7 +2091,9 @@ class Inform:
             May be a pathlib path or a string, in which case it is taken to be
             the path of the logfile.  May be *True*, in which case
             ./.<prog_name>.log is used.  May be an open stream.  Or it may be
-            *False*, in which case no log file is created.
+            *False*, in which case no log file is created.  It may also be an
+            instance of :class:`LoggingCache`, which caches the log messages
+            until it is replaced with :meth:`Inform.set_logfile`.
 
         prev_logfile_suffix (string):
             If specified, the previous logfile will be moved aside before
