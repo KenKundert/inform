@@ -329,9 +329,10 @@ class Color:
         if scheme is True:
             scheme = INFORMER.colorscheme
         if scheme and self.color and self.enable:
-            assert self.color in self.COLORS
+            color = self.color.lower()
+            assert color in self.COLORS, f'{color} is an invalid color'
             bright = 1 if scheme == 'light' else 0
-            prefix = '\033[%s;3%dm' % (bright, self.COLORS.index(self.color))
+            prefix = '\033[%s;3%dm' % (bright, self.COLORS.index(color))
             suffix = '\033[0m'
             return prefix + text + suffix
         return text
@@ -374,6 +375,11 @@ class Color:
         if '\033' in text:
             return cls.COLOR_CODE_REGEX.sub('', text)
         return text
+
+    # __repr {{{3
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.color!r})'
+
 
 # LoggingCache class {{{2
 class LoggingCache:
