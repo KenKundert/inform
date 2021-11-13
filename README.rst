@@ -1,14 +1,15 @@
 Inform - Print & Logging Utilities
 ==================================
 
+..  image:: 
+    https://github.com/KenKundert/infom/actions/workflows/build.yaml/badge.svg
+    :target: https://github.com/KenKundert/infom/actions/workflows/build.yaml
+
 .. image:: https://pepy.tech/badge/inform/month
     :target: https://pepy.tech/project/inform
 
 .. image:: https://img.shields.io/readthedocs/inform.svg
    :target: https://inform.readthedocs.io/en/latest/?badge=latest
-
-.. image:: https://img.shields.io/travis/KenKundert/inform/master.svg
-    :target: https://travis-ci.org/KenKundert/inform
 
 .. image:: https://img.shields.io/coveralls/KenKundert/inform.svg
     :target: https://coveralls.io/r/KenKundert/inform
