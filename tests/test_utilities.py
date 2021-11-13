@@ -31,7 +31,7 @@ def test_debug(capsys):
     ddd(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 31, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 31, tests.test_utilities.test_debug():
             'a'
             'b'
             'c'
@@ -40,7 +40,7 @@ def test_debug(capsys):
     ddd(a=a, b=b, c=c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 40, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 40, tests.test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -49,13 +49,13 @@ def test_debug(capsys):
     ppp(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 49, test_utilities.test_debug(): a b c
+        DEBUG: test_utilities.py, 49, tests.test_utilities.test_debug(): a b c
     """).lstrip()
 
     vvv(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 55, test_utilities.test_debug():
+        DEBUG: test_utilities.py, 55, tests.test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -63,7 +63,7 @@ def test_debug(capsys):
 
     sss()
     captured = capsys.readouterr()
-    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 64, test_utilities.test_debug():"
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 64, tests.test_utilities.test_debug():"
 
 def test_indent():
     text=dedent('''
