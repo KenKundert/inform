@@ -6,7 +6,7 @@
 # Documentation can be found at inform.readthedocs.io.
 
 # License {{{1
-# Copyright (c) 2014-2021 Kenneth S. Kundert
+# Copyright (c) 2014-2022 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ import os
 import re
 import sys
 from codecs import open
-from textwrap import dedent as tw_dedent
+from textwrap import dedent as tw_dedent, fill
 
 # Globals {{{1
 INFORMER = None
@@ -512,7 +512,6 @@ def _join(args, kwargs):
     # wrap the message if desired
     wrap = kwargs.get('wrap')
     if wrap:
-        from textwrap import fill
         if type(wrap) is int:
             message = fill(message, width=wrap)
         else:
@@ -736,21 +735,27 @@ def fmt(message, *args, **kwargs):
 
 
 # dedent {{{2
-def dedent(text, bolm=None, strip_nl=None):
+def dedent(text, bolm=None, strip_nl=None, wrap=False):
     """
     Removes indentation that is common to all lines.
 
     Without its named arguments, dedent behaves just like, and is a equivalent
     replacement for, textwrap.dedent.
 
-    The beginning of line mark (bolm) is replaced by a space after the 
-    indent is removed.  It must be the first character after the initial 
-    newline.  Normally bolm is a single character, often '|', but it may be
-    contain multiple characters, all of which are replaced by spaces.
+    bolm = None:
+        The beginning of line mark (bolm) is replaced by a space after the 
+        indent is removed.  It must be the first character after the initial 
+        newline.  Normally bolm is a single character, often '|', but it may be
+        contain multiple characters, all of which are replaced by spaces.
 
-    strip_nl is used to strip off a single leading or trailing newline.
-    strip_nl may be None, 's', 'e', or 'b' representing none, start, end, 
-    or both.
+    strip_nl = None:
+        strip_nl is used to strip off a single leading or trailing newline.
+        strip_nl may be None, 's', 'e', or 'b' representing none, start, end, 
+        or both.
+
+    wrap (bool or int):
+        If true the string is wrapped using a width of 70. If an integer value
+        is passed, is used as the width of the wrap.
 
     >>> from inform import dedent
 
@@ -804,6 +809,10 @@ def dedent(text, bolm=None, strip_nl=None):
     # remove trailing newline if desired
     if strip_nl in ['e', 'b'] and dedented[-1] == '\n':
         dedented = dedented[:-1]
+
+    # wrap text to desired width
+    if wrap:
+        dedented = fill(dedented, wrap) if type(wrap) is int else fill(dedented)
 
     return dedented
 
