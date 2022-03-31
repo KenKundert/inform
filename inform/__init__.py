@@ -11,7 +11,7 @@ from .inform import (
     os_error, parse_range, plural, ProgressBar, render, render_bar, title_case,
 
     # debug functions
-    aaa, ppp, ddd, vvv, sss,
+    aaa, ccc, ddd, ppp, sss, vvv,
 
     # inform classes
     InformantFactory, Inform, Error,

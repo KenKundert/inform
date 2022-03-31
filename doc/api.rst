@@ -113,6 +113,8 @@ Debug Utilities
 
 .. autofunction:: inform.aaa
 
+.. autofunction:: inform.ccc
+
 .. autofunction:: inform.ddd
 
 .. autofunction:: inform.ppp

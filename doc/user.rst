@@ -2,7 +2,7 @@
 
 .. Initialize Inform and suppress outputting of program name
 
-    >>> from inform import Inform
+    >>> from inform import Inform, Color
     >>> inform = Inform(prog_name=False)
 
 
@@ -1489,7 +1489,7 @@ example:
 
     >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
     ...     process(item)
-    Progress: ......9......8......7......6......5......4......3......2......1......0
+    Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
 
     >>> display('Processed:', conjoin(processed), end='.\n')
     Processed: i1, i2, i3, i4, i5, i6, i7, i8, i9 and i10.
@@ -1501,7 +1501,7 @@ how many iterations you wish:
 
     >>> for i in ProgressBar(50, prefix='Progress: '):
     ...     process(i)
-    Progress: ......9......8......7......6......5......4......3......2......1......0
+    Progress: ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
 
 Finally, the third illustrates progress through a continuous range:
 
@@ -1517,7 +1517,7 @@ Finally, the third illustrates progress through a continuous range:
     ...         progress.draw(value)
     ...         value += step
     Progress:
-    ......9......8......7......6......5......4......3......2......1......0
+    ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
 
 In this case, you need to notify the progress bar if you decide to exit the loop 
 before its complete unless an exception is raised that causes the *with* block 
@@ -1535,7 +1535,7 @@ to exit:
     ...             progress.escape()
     ...             break
     Progress:
-    ......9......8......7......6......
+    ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅
 
 Without calling escape, the bar would have been terminated with a 0 upon exiting 
 the *with* block. Using *escape()* is not necessary if the *with* block is 
@@ -1555,8 +1555,55 @@ exited via an exception:
     ... except Error as e:
     ...     e.report()
     Progress:
-    ......9......8......7......6......
+    ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅
     myprog error: early exit.
+
+    It is possible to pass a second argument to :meth:`ProgressBar.draw()` that 
+    indicates the desired marker to use when updating the bar.  This is usually 
+    used to signal that there was a problem with the update.  To do so, you 
+    define the desired markers when instantiating :class:`ProgressBar`.  Each
+    marker consists of a fill character and a color.  The color can be specified 
+    by giving its name, with a :class:`Color` object, or with None.
+    For example, the following example uses markers to distinguish four types of 
+    results: *okay*, *warn*, *fail*, *error*.
+
+    >>> results = 'okay okay okay fail okay fail okay error warn okay'.split()
+
+    >>> def process(index):
+    ...     # this function would implement some expensive operation
+    ...     return results[index]
+
+    >>> markers = dict(
+    ...     okay=('⋅', None),
+    ...     warn=('−', None),
+    ...     fail=('+', None),
+    ...     error=('×', None)
+    ... )
+
+    >>> with ProgressBar(len(results), prefix="progress: ", markers=markers) as progress:
+    ...     for i in range(len(results)):
+    ...         status = results[i]
+    ...         progress.draw(i+1, status)
+    progress: ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3××××××2−−−−−−1⋅⋅⋅⋅⋅⋅0
+
+    In this case color was not used, but you could specify the following to 
+    render the markers in color:
+
+    >>> markers = dict(
+    ...     okay=('⋅', 'green'),
+    ...     warn=('–', 'yellow'),
+    ...     fail=('+', 'magenta'),
+    ...     error=('×', 'red')
+    ... )
+
+    You can also use the :class:`Color` class:
+
+    >>> markers = dict(
+    ...     okay=('⋅', Color('green', Color.isTTY())),
+    ...     warn=('–', Color('yellow', Color.isTTY())),
+    ...     fail=('+', Color('magenta', Color.isTTY())),
+    ...     error=('×', Color('red', Color.isTTY()))
+    ... )
 
 The progress bar generally handles interruptions with grace. For example:
 
@@ -1565,9 +1612,9 @@ The progress bar generally handles interruptions with grace. For example:
     >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
     ...     if item == 'i4':
     ...         warn('bad value.', culprit=item)
-    Progress: .....9.....8.....7
+    Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7
     myprog warning: i4: bad value.
-    Progress: .....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+    Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
 
 Notice that the warning started on a new line and the progress bar was restarted 
 from the beginning after the warning.

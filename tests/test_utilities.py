@@ -1278,7 +1278,7 @@ def test_rattle(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......5......4......3......2......1......0
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1297,7 +1297,7 @@ def test_company(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......5......4......3......2......1......0
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1321,9 +1321,9 @@ def test_filling(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            Progress: .....9.....8.....7.....6.....
+            Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅
             Hey now!
-            Progress: .....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+            Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1346,7 +1346,7 @@ def test_being(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅
             error: Hey now!
             after
         """).lstrip()
@@ -1367,7 +1367,7 @@ def test_deadbeat(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......5......4......3......2......1......0
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1388,7 +1388,7 @@ def test_lipstick(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......5......4......
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅
             after
         """).lstrip()
 
@@ -1408,7 +1408,7 @@ def test_stomp(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......5......4......3......2......1......0
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1424,15 +1424,15 @@ def test_sherbet(capsys):
         assert captured[0] == dedent("""
             before
             hello 0
-            ......9.....
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅
             hello 10
-            ......9......8......7......
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅
             hello 20
-            ......9......8......7......6......5......
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅
             hello 30
-            ......9......8......7......6......5......4......3......
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅
             hello 40
-            ......9......8......7......6......5......4......3......2......1......0
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1448,17 +1448,17 @@ def test_sherbet(capsys):
         assert captured[0] == dedent("""
             before
             hello 0
-            ......9......8
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8
             hello 10
-            ......9......8......7......6
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6
             hello 20
-            ......9......8......7......6......5......4
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4
             hello 30
-            ......9......8......7......6......5......4......3......2
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2
             hello 40
-            ......9......8......7......6......5......4......3......2......1......
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅
             hello 50
-            ......9......8......7......6......5......4......3......2......1......0
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1510,9 +1510,9 @@ def test_aerosol(capsys):
         assert captured[0] == dedent("""
             before
             mid 1
-            one: |.....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+            one: |⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
             mid 2
-            two: |.....9.....8.....7.....6.....5.....4.....3.....2.....1.....0
+            two: |⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
@@ -1533,8 +1533,57 @@ def test_employ(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
             before
-            ......9......8......7......6......5
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5
             after
+        """).lstrip()
+
+def test_prophet(capsys):
+    # ProgressBar: markers
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+
+        repos = 'bias cp dac ldop pa ldop pa pbf topbias bias'.split()
+
+        markers = dict(
+            okay=('⋅', None),
+            warn=('–', None),
+            fail=('+', None),
+            error=('×', None)
+        )
+        with ProgressBar(len(repos), markers=markers) as progress:
+            display('Progress:')
+            for i in range(len(repos)):
+                repo = repos[i]
+                kind = 'error' if repo=='pbf' else 'fail' if repo=='ldop' else 'warn' if repo=='topbias' else 'okay'
+                progress.draw(i+1, kind)
+
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+        Progress:
+        ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3××××××2––––––1⋅⋅⋅⋅⋅⋅0
+        """).lstrip()
+
+def test_stylus(capsys):
+    # ProgressBar: markers
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+
+        # this test assure markers that were specified on a non-printing update
+        # get retained on the next printing update.
+        markers = dict(
+            okay=('⋅', None),
+            warn=('–', None),
+            fail=('+', None),
+            error=('×', None)
+        )
+        with ProgressBar(1000, markers=markers) as progress:
+            display('Progress:')
+            for i in range(1000):
+                kind = 'error' if i==432 else 'fail' if i==506 else 'warn' if i==873 else 'okay'
+                progress.draw(i+1, kind)
+
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+        Progress:
+        ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅×⋅⋅⋅5+⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅–1⋅⋅⋅⋅⋅⋅0
         """).lstrip()
 
 def test_orwell():
