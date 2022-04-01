@@ -1693,7 +1693,7 @@ class ProgressBar:
             # if use_prev_marker is true, it indicates that some unprinted
             # points were received.  This code ups the marker to the most severe
             # received since the last marker was actually printed.
-            for resolved_marker in reversed(self.markers):
+            for resolved_marker in reversed(list(self.markers)):
                 if resolved_marker in [marker, self.prev_marker]:
                     break
             else:
