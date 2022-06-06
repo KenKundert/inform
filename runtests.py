@@ -174,12 +174,12 @@ def writeSummary(tests, testFailures, suites = 1, suiteFailures = None):
     try:
         with open('.%s.sum' % name, 'w') as f:
             dumpSummary({
-                'tests': tests
-              , 'testFailures': testFailures
-              , 'suites': suites
-              , 'suiteFailures': suiteFailures
+                'tests': tests,
+                'testFailures': testFailures,
+                'suites': suites,
+                'suiteFailures': suiteFailures
             }, f)
-    except IOError as err:
+    except OSError as err:
         sys.exit(
             exception(
                 "%s: summary file '%s': %s." % (
@@ -236,7 +236,7 @@ def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test
         name = '%s/%s' % (clp.parent, test) if clp.parent else test
         if os.path.isfile('%s.%s.py' % (testKey, test)):
             summaryFileName = './.%s.%s.sum' % (testKey, test)
-            _deleteYamlFile(summaryFileName)
+            deleteSummaryFile(summaryFileName)
             if clp.printSummary:
                 sys.stdout.write(status('%s: ' % name))
                 sys.stdout.flush()
@@ -246,7 +246,7 @@ def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test
             error = _invoke(cmd)
         elif os.path.isdir(test):
             summaryFileName = './%s/.%s.sum' % (test, testKey)
-            _deleteYamlFile(summaryFileName)
+            deleteSummaryFile(summaryFileName)
             cmd = 'cd %s; %s %s %s' % (test, python, testKey, _childOpts(test))
             error = _invoke(cmd)
         else:
@@ -277,7 +277,7 @@ def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test
                     )
                 )
             )
-        except IOError as err:
+        except OSError as err:
             if error:
                 numSuites += 1
                 numSuiteFailures += 1
@@ -302,7 +302,7 @@ def runTests(tests, pythonVers=None, source=None, pythonPath=None, testKey='test
 
     try:
         writeSummary(numTests, numTestFailures, numSuites, numSuiteFailures)
-    except IOError as err:
+    except OSError as err:
         sys.exit(
             exception(
                 "%s: summary file '%s': %s." % (
@@ -344,21 +344,21 @@ def _invoke(cmd):
         sys.exit(
             exception(
                 '\n'.join([
-                    "%s: when running '%s':" % (sys.argv[0], cmd)
-                  , "%s: " % ((err.filename)) if err.filename else ''
+                    "%s: when running '%s':" % (sys.argv[0], cmd),
+                    "%s: " % ((err.filename)) if err.filename else ''
                       + "%s." % (err.strerror)
                 ])
             )
         )
 
-# _deleteYamlFile {{{2
+# deleteSummaryFile {{{2
 # delete a summary file (need to do this to assure we don't pick up a
 # stale one if the test program fails to generate a new one). 
-def _deleteYamlFile(filename):
+def deleteSummaryFile(filename):
     if os.path.isfile(filename):
         try:
             os.remove(filename)
-        except IOError as err:
+        except OSError as err:
             sys.exit(
                 exception(
                     "%s: summary file '%s': %s." % (
