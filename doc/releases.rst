@@ -6,8 +6,8 @@ Releases
 Latest development release
 --------------------------
 
-    | Version: 1.26.1
-    | Released: 2022-03-31
+    | Version: 1.26.2
+    | Released: 2022-08-26
 
 - Added :func:`dedent`.
 - Added :class:`LoggingCache`.
