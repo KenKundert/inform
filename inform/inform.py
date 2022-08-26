@@ -1460,6 +1460,9 @@ class Info:
             raise AttributeError(name)
         return self.__dict__.get(name)
 
+    def get(self, name, default=None):
+        return self.__dict__.get(name, default)
+
     def render(self, template):
         """Render class to a string
 
@@ -1496,7 +1499,8 @@ class ProgressBar:
             the same sign as stop if log is True.
 
         log (bool):
-            Report the logarithmic progress (start must be nonzero).
+            Report the logarithmic progress (start and stop must be positive and
+            nonzero).
 
         prefix (str):
             A string that is output before the progress bar on the same line.
@@ -1564,8 +1568,8 @@ class ProgressBar:
     markers = dict(
         okay=('⋅', 'green'),
         warn=('−', 'yellow'),
-        fail=('+', 'magenta'),
-        error=('×', 'red')
+        fail=('×', 'magenta'),
+        error=('!', 'red')
     )
     with ProgressBar(len(results), markers=markers) as progress:
         for i in range(len(repos)):
@@ -1575,7 +1579,7 @@ class ProgressBar:
     It produces the following, where each of the types is rendered in the
     appropriate color:
 
-        ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3××××××2−−−−−−1⋅⋅⋅⋅⋅⋅0
+        ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7××××××6⋅⋅⋅⋅⋅⋅5××××××4⋅⋅⋅⋅⋅⋅3!!!!!!2−−−−−−1⋅⋅⋅⋅⋅⋅0
 
     """
 
@@ -2439,9 +2443,9 @@ class Inform:
                     os.unlink(prev_logfile)
                 if os.path.exists(logfile) and os.path.isfile(logfile):
                     os.rename(logfile, prev_logfile)
-            except (OSError, IOError):
+                    self.logfile_copied = True
+            except (OSError, IOError) as e:
                 pass
-        self.logfile_copied = True
 
         try:
             if is_str(logfile):
