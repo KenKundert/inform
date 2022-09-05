@@ -21,7 +21,7 @@ Inform - Print & Logging Utilities
 
 
 :Author: Ken Kundert
-:Version: 1.26.3
+:Version: 1.26.4
 :Released: 2022-09-05
 
 A package that provides specialized print functions that are used when 
