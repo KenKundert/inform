@@ -22,7 +22,6 @@
 # this program.  If not, see http://www.gnu.org/licenses/.
 
 # Imports {{{1
-from __future__ import print_function
 import arrow
 import io
 import os
@@ -40,10 +39,7 @@ STREAM_POLICIES = {
     'header': lambda i, so, se: se if i.severity else so,
         # stderr is used on all messages that include headers
 }
-if sys.version_info >= (3,0,0):
-    BAR_CHARS = '▏▎▍▌▋▊▉█'
-else:                                  # pragma: no cover
-    BAR_CHARS = '-=#'
+BAR_CHARS = '▏▎▍▌▋▊▉█'
 NUM_BAR_CHARS = len(BAR_CHARS)
 
 """
@@ -190,10 +186,7 @@ def is_iterable(obj):
         True
 
     """
-    try:  # python3
-        from collections.abc import Iterable
-    except ImportError:  # python2               # pragma: no cover
-        from collections import Iterable
+    from collections.abc import Iterable
     return isinstance(obj, Iterable)
 
 
@@ -243,10 +236,7 @@ def is_mapping(obj):
         True
 
     """
-    try:  # python3
-        from collections.abc import Mapping
-    except ImportError:  # python2               # pragma: no cover
-        from collections import Mapping
+    from collections.abc import Mapping
     return isinstance(obj, Mapping)
 
 # Color class {{{2
@@ -831,8 +821,7 @@ def os_error(e):
 
     Args:
         e (exception):
-            The value of an *OSError* or *IOError* exception (in Python3 *IOError*
-            is a subclass of *OSError*, so you only need to catch *OSError*).
+            The value of an *OSError* exception.
 
     **Example**::
 
@@ -840,7 +829,7 @@ def os_error(e):
         >>> try:
         ...     with open('config') as f:
         ...         contents = f.read()
-        ... except (OSError, IOError) as e:
+        ... except OSError as e:
         ...     display(os_error(e))
         config: no such file or directory.
 
@@ -1272,10 +1261,7 @@ class plural:
         return self.__format__(formatter)
 
     def __format__(self, formatter):
-        try:  # python3
-            from collections.abc import Sized
-        except ImportError:  # python2               # pragma: no cover
-            from collections import Sized
+        from collections.abc import Sized
 
         value = self.value
         number = len(value) if isinstance(value, Sized) else value
@@ -2450,7 +2436,7 @@ class Inform:
                 if os.path.exists(logfile) and os.path.isfile(logfile):
                     os.rename(logfile, prev_logfile)
                     self.logfile_copied = True
-            except (OSError, IOError) as e:
+            except OSError:
                 pass
 
         try:
@@ -2464,7 +2450,7 @@ class Inform:
             elif logfile:
                 assert hasattr(logfile, 'close'), 'expected logfile to be string, path, or stream.'
             # else no logfile
-        except (IOError, OSError) as e:
+        except OSError as e:
             print(os_error(e), file=sys.stderr)
             logfile = None
 
@@ -2870,9 +2856,9 @@ class Inform:
             >>> with open(filename) as f, set_culprit(filename):
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
-            warning: pyproject.toml, 30: empty line.
-            warning: pyproject.toml, 38: empty line.
-            warning: pyproject.toml, 44: empty line.
+            warning: pyproject.toml, 26: empty line.
+            warning: pyproject.toml, 34: empty line.
+            warning: pyproject.toml, 40: empty line.
 
         """
         return self.CulpritContextManager(self, culprit, append=False)

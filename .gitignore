@@ -8,6 +8,8 @@ htmlcov
 COVERAGE_ISSUE
 .pytest_cache
 .teneya.log
+.mylog
+tests/.mylog
 
 
 # Packages
