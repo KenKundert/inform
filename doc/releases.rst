@@ -9,6 +9,10 @@ Latest development release
     | Version: 1.26.3
     | Released: 2022-09-05
 
+
+1.27 (2022-09-05)
+-----------------
+
 - Add markers to :class:`ProgressBar`.
 
 
