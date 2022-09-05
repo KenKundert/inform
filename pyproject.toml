@@ -1,6 +1,6 @@
 [project]
 name = "inform"
-version = '1.26.2'
+version = '1.26.3'
 description = 'print & logging utilities for communicating with user'
 readme = "README.rst"
 requires-python = ">=3.6"
