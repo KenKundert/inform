@@ -1,11 +1,11 @@
 # encoding: utf8
 
 from inform import (
-    Color, Info, columns, conjoin, did_you_mean, comment, cull, dedent, display,
-    done, error, Error, fatal, fmt, full_stop, indent, Inform, is_collection,
-    is_iterable, is_mapping, is_str, join, get_prog_name, get_informer, narrate,
-    os_error, output, plural, render, terminate, title_case, warn, ddd, ppp,
-    sss, vvv, ProgressBar, parse_range, format_range
+    Color, Error, Info, LoggingCache, columns, conjoin, did_you_mean, comment, cull,
+    dedent, display, done, error, fatal, fmt, full_stop, indent, Inform,
+    is_collection, is_iterable, is_mapping, is_str, join, get_prog_name,
+    get_informer, narrate, os_error, output, plural, render, terminate,
+    title_case, warn, ddd, ppp, sss, vvv, ProgressBar, parse_range, format_range
 )
 from textwrap import dedent as tw_dedent
 import sys
@@ -743,6 +743,9 @@ def test_is_mapping():
     assert is_mapping({}) == True
 
 def test_color():
+    assert Color('white', 'dark')('') == ''
+    assert repr(Color('white', 'dark')) == "Color('white')"
+
     assert Color('black', 'dark')('black') == '\x1b[0;30mblack\x1b[0m'
     assert Color('red', 'dark')('red') == '\x1b[0;31mred\x1b[0m'
     assert Color('green', 'dark')('green') == '\x1b[0;32mgreen\x1b[0m'
@@ -1139,6 +1142,41 @@ def test_logging(capsys):
          StringIO() as logfile, \
          Inform(stdout=stdout, stderr=stderr, logfile=logfile, prog_name='dog', version='3v14') as msg:
             display('running test')
+
+            assert msg.errors_accrued() == 0
+            assert str(stdout.getvalue()) == 'running test\n'
+            assert str(stderr.getvalue()) == ''
+            logfile_text = logfile.getvalue()
+            logfile_text_sum = str(logfile_text[:10]), str(logfile_text[-13:])
+            assert logfile_text_sum == ('dog: versi', 'running test\n')
+            assert '3v14' in logfile_text
+
+            msg.set_logfile(False)
+            error('oh no!')
+            assert msg.errors_accrued() == 1
+            assert str(stdout.getvalue()) == 'running test\ndog error: oh no!\n'
+            assert str(stderr.getvalue()) == ''
+            with pytest.raises(ValueError) as exception:
+                logfile.getvalue()
+            assert full_stop(exception.value) == 'I/O operation on closed file.'
+
+def test_cached_logging(capsys):
+    if sys.version[0] == '2':
+        # io assumes unicode, which python2 does not provide by default
+        # so use StringIO instead
+        from StringIO import StringIO
+        # Add support for with statement by monkeypatching
+        StringIO.__enter__ = lambda self: self
+        StringIO.__exit__ = lambda self, exc_type, exc_val, exc_tb: self.close()
+    else:
+        from io import StringIO
+
+    with StringIO() as stdout, \
+         StringIO() as stderr, \
+         StringIO() as logfile, \
+         Inform(stdout=stdout, stderr=stderr, logfile=LoggingCache(), prog_name='dog', version='3v14') as msg:
+            display('running test')
+            msg.set_logfile(logfile)
 
             assert msg.errors_accrued() == 0
             assert str(stdout.getvalue()) == 'running test\n'
@@ -1604,6 +1642,8 @@ def test_orwell():
     assert george.truth == 'lies'
     assert george.happiness is None
     assert george.render(template='peace={peace}, truth={truth}') == 'peace=war, truth=lies'
+    assert george.get('happiness') is None
+    assert george.get('happiness', 'lost') == 'lost'
 
 def test_oblong():
     from inform import render_bar

@@ -1558,14 +1558,16 @@ exited via an exception:
     ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅
     myprog error: early exit.
 
-    It is possible to pass a second argument to :meth:`ProgressBar.draw()` that 
-    indicates the desired marker to use when updating the bar.  This is usually 
-    used to signal that there was a problem with the update.  To do so, you 
-    define the desired markers when instantiating :class:`ProgressBar`.  Each
-    marker consists of a fill character and a color.  The color can be specified 
-    by giving its name, with a :class:`Color` object, or with None.
-    For example, the following example uses markers to distinguish four types of 
-    results: *okay*, *warn*, *fail*, *error*.
+It is possible to pass a second argument to :meth:`ProgressBar.draw()` that 
+indicates the desired marker to use when updating the bar.  This is usually used 
+to signal that there was a problem with the update.  To do so, you define the 
+desired markers when instantiating :class:`ProgressBar`.  Each
+marker consists of a fill character and a color.  The color can be specified 
+by giving its name, with a :class:`Color` object, or with None.
+For example, the following example uses markers to distinguish four types of 
+results: *okay*, *warn*, *fail*, *error*.
+
+.. code-block:: python
 
     >>> results = 'okay okay okay fail okay fail okay error warn okay'.split()
 
@@ -1586,8 +1588,10 @@ exited via an exception:
     ...         progress.draw(i+1, status)
     progress: ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3××××××2−−−−−−1⋅⋅⋅⋅⋅⋅0
 
-    In this case color was not used, but you could specify the following to 
-    render the markers in color:
+In this case color was not used, but you could specify the following to render 
+the markers in color:
+
+.. code-block:: python
 
     >>> markers = dict(
     ...     okay=('⋅', 'green'),
@@ -1596,7 +1600,9 @@ exited via an exception:
     ...     error=('×', 'red')
     ... )
 
-    You can also use the :class:`Color` class:
+You can also use the :class:`Color` class:
+
+.. code-block:: python
 
     >>> markers = dict(
     ...     okay=('⋅', Color('green', Color.isTTY())),

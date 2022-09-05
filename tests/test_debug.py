@@ -6,7 +6,7 @@ except ImportError:  # python2
     import __builtin__ as builtins
 
 # Imports {{{1
-from inform import Inform, aaa, ddd, ppp, sss, vvv
+from inform import Inform, aaa, ccc, ddd, ppp, sss, vvv
 from textwrap import dedent
 import sys
 
@@ -124,30 +124,30 @@ def test_shear(capsys):
                 e = {0: 'b'}
         ''').lstrip()
 
-    def test_prostrate(capsys):
-        Inform(colorscheme=None, prog_name=False)
-        sss()
-        out, err = capsys.readouterr()
-        out = out.strip().split('\n')
-        assert out[0] == 'DEBUG: test_debug.py, 129, tests.test_debug.test_prostrate():'
-        assert out[-2][-57:] == "inform/tests/test_debug.py', line 124, in test_prostrate,"
-        assert out[-1] == '        sss()'
+def test_prostrate(capsys):
+    Inform(colorscheme=None, prog_name=False)
+    sss()
+    out, err = capsys.readouterr()
+    out = out.strip().split('\n')
+    assert out[0] == 'DEBUG: test_debug.py, 129, tests.test_debug.test_prostrate():'
+    assert out[-2][-57:] == "inform/tests/test_debug.py', line 129, in test_prostrate,"
+    assert out[-1] == '        sss()'
 
-    def test_rubber(capsys):
-        Inform(colorscheme=None, prog_name=False)
-        a = aaa('a')
-        out, err = capsys.readouterr()
-        assert out == dedent('''
-            DEBUG: test_debug.py, 138, tests.test_debug.test_rubber(): 'a'
-        ''').lstrip()
-        assert a == 'a'
+def test_rubber(capsys):
+    Inform(colorscheme=None, prog_name=False)
+    a = aaa('a')
+    out, err = capsys.readouterr()
+    assert out == dedent('''
+        DEBUG: test_debug.py, 138, tests.test_debug.test_rubber(): 'a'
+    ''').lstrip()
+    assert a == 'a'
 
-        b = aaa(b = 'b')
-        out, err = capsys.readouterr()
-        assert out == dedent('''
-            DEBUG: test_debug.py, 145, tests.test_debug.test_rubber(): b: 'b'
-        ''').lstrip()
-        assert b == 'b'
+    b = aaa(b = 'b')
+    out, err = capsys.readouterr()
+    assert out == dedent('''
+        DEBUG: test_debug.py, 145, tests.test_debug.test_rubber(): b: 'b'
+    ''').lstrip()
+    assert b == 'b'
 
 def test_bartender(capsys):
     Inform(colorscheme=None, prog_name=False)
@@ -158,6 +158,14 @@ def test_bartender(capsys):
         DEBUG: test_debug.py, 155, tests.test_debug.test_bartender(): 'b'
     ''').lstrip()
     assert ret == 'b'
+
+def test_scene(capsys):
+    msg = Inform(colorscheme=None, prog_name=False)
+    ccc(msg)
+    out, err = capsys.readouterr()
+    assert out == dedent('''
+        DEBUG: test_debug.py, 164, tests.test_debug.test_scene(): Inform
+    ''').lstrip()
 
 
 if __name__ == '__main__':

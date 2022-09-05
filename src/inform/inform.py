@@ -791,6 +791,12 @@ def dedent(text, bolm=None, strip_nl=None, wrap=False):
     Diaspar
     Lys
 
+    >>> print(dedent('''
+    ...         Diaspar
+    ...         Lys
+    ... ''', strip_nl='b', wrap=True))
+    Diaspar Lys
+
     """
 
     # perform normal dedent
@@ -1561,23 +1567,23 @@ class ProgressBar:
     This last version can be used to indicate the nature of individual updates.
     This is usually used to signal that there was a problem with the update.
     For example, the following example uses both color and fill character to
-    distinguish four types of results: okay, warn, fail, error.
+    distinguish four types of results: okay, warn, fail, error::
 
-    results = 'okay okay okay fail okay fail okay error warn okay'.split()
+        results = 'okay okay okay fail okay fail okay error warn okay'.split()
 
-    markers = dict(
-        okay=('⋅', 'green'),
-        warn=('−', 'yellow'),
-        fail=('×', 'magenta'),
-        error=('!', 'red')
-    )
-    with ProgressBar(len(results), markers=markers) as progress:
-        for i in range(len(repos)):
-            result = results[i]
-            progress.draw(i+1, result)
+        markers = dict(
+            okay=('⋅', 'green'),
+            warn=('−', 'yellow'),
+            fail=('×', 'magenta'),
+            error=('!', 'red')
+        )
+        with ProgressBar(len(results), markers=markers) as progress:
+            for i in range(len(repos)):
+                result = results[i]
+                progress.draw(i+1, result)
 
     It produces the following, where each of the types is rendered in the
-    appropriate color:
+    appropriate color::
 
         ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7××××××6⋅⋅⋅⋅⋅⋅5××××××4⋅⋅⋅⋅⋅⋅3!!!!!!2−−−−−−1⋅⋅⋅⋅⋅⋅0
 
@@ -1701,7 +1707,7 @@ class ProgressBar:
                 if resolved_marker in [marker, self.prev_marker]:
                     break
             else:
-                raise AssertionError
+                raise AssertionError  # pragma: no cover
         self.prev_marker = resolved_marker
         self.use_prev_marker = True
         fill_char, color = self.markers[resolved_marker]
@@ -2858,15 +2864,15 @@ class Inform:
             ...    empty = 0
             ...    for lineno, line in enumerate(lines):
             ...        if not line:
-            ...            warn('empty line.', culprit=get_culprit(lineno))
+            ...            warn('empty line.', culprit=get_culprit(lineno+1))
 
-            >>> filename = 'setup.py'
+            >>> filename = 'pyproject.toml'
             >>> with open(filename) as f, set_culprit(filename):
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
-            warning: setup.py, 3: empty line.
-            warning: setup.py, 6: empty line.
-            warning: setup.py, 11: empty line.
+            warning: pyproject.toml, 30: empty line.
+            warning: pyproject.toml, 38: empty line.
+            warning: pyproject.toml, 44: empty line.
 
         """
         return self.CulpritContextManager(self, culprit, append=False)

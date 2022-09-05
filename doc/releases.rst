@@ -9,8 +9,15 @@ Latest development release
     | Version: 1.26.2
     | Released: 2022-08-26
 
+- Add markers to :class:`ProgressBar`.
+
+
+1.26 (2021-09-15)
+-----------------
+
 - Added :func:`dedent`.
 - Added :class:`LoggingCache`.
+
 
 1.25 (2021-07-07)
 -----------------
