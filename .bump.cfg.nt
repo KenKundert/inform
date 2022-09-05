@@ -4,9 +4,9 @@ patch: 2
 revision: 0
 type: release
 files:
-    setup.py:
+    pyproject.toml:
         version: version
-    inform/__init__.py:
+    src/inform/__init__.py:
         version: __version__
         date: __released__
     README.rst:
