@@ -1,6 +1,3 @@
-__version__ = '1.26.4'
-__released__ = '2022-09-05'
-
 from .inform import (
     # inform utility functions and classes
     cull, indent, is_collection, is_iterable, is_mapping, is_str, join,
@@ -27,5 +24,8 @@ from .inform import (
     get_informer, set_informer,
 
     # culprit functions
-    set_culprit, add_culprit, get_culprit, join_culprit
+    set_culprit, add_culprit, get_culprit, join_culprit,
+
+    # version
+    __version__, __released__,
 )

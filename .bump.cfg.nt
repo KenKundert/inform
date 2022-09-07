@@ -6,7 +6,7 @@ type: release
 files:
     pyproject.toml:
         version: version
-    src/inform/__init__.py:
+    inform/inform.py:
         version: __version__
         date: __released__
     README.rst:
