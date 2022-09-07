@@ -1,4 +1,0 @@
-#!/bin/sh
-
-coverage run -m py.test
-coverage html

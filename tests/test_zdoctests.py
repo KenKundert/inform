@@ -21,7 +21,7 @@ def test_inform():
     if sys.version_info < (3, 6):
         # code used in doctests assumes python3.6
         return
-    rv = doctest.testfile('../src/inform/inform.py', optionflags=doctest.ELLIPSIS)
+    rv = doctest.testfile('../inform/inform.py', optionflags=doctest.ELLIPSIS)
     assert rv.attempted == 131
     assert rv.failed == 0
 

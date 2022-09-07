@@ -3,7 +3,6 @@ name = "inform"
 version = '1.26.4'
 description = 'print & logging utilities for communicating with user'
 readme = "README.rst"
-requires-python = ">=3.6"
 license = {file = "LICENSE"}
 keywords = ["inform", "logging", "printing"]
 authors = [
@@ -13,12 +12,13 @@ authors = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Topic :: Utilities",
 ]
+requires-python = ">=3.6"
 dependencies = [
     "arrow",
     "six",
@@ -34,9 +34,9 @@ test = [
 
 [project.urls]
 homepage = "https://inform.readthedocs.io"
-documentation = "inform.readthedocs.io"
+documentation = "https://inform.readthedocs.io"
 repository = "https://github.com/kenkundert/inform"
-changelog = "https://github.com/kenkundert/inform/doc/releases.html"
+changelog = "https://github.com/KenKundert/inform/blob/master/doc/releases.rst"
 
 [build-system]
 requires = ["flit_core >=2,<4"]
