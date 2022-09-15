@@ -10,7 +10,7 @@
 Inform: Print & Logging Utilities
 =================================
 
-| Version: 1.26.5
+| Version: 1.27.0
 | Released: 2022-09-15
 | Please post all bugs and suggestions at
   `Inform Issues <https://github.com/KenKundert/inform/issues>`_
