@@ -10,10 +10,12 @@ Latest development release
     | Released: 2022-09-15
 
 
-1.27 (2022-09-05)
+1.27 (2022-09-15)
 -----------------
 
 - Add markers to :class:`ProgressBar`.
+- Change order of arguments to :func:`dedent`.
+- Drop support for Python 2.
 
 
 1.26 (2021-09-15)
