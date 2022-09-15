@@ -727,7 +727,7 @@ def fmt(message, *args, **kwargs):
 
 
 # dedent {{{2
-def dedent(text, bolm=None, strip_nl=None, wrap=False):
+def dedent(text, strip_nl=None, *, bolm=None, wrap=False):
     """
     Removes indentation that is common to all lines.
 
@@ -736,9 +736,10 @@ def dedent(text, bolm=None, strip_nl=None, wrap=False):
 
     bolm = None:
         The beginning of line mark (bolm) is replaced by a space after the 
-        indent is removed.  It must be the first character after the initial 
-        newline.  Normally bolm is a single character, often '|', but it may be
-        contain multiple characters, all of which are replaced by spaces.
+        indent is removed.  It must be the first non-space character after
+        the initial newline.  Normally bolm is a single character, often '|',
+        but it may be contain multiple characters, all of which are replaced by
+        spaces.
 
     strip_nl = None:
         strip_nl is used to strip off a single leading or trailing newline.

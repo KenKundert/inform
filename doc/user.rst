@@ -1131,6 +1131,77 @@ be a function, in which case it takes a single item as an argument and returns
        savings: $13,948.78
 
 
+.. _dedent desc:
+
+dedent
+"""""""
+
+.. py:function:: dedent(text, strip_nl=None, *, bolm=None, wrap=False)
+   :noindex:
+
+Without its named arguments, *dedent* behaves just like, and is as equivalent
+replacement for, *textwrap.dedent*.
+
+Args:
+    strip_nl = None:
+        strip_nl is used to strip off a single leading or trailing newline.
+        strip_nl may be None, 's', 'e', or 'b' representing neither,
+        start, end, or both. True may also be passed, which is equivalent to 'b'.
+
+    bolm = None:
+        The beginning of line mark (bolm) is replaced by a space after the 
+        indent is removed.  It must be the first non-space character after 
+        the initial newline.  Normally bolm is a single character, often 
+        '|', but it may be contain multiple characters, all of which are 
+        replaced by spaces.
+
+    wrap (bool or int):
+        If true the string is wrapped using a width of 70. If an integer value
+        is passed, is used as the width of the wrap.
+
+Examples:
+
+    >>> from inform import dedent
+
+    >>> print(dedent('''
+    ...     ◊   Diaspar
+    ...         Lys
+    ... ''', bolm='◊'))
+    <BLANKLINE>
+        Diaspar
+        Lys
+    <BLANKLINE>
+
+    >>> print(dedent('''
+    ...     |   Diaspar
+    ...     |   Lys
+    ... ''', bolm='|', strip_nl='e'))
+    <BLANKLINE>
+        Diaspar
+    |   Lys
+
+    >>> print(dedent('''
+    ...     ||  Diaspar
+    ...         Lys
+    ... ''', bolm='||', strip_nl='s'))
+        Diaspar
+        Lys
+    <BLANKLINE>
+
+    >>> print(dedent('''
+    ...         Diaspar
+    ...         Lys
+    ... ''', strip_nl='b'))
+    Diaspar
+    Lys
+
+    >>> print(dedent('''
+    ...         Diaspar
+    ...         Lys
+    ... ''', strip_nl='b', wrap=True))
+    Diaspar Lys
+
+
 .. _did_you_mean desc:
 
 did_you_mean
@@ -1139,23 +1210,23 @@ did_you_mean
 .. py:function:: did_you_mean(candidate, choices)
    :noindex:
 
-    Given a candidate string from the user, return the closest valid choice.
+Given a candidate string from the user, return the closest valid choice.
 
-    Args:
-        candidate (string):
-            The string given by the user.
-        choices (iterable):
-            The set of valid strings that the user was expected to choose from.
+Args:
+    candidate (string):
+        The string given by the user.
+    choices (iterable):
+        The set of valid strings that the user was expected to choose from.
 
-    Examples:
+Examples:
 
-        >>> from inform import did_you_mean
-        >>> did_you_mean('cat', ['cat', 'dog'])
-        'cat'
-        >>> did_you_mean('car', ['cat', 'dog'])
-        'cat'
-        >>> did_you_mean('car', {'cat': 1, 'dog': 2})
-        'cat'
+    >>> from inform import did_you_mean
+    >>> did_you_mean('cat', ['cat', 'dog'])
+    'cat'
+    >>> did_you_mean('car', ['cat', 'dog'])
+    'cat'
+    >>> did_you_mean('car', {'cat': 1, 'dog': 2})
+    'cat'
 
 
 .. _fmt desc:
@@ -1650,85 +1721,85 @@ plural
 .. py:class:: plural(count, num='#')
    :noindex:
 
-    Used with python format strings to conditionally format a phrase depending
-    on whether it refers to a singular or plural number of things.
+Used with python format strings to conditionally format a phrase depending
+on whether it refers to a singular or plural number of things.
 
-    The format specification has three sections, separated by '/'.  The first
-    section is always included, the last section is included if the given number
-    is plural, and the middle section, which can be omitted, is included if the
-    given number is singular.  If there is only one section, it is used as is
-    for the singular case and an 's' is added to it for the plural case.
-    If any of the sections contain a '#', it is replaced by the number of
-    things.
+The format specification has three sections, separated by '/'.  The first
+section is always included, the last section is included if the given number
+is plural, and the middle section, which can be omitted, is included if the
+given number is singular.  If there is only one section, it is used as is
+for the singular case and an 's' is added to it for the plural case.
+If any of the sections contain a '#', it is replaced by the number of
+things.
 
-    You may provide either a number (e.g. 0, 1, 2, ...) or any object that
-    implements `__len__()` (e.g. list, dict, set, ...).  In the latter case,
-    the length of the object will be used to decide whether to use the singular
-    of plural form.  Only 1 is considered to be singular; every other number is
-    considered plural.
+You may provide either a number (e.g. 0, 1, 2, ...) or any object that
+implements `__len__()` (e.g. list, dict, set, ...).  In the latter case,
+the length of the object will be used to decide whether to use the singular
+of plural form.  Only 1 is considered to be singular; every other number is
+considered plural.
 
-    If the format string starts with '!' then it is removed and the sense of
-    plurality is reversed (the plural form is used for one thing, and the
-    singular form is used otherwise). This is useful when pluralizing verbs.
+If the format string starts with '!' then it is removed and the sense of
+plurality is reversed (the plural form is used for one thing, and the
+singular form is used otherwise). This is useful when pluralizing verbs.
 
-    Here is a typical usage::
+Here is a typical usage::
 
-        >>> from inform import plural, conjoin
+    >>> from inform import plural, conjoin
 
-        >>> astronauts = ['John Glenn']
-        >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
-        'The astronaut: John Glenn'
+    >>> astronauts = ['John Glenn']
+    >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
+    'The astronaut: John Glenn'
 
-        >>> astronauts = ['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins']
-        >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
-        'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
+    >>> astronauts = ['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins']
+    >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
+    'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
 
-    The count can be inserted into the output by placing # into the format 
-    specification.
+The count can be inserted into the output by placing # into the format 
+specification.
 
-    If using '#' or '!' is inconvenient, you can change them by specifying the 
-    *num* or *invert* to *plural()*.
+If using '#' or '!' is inconvenient, you can change them by specifying the 
+*num* or *invert* to *plural()*.
 
-    Examples::
+Examples::
 
-        >>> f"{plural(1):# thing}"
-        '1 thing'
-        >>> f"{plural(2):# thing}"
-        '2 things'
+    >>> f"{plural(1):# thing}"
+    '1 thing'
+    >>> f"{plural(2):# thing}"
+    '2 things'
 
-        >>> f"{plural(1):# thing/s}"
-        '1 thing'
-        >>> f"{plural(2):# thing/s}"
-        '2 things'
+    >>> f"{plural(1):# thing/s}"
+    '1 thing'
+    >>> f"{plural(2):# thing/s}"
+    '2 things'
 
-        >>> f"{plural(1):/a cactus/# cacti}"
-        'a cactus'
-        >>> f"{plural(2):/a cactus/# cacti}"
-        '2 cacti'
+    >>> f"{plural(1):/a cactus/# cacti}"
+    'a cactus'
+    >>> f"{plural(2):/a cactus/# cacti}"
+    '2 cacti'
 
-        >>> f"{plural(1):# /is/are}"
-        '1 is'
-        >>> f"{plural(2):# /is/are}"
-        '2 are'
+    >>> f"{plural(1):# /is/are}"
+    '1 is'
+    >>> f"{plural(2):# /is/are}"
+    '2 are'
 
-        >>> f"{plural([]):# thing/s}"
-        '0 things'
-        >>> f"{plural([0]):# thing/s}"
-        '1 thing'
+    >>> f"{plural([]):# thing/s}"
+    '0 things'
+    >>> f"{plural([0]):# thing/s}"
+    '1 thing'
 
-        >>> f"{plural(1):!agree}"
-        'agrees'
-        >>> f"{plural(2):!agree}"
-        'agree'
+    >>> f"{plural(1):!agree}"
+    'agrees'
+    >>> f"{plural(2):!agree}"
+    'agree'
 
-    Finally, you can use the *format* method to directly produce a descriptive 
-    string::
+Finally, you can use the *format* method to directly produce a descriptive 
+string::
 
-        >>> plural(2).format("/a cactus/# cacti")
-        '2 cacti'
+    >>> plural(2).format("/a cactus/# cacti")
+    '2 cacti'
 
-    The original implementation is from `Veedrac
-    <http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.
+The original implementation is from `Veedrac
+<http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.
 
 
 .. _render desc:
