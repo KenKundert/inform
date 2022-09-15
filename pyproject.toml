@@ -1,6 +1,6 @@
 [project]
 name = "inform"
-version = '1.26.4'
+version = '1.26.5'
 description = 'print & logging utilities for communicating with user'
 readme = "README.rst"
 license = {file = "LICENSE"}
