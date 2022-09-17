@@ -130,7 +130,7 @@ def test_prostrate(capsys):
     out, err = capsys.readouterr()
     out = out.strip().split('\n')
     assert out[0] == 'DEBUG: test_debug.py, 129, tests.test_debug.test_prostrate():'
-    assert out[-2][-57:] == "inform/tests/test_debug.py', line 129, in test_prostrate,"
+    assert out[-2][-50:] == "tests/test_debug.py', line 129, in test_prostrate,"
     assert out[-1] == '        sss()'
 
 def test_rubber(capsys):
