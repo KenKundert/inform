@@ -1241,7 +1241,7 @@ class plural:
     http://stackoverflow.com/questions/21872366/plural-string-formatting
     """
 
-    def __init__(self, value, num='#', invert='!', slash='/'):
+    def __init__(self, value, *, num='#', invert='!', slash='/'):
         self.value = value
         self.symbol = num
         self.invert = invert
@@ -1326,7 +1326,10 @@ def full_stop(sentence, end='.', allow='.?!'):
 
 
 # columns {{{2
-def columns(array, pagewidth=79, alignment='<', leader='    ', min_sep_width=2):
+def columns(
+        array, pagewidth=79, alignment='<', leader='    ',
+        min_sep_width=2, min_col_width=1
+    ):
     """Distribute array over enough columns to fill the screen.
 
     Returns a multiline string.
@@ -1347,6 +1350,9 @@ def columns(array, pagewidth=79, alignment='<', leader='    ', min_sep_width=2):
 
         min_sep_width (int):
             The minimum number of spaces between columns.  Default is 2.
+
+        min_col_width (int):
+            The minimum number of spaces between columns.  Default is 1.
 
     **Example**::
 
@@ -1370,6 +1376,7 @@ def columns(array, pagewidth=79, alignment='<', leader='    ', min_sep_width=2):
     array = list(array)
     textwidth = pagewidth - len(leader)
     width = max([len(e) for e in array]) + min_sep_width - 1
+    width = max(min_col_width, width)
     numcols = max(1, textwidth//(width+1))
     stride = len(array)//numcols + 1
     fmt = '{{:{align}{width}s}}'.format(align=alignment, width=width)
@@ -1386,25 +1393,30 @@ def columns(array, pagewidth=79, alignment='<', leader='    ', min_sep_width=2):
 
 
 # render bar {{{2
-def render_bar(value, width=72):
+def render_bar(value, width=72, full_width=False):
     """Render graphic representation of a value in the form of a bar
 
     Args:
-        value (real): should be normalized (fall between 0 and 1)
+        value (real): Should be normalized (fall between 0 and 1)
 
-        width (int): the width of the bar in characters when value is 1.
+        width (int): The width of the bar in characters when value is 1.
 
+        full_width (bool):
+            Whether bar should be rendered to fill the whole width using
+            trailing spaces,.  This is useful if you plan to mark the end of the
+            bar.
     **Examples**::
 
         >>> from inform import render_bar
-        >>> display(render_bar(0))
-        <BLANKLINE>
 
-        >>> display(render_bar(0.5))
-        ████████████████████████████████████
+        >>> assets = {'property': 13_194, 'cash': 2846, 'equities': 19_301}
+        >>> total = sum(assets.values())
+        >>> for key, value in assets.items():
+        ...     display(f"{key:>8}: ❭{render_bar(value/total, full_width=True)}❬")
+        property: ❭██████████████████████████▉                                             ❬
+            cash: ❭█████▊                                                                  ❬
+        equities: ❭███████████████████████████████████████▎                                ❬
 
-        >>> display(render_bar(1.0))
-        ████████████████████████████████████████████████████████████████████████
 
     """
     scaled = value*width
@@ -1415,7 +1427,10 @@ def render_bar(value, width=72):
     buckets = int(scaled)
     frac = int((NUM_BAR_CHARS*scaled) % NUM_BAR_CHARS)
     extra = BAR_CHARS[frac-1:frac]
-    return buckets*BAR_CHARS[-1] + extra
+    bar = buckets*BAR_CHARS[-1] + extra
+    if full_width:
+         bar += (width - len(bar))*' '
+    return bar
 
 
 # Info class {{{2
@@ -2013,32 +2028,29 @@ class InformantFactory:
         In the console 'Pass' is rendered in green and 'FAIL' in red.
     """
 
-    def __init__(
-        self,
-        severity=None,
-        is_error=False,
-        log=True,
-        output=True,
-        notify=False,
-        terminate=False,
-        is_continuation=False,
-        message_color=None,
-        header_color=None,
-        stream=None,
-        clone=None,
-    ):
+    def __init__(self, **kwargs):
+        # set default values
+        self.severity = None
+        self.is_error = False
+        self.log = True
+        self.output = True
+        self.notify = False
+        self.terminate = False
+        self.is_continuation = False
+        self.message_color = None
+        self.header_color = None
+        self.stream = None
+
+        # override defaults with values from clone
+        clone = kwargs.pop('clone', None)
         if clone:
             self.__dict__.update(clone.__dict__)
-        self.severity = severity
-        self.is_error = is_error
-        self.log = log
-        self.output = output
-        self.notify = notify
-        self.terminate = terminate
-        self.is_continuation = is_continuation
-        self.message_color = Color(message_color)
-        self.header_color = Color(header_color)
-        self.stream = stream
+
+        # override with values specified in argument list
+        self.__dict__.update(kwargs)
+        self.header_color = Color(self.header_color)
+        self.message_color = Color(self.message_color)
+
 
     def __call__(self, *args, **kwargs):
         INFORMER._report(args, kwargs, self)
@@ -2342,7 +2354,7 @@ class Inform:
         self.culprit = ()
         self.stream_info = {}
 
-        # make verbosity flags consistent
+        # make verbosity flags consistent while saving
         self.mute = mute
         self.quiet = quiet
         if quiet:
@@ -3086,7 +3098,7 @@ class Error(Exception):
                 positional arguments of the exception are joined using *sep* and
                 that is returned.
 
-        Returned:
+        Returns:
             The formatted message without the culprits.
         """
         if not template:
@@ -3224,7 +3236,7 @@ class Error(Exception):
                 positional arguments of the exception are joined using *sep* and
                 that is returned.
 
-        Returned:
+        Returns:
             The formatted message with any culprits.
         """
         message = self.get_message(template)
