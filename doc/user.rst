@@ -40,8 +40,8 @@ as unnamed arguments:
 Informant Arguments
 """""""""""""""""""
 
-By default, all of the unnamed arguments converted to strings and then joined 
-together using a space between each argument.  However, you can use named 
+By default, all of the unnamed arguments are converted to strings and then 
+joined together using a space between each argument.  However, you can use named 
 arguments to change this behavior.  The following named arguments are used to 
 control the informants:
 
@@ -66,7 +66,7 @@ culprit = *None*:
    (default is ', ').
 
 codicil = *None*:
-   A string or a collection of strings that contain messages that are printed 
+   A string or a collection of strings that contains messages that are printed 
    after the primary message.
 
 wrap = False:
@@ -297,7 +297,8 @@ codicil
 
 Continues a previous message. Continued messages inherit the properties (output, 
 log, message color, etc) of the previous message.  If the previous message had 
-a header, that header is not output and instead the message is indented.
+a header, that header is not output and instead the message is indented.  
+Generally, one does not specify a culprit on codicils.
 
 .. code-block:: python
 
@@ -742,10 +743,10 @@ is a particular color:
 
 .. code-block:: python
 
-    >>> from inform import InformantFactory
+    >>> from inform import InformantFactory, display, output
 
-    >>> succeed = InformantFactory(message_color='green')
-    >>> fail = InformantFactory(message_color='red')
+    >>> succeed = InformantFactory(message_color='green', clone=display)
+    >>> fail = InformantFactory(message_color='red', clone=output)
 
     >>> succeed('This message would be green.')
     This message would be green.
@@ -755,9 +756,14 @@ is a particular color:
 
 A common use for this would be to have success and failure messages. For 
 example, if your program runs a series of tests, the successes could be printed 
-in green and the failures in red. In addition, the success informant may be 
-configured to suppress the messages if the user asks for quiet.  In that case, 
-only the failures would be displayed.
+in green and the failures in red.
+
+In this example, the two informants are first cloned from existing informants 
+before applying any additional arguments.  In this way the *success* informant 
+inherits the qualities of *display* and the *fail* informant inherits the 
+qualities of *output* before applying the color.  The result is that the 
+*success* informant suppresses the messages if the user asks for quiet, but the 
+*fail* informant does not.
 
 .. _inform exceptions:
 
