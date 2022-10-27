@@ -1930,6 +1930,19 @@ characters.
     0.113: ███████▉
     0.002: ▏
 
+If you would like to add delimiters to the bar, you can make each bar fixed 
+width by adding ``fullwidth=True``:
+
+.. code-block:: python
+
+    >>> assets = {'property': 13_194, 'cash': 2846, 'equities': 19_301}
+    >>> total = sum(assets.values())
+    >>> for key, value in assets.items():
+    ...     display(f"{key:>8}: ❭{render_bar(value/total, full_width=True)}❬")
+    property: ❭██████████████████████████▉                                             ❬
+        cash: ❭█████▊                                                                  ❬
+    equities: ❭███████████████████████████████████████▎                                ❬
+
 
 .. _title_case desc:
 
@@ -1947,9 +1960,9 @@ properly.
 .. code-block:: python
 
     >>> from inform import title_case
-    >>> headline = 'CDC warns about "aggressive" rats as coronavirus shuts down restaurants'
+    >>> headline = 'CDC warns about “aggressive” rats as coronavirus shuts down restaurants'
     >>> display(title_case(headline))
-    CDC Warns About "Aggressive" Rats as Coronavirus Shuts Down Restaurants
+    CDC Warns About “Aggressive” Rats as Coronavirus Shuts Down Restaurants
 
 
 Debugging Functions
