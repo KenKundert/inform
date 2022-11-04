@@ -1327,9 +1327,9 @@ def full_stop(sentence, end='.', allow='.?!'):
 
 # columns {{{2
 def columns(
-        array, pagewidth=79, alignment='<', leader='    ',
-        min_sep_width=2, min_col_width=1
-    ):
+    array, pagewidth=79, alignment='<', leader='    ',
+    min_sep_width=2, min_col_width=1
+):
     """Distribute array over enough columns to fill the screen.
 
     Returns a multiline string.
@@ -1429,7 +1429,7 @@ def render_bar(value, width=72, full_width=False):
     extra = BAR_CHARS[frac-1:frac]
     bar = buckets*BAR_CHARS[-1] + extra
     if full_width:
-         bar += (width - len(bar))*' '
+        bar += (width - len(bar))*' '
     return bar
 
 

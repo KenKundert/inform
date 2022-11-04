@@ -1,4 +1,4 @@
-Inform - Print & Logging Utilities
+Inform — Print & Logging Utilities
 ==================================
 
 ..  image:: https://github.com/KenKundert/inform/actions/workflows/build.yaml/badge.svg
