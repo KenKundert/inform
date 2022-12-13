@@ -68,7 +68,7 @@ config_filename = 'config'
 default_profile = 'me'
 avendesora_fieldname = 'estimated_value'
 value_updated_subfieldname = 'updated'
-aliases = {}
+aliases = {}   # type: dict[str, str]
 
 # cryptocurrency settings (empty coins to disable cryptocurrency support) {{{2
 proxy = None
@@ -244,7 +244,7 @@ try:
             continue
 
         # get account name {{{2
-        account_name = account.get_name()
+        account_name = account.get_name()  # type: str
         account_name = aliases.get(account_name, account_name)
         account_name = account_name.replace('_', ' ')
         width = max(width, len(account_name))

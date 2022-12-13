@@ -734,7 +734,7 @@ def dedent(text, strip_nl=None, *, bolm=None, wrap=False):
     Without its named arguments, dedent behaves just like, and is a equivalent
     replacement for, textwrap.dedent.
 
-    bolm = None:
+    bolm (str):
         The beginning of line mark (bolm) is replaced by a space after the 
         indent is removed.  It must be the first non-space character after
         the initial newline.  Normally bolm is a single character, often '|',
@@ -1039,11 +1039,11 @@ def did_you_mean(invalid_str, valid_strs):
 
 # parse_range {{{2
 def parse_range(
-        items_str,
-        cast=int,
-        range=lambda a, b: range(a, b+1),
-        block_delim=',',
-        range_delim='-'
+    items_str,
+    cast = int,
+    range = lambda a, b: range(a, b+1),
+    block_delim = ',',
+    range_delim = '-'
 ):
     """Parse a set of values from a string where commas can be used to separate 
     individual items and hyphens can be used to specify ranges of items.
@@ -1107,12 +1107,12 @@ def parse_range(
 
 # format_range {{{2
 def format_range(
-        items,
-        diff=lambda a, b: b - a,
-        key=None,
-        str=str,
-        block_delim=',',
-        range_delim='-',
+    items,
+    diff = lambda a, b: b - a,
+    key = None,
+    str = str,
+    block_delim = ',',
+    range_delim = '-',
 ):
     """Create a string that succinctly represents the given set of items.  
     Groups of consecutive items are succinctly displayed as a range, and other 
@@ -1500,8 +1500,10 @@ class ProgressBar:
     """Draw a progress bar.
 
     Args:
-        stop (float):
-            The last expected value.
+        stop (float, iterable):
+            The last expected value.  May also be an iterable (list, tuple,
+            iterator, etc), in which case the ProgressBar becomes an interable
+            and start and log are ignored.
 
         start (float):
             The first expected value. May be greater than or less than stop, but
@@ -1641,13 +1643,8 @@ class ProgressBar:
         self.previously_shown = ''
 
     # draw() {{{3
-    def draw(self, abscissa, marker=None, *, interrupted=False):
-        """Draw the progress bar.
-
-        Normally only those characters that are new since the last call to
-        draw() are output, however if *interrupted* is true all previous
-        characters are output as well.
-        """
+    def draw(self, abscissa, marker=None):
+        "Draw the progress bar."
         if self.finished:
             return
         if self.log:
@@ -1695,11 +1692,14 @@ class ProgressBar:
             return
 
         stream_info = self.informer.get_stream_info(self.informant)
+        flush = False
         if self.prefix:
             if stream_info.interrupted or not self.started:
                 self.informant(self.prefix, end='', continuing=True)
+                flush = True
         if stream_info.interrupted:
             self.informant(self.previously_shown, end='', continuing=True)
+            flush = True
 
         # choose the highest priority marker seen since last draw
         resolved_marker = marker
@@ -1729,12 +1729,18 @@ class ProgressBar:
         if text:
             text = color(''.join(text))
             self.informant(text, end='', continuing=True)
-            stream_info.stream.flush()
+            flush = True
+
             self.previously_shown += text
             self.use_prev_marker = False
         self.prev_index = index
         stream_info.interrupted = False
         self.started = True
+        if flush:
+            # something was printed, so flush the stream because an interruption
+            # could be printed to stderr, which is not buffered.  If this stream
+            # is not flushed the user may see output out of order.
+            stream_info.stream.flush()
 
     # context manager {{{3
     def __enter__(self):

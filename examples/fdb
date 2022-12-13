@@ -18,7 +18,7 @@ Options:
 
 # Imports {{{1
 from docopt import docopt
-from inform import display, os_error, terminate
+from inform import display, error, os_error, terminate
 import re
 from shlib import lsf, Run
 
