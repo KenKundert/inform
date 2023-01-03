@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""
+This program reads a table that contains both measured and expected results.
+It checks the measured result against the expected result and if out of 
+tolerance reports a failure, otherwise it reports a pass.
+
+The expected output of this program is:
+
+    Pass: measured = 5 g, expected = 0 g, diff = 5 g
+    Pass: measured = 512 g, expected = 500 g, diff = 12 g
+    FAIL: measured = 875 g, expected = 1 kg, diff = -125 g
+    FAIL: measured = 1.379 kg, expected = 1.5 kg, diff = -121 g
+
+where 'Pass' is rendered in green and 'FAIL' is red.
+"""
+
+from inform import Inform, InformantFactory, display
+from quantiphy import Quantity
+
+success = InformantFactory(
+    clone = display,
+    severity = 'Pass',
+    header_color = 'green'
+)
+failure = InformantFactory(
+    clone = display,
+    severity = 'FAIL',
+    header_color = 'red'
+)
+
+results = '''\
+    0 g,      5 g
+    500 g,    512 g
+    1 kg,     875 g
+    1.5 kg,   1.379 kg
+'''
+
+with Inform(prog_name=False), Quantity.prefs(reltol=0.05, abstol=10):
+    for line in results.splitlines():
+        fields = line.split(',')
+        expected = Quantity(fields[0])
+        measured = Quantity(fields[1])
+        report = success if expected.is_close(measured) else failure
+        report(
+            measured, expected, measured.add(-expected),
+            template='measured = {}, expected = {}, diff = {}'
+        )

@@ -2054,8 +2054,10 @@ class InformantFactory:
 
         # override with values specified in argument list
         self.__dict__.update(kwargs)
-        self.header_color = Color(self.header_color)
-        self.message_color = Color(self.message_color)
+        if not isinstance(self.header_color, Color):
+            self.header_color = Color(self.header_color)
+        if not isinstance(self.message_color, Color):
+            self.message_color = Color(self.message_color)
 
 
     def __call__(self, *args, **kwargs):
