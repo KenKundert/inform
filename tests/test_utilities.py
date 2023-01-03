@@ -743,54 +743,46 @@ def test_is_mapping():
     assert is_mapping({}) == True
 
 def test_color():
-    assert Color('white', 'dark')('') == ''
-    assert repr(Color('white', 'dark')) == "Color('white')"
+    assert Color('white', scheme='dark')('') == ''
+    assert repr(Color('white', scheme='dark')) == "Color('white')"
 
-    assert Color('black', 'dark')('black') == '\x1b[0;30mblack\x1b[0m'
-    assert Color('red', 'dark')('red') == '\x1b[0;31mred\x1b[0m'
-    assert Color('green', 'dark')('green') == '\x1b[0;32mgreen\x1b[0m'
-    assert Color('yellow', 'dark')('yellow') == '\x1b[0;33myellow\x1b[0m'
-    assert Color('blue', 'dark')('blue') == '\x1b[0;34mblue\x1b[0m'
-    assert Color('magenta', 'dark')('magenta') == '\x1b[0;35mmagenta\x1b[0m'
-    assert Color('cyan', 'dark')('cyan') == '\x1b[0;36mcyan\x1b[0m'
-    assert Color('white', 'dark')('white') == '\x1b[0;37mwhite\x1b[0m'
+    assert Color('black', scheme='dark')('black') == '\x1b[0;30mblack\x1b[0m'
+    assert Color('red', scheme='dark')('red') == '\x1b[0;31mred\x1b[0m'
+    assert Color('green', scheme='dark')('green') == '\x1b[0;32mgreen\x1b[0m'
+    assert Color('yellow', scheme='dark')('yellow') == '\x1b[0;33myellow\x1b[0m'
+    assert Color('blue', scheme='dark')('blue') == '\x1b[0;34mblue\x1b[0m'
+    assert Color('magenta', scheme='dark')('magenta') == '\x1b[0;35mmagenta\x1b[0m'
+    assert Color('cyan', scheme='dark')('cyan') == '\x1b[0;36mcyan\x1b[0m'
+    assert Color('white', scheme='dark')('white') == '\x1b[0;37mwhite\x1b[0m'
+    assert Color('red', scheme='dark', enable=False)('disabled') == 'disabled'
+    assert Color('cyan', scheme=None)('none') == 'none'
+    assert Color('blue', scheme=None, enable=False)('none') == 'none'
+    color =  Color('green', scheme='dark')
+    color.enable = False
+    assert color('disabled') == 'disabled'
 
-    assert Color('black', 'light')('black') == '\x1b[1;30mblack\x1b[0m'
-    assert Color('red', 'light')('red') == '\x1b[1;31mred\x1b[0m'
-    assert Color('green', 'light')('green') == '\x1b[1;32mgreen\x1b[0m'
-    assert Color('yellow', 'light')('yellow') == '\x1b[1;33myellow\x1b[0m'
-    assert Color('blue', 'light')('blue') == '\x1b[1;34mblue\x1b[0m'
-    assert Color('magenta', 'light')('magenta') == '\x1b[1;35mmagenta\x1b[0m'
-    assert Color('cyan', 'light')('cyan') == '\x1b[1;36mcyan\x1b[0m'
-    assert Color('white', 'light')('white') == '\x1b[1;37mwhite\x1b[0m'
-
-    assert Color('black')('black', scheme='dark') == '\x1b[0;30mblack\x1b[0m'
-    assert Color('red')('red', scheme='dark') == '\x1b[0;31mred\x1b[0m'
-    assert Color('green')('green', scheme='dark') == '\x1b[0;32mgreen\x1b[0m'
-    assert Color('yellow')('yellow', scheme='dark') == '\x1b[0;33myellow\x1b[0m'
-    assert Color('blue')('blue', scheme='dark') == '\x1b[0;34mblue\x1b[0m'
-    assert Color('magenta')('magenta', scheme='dark') == '\x1b[0;35mmagenta\x1b[0m'
-    assert Color('cyan')('cyan', scheme='dark') == '\x1b[0;36mcyan\x1b[0m'
-    assert Color('white')('white', scheme='dark') == '\x1b[0;37mwhite\x1b[0m'
-
-    assert Color('black')('black', scheme='light') == '\x1b[1;30mblack\x1b[0m'
-    assert Color('red')('red', scheme='light') == '\x1b[1;31mred\x1b[0m'
-    assert Color('green')('green', scheme='light') == '\x1b[1;32mgreen\x1b[0m'
-    assert Color('yellow')('yellow', scheme='light') == '\x1b[1;33myellow\x1b[0m'
-    assert Color('blue')('blue', scheme='light') == '\x1b[1;34mblue\x1b[0m'
-    assert Color('magenta')('magenta', scheme='light') == '\x1b[1;35mmagenta\x1b[0m'
-    assert Color('cyan')('cyan', scheme='light') == '\x1b[1;36mcyan\x1b[0m'
-    assert Color('white')('white', scheme='light') == '\x1b[1;37mwhite\x1b[0m'
-
-    assert Color('black', scheme=None)('black') == 'black'
-    assert Color('black')('black', scheme=None) == 'black'
+    assert Color('black', scheme='light')('black') == '\x1b[1;30mblack\x1b[0m'
+    assert Color('red', scheme='light')('red') == '\x1b[1;31mred\x1b[0m'
+    assert Color('green', scheme='light')('green') == '\x1b[1;32mgreen\x1b[0m'
+    assert Color('yellow', scheme='light')('yellow') == '\x1b[1;33myellow\x1b[0m'
+    assert Color('blue', scheme='light')('blue') == '\x1b[1;34mblue\x1b[0m'
+    assert Color('magenta', scheme='light')('magenta') == '\x1b[1;35mmagenta\x1b[0m'
+    assert Color('cyan', scheme='light')('cyan') == '\x1b[1;36mcyan\x1b[0m'
+    assert Color('white', scheme='light')('white') == '\x1b[1;37mwhite\x1b[0m'
+    assert Color('yellow', scheme='light', enable=False)('disabled') == 'disabled'
+    color =  Color('magenta', scheme='light')
+    color.enable = False
+    assert color('disabled') == 'disabled'
 
     Inform(colorscheme=None)
     assert Color('black')('black') == 'black'
+    assert Color('white', scheme=True)('white') == 'white'
     Inform(colorscheme='dark')
     assert Color('black')('black') == '\x1b[0;30mblack\x1b[0m'
+    assert Color('white', scheme=True)('white') == '\x1b[0;37mwhite\x1b[0m'
     Inform(colorscheme='light')
     assert Color('black')('black') == '\x1b[1;30mblack\x1b[0m'
+    assert Color('white', scheme=True)('white') == '\x1b[1;37mwhite\x1b[0m'
     assert Color.strip_colors(Color('red')('red')) == 'red'
 
 def test_join():
@@ -1462,19 +1454,19 @@ def test_sherbet(capsys):
         assert captured[0] == dedent("""
             before
             hello 0
-            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8
             hello 10
-            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6
             hello 20
-            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4
             hello 30
-            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2
             hello 40
             ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()
 
-def test_sherbet(capsys):
+def test_world(capsys):
     # ProgressBar: integer
     with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
         display('before')

@@ -30,6 +30,7 @@ class Color:
     def __init__(
         self,
         color: str,
+        *,
         scheme: str = ...,
         enable: bool = ...
     ) -> None:
@@ -128,7 +129,7 @@ class plural:
     def __format__(self, formatter: str) -> str: ...
 
 def full_stop(
-    sentence: str,
+    sentence: str | Exception,
     end: str = ...,
     allow: str = ...
 ) -> str:

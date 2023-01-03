@@ -50,13 +50,13 @@ from inform import Color
 import argparse
 
 # Globals {{{2
-status = Color('blue', 'dark')
-info = Color('magenta', 'dark')
-succeed = Color('green', 'dark')
-fail = Color('red', 'dark')
-warning = Color('yellow', 'dark')
-error = Color('red', 'dark')
-exception = Color('red', 'light')
+status = Color('blue', scheme='dark')
+info = Color('magenta', scheme='dark')
+succeed = Color('green', scheme='dark')
+fail = Color('red', scheme='dark')
+warning = Color('yellow', scheme='dark')
+error = Color('red', scheme='dark')
+exception = Color('red', scheme='light')
 
 
 # default python

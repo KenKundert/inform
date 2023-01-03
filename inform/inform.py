@@ -6,7 +6,7 @@
 # Documentation can be found at inform.readthedocs.io.
 
 # License {{{1
-# Copyright (c) 2014-2022 Kenneth S. Kundert
+# Copyright (c) 2014-2023 Kenneth S. Kundert
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -305,7 +305,7 @@ class Color:
     COLOR_CODE_REGEX = re.compile('\033' + r'\[[01](;\d\d)?m')
 
     # constructor {{{3
-    def __init__(self, color, scheme=True, enable=True):
+    def __init__(self, color, *, scheme=True, enable=True):
         self.color = color
         self.scheme = scheme
         self.enable = enable
@@ -2877,9 +2877,9 @@ class Inform:
             >>> with open(filename) as f, set_culprit(filename):
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
-            warning: pyproject.toml, 26: empty line.
-            warning: pyproject.toml, 34: empty line.
-            warning: pyproject.toml, 40: empty line.
+            warning: pyproject.toml, 25: empty line.
+            warning: pyproject.toml, 33: empty line.
+            warning: pyproject.toml, 39: empty line.
 
         """
         return self.CulpritContextManager(self, culprit, append=False)

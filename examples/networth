@@ -78,8 +78,8 @@ max_coin_price_age = 86400  # refresh cache if older than this (seconds)
 
 # bar settings {{{2
 screen_width = 79
-asset_color = 'green'
-debt_color = 'red'
+asset_color = Color('green')
+debt_color = Color('red')
     # currently we only colorize the bar because ...
     # - it is the only way of telling whether value is positive or negative
     # - trying to colorize the value really messes with the column widths and is 
@@ -164,12 +164,6 @@ try:
     else:
         narrate('not found:', config_filepath)
 
-    # Process the settings
-    if is_str(date_formats):
-        date_formats = [date_formats]
-    asset_color = Color(asset_color)
-    debt_color = Color(debt_color)
-
     # Get cryptocurrency prices {{{1
     if coins:
         import requests
@@ -183,8 +177,8 @@ try:
             age = now.timestamp - prices_cache.stat().st_mtime
             cache_valid = age < max_coin_price_age
         if cache_valid:
-            contents = prices_cache.read_text()
-            prices = Quantity.extract(contents)
+            contents = prices_cache.read_text()  # type: dict[str, Quantity]
+            prices = Quantity.extract(contents)  # type: dict[str, Quantity]
             narrate('coin prices are current:', prices_cache)
         else:
             narrate('updating coin prices')
@@ -224,7 +218,7 @@ try:
     # Build account summaries {{{1
     narrate('running avendesora')
     pw = PasswordGenerator()
-    totals = {}
+    totals = {}  # type: dict[str, Quantity]
     accounts = {}
     total_assets = Quantity(0, '$')
     total_debt = Quantity(0, '$')
@@ -283,7 +277,7 @@ try:
             if age and age > max_account_value_age:
                 desc += f' ({age//30} months old)'
         accounts[account_name] = join(
-            total, desc.replace('_', ' '),
+            total, desc.replace('_', ' '),   # type: ignore
             template=('{:7q} {}', '{:7q}'), remove=(None,'')
         )
 

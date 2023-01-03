@@ -9,6 +9,12 @@ Latest development release
     | Version: 1.27.1
     | Released: 2022-10-26
 
+- Added type hints.
+
+.. warning::
+
+    :class:`Color` now requires secondary arguments to be specified by name.
+
 
 1.27 (2022-09-15)
 -----------------

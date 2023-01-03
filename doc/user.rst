@@ -1682,10 +1682,10 @@ You can also use the :class:`Color` class:
 .. code-block:: python
 
     >>> markers = dict(
-    ...     okay=('⋅', Color('green', Color.isTTY())),
-    ...     warn=('–', Color('yellow', Color.isTTY())),
-    ...     fail=('+', Color('magenta', Color.isTTY())),
-    ...     error=('×', Color('red', Color.isTTY()))
+    ...     okay=('⋅', Color('green', enable=Color.isTTY())),
+    ...     warn=('–', Color('yellow', enable=Color.isTTY())),
+    ...     fail=('+', Color('magenta', enable=Color.isTTY())),
+    ...     error=('×', Color('red', enable=Color.isTTY()))
     ... )
 
 The progress bar generally handles interruptions with grace. For example:
