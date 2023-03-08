@@ -53,6 +53,21 @@ These are used to configure inform for doctests:
 """
 
 # Inform Utilities {{{1
+# _print {{{2
+def _print(*args, **kwargs):
+    "This is the system print function except that it ignores BrokenPipeError"
+    try:
+        print(*args, **kwargs)
+    except BrokenPipeError:
+        # must close the stream
+        # if not _io.TextIOWrapper prints an “exception ignored” message
+        stream = kwargs.get('file', sys.stdout)
+        try:
+            # this raises the BrokenPipeError exception yet again
+            stream.close()
+        except BrokenPipeError:
+            pass
+
 # indent {{{2
 def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     r"""Add indentation.
@@ -2474,7 +2489,7 @@ class Inform:
                 assert hasattr(logfile, 'close'), 'expected logfile to be string, path, or stream.'
             # else no logfile
         except OSError as e:
-            print(os_error(e), file=sys.stderr)
+            _print(os_error(e), file=sys.stderr)
             logfile = None
 
         self.logfile = logfile
@@ -2596,7 +2611,7 @@ class Inform:
 
             if action._notify_user(self) or notify_override:
                 import subprocess
-                urgency = kwargs.get('urgency')
+                urgency = kwargs.get('urgency', 'critical' if action.is_error else None)
                 if urgency in ['low', 'normal', 'critical']:
                     urgency = '--urgency=' + urgency
                 body = ': '.join(cull([culprit, message]))
@@ -2658,7 +2673,7 @@ class Inform:
             # bar. This clause is executed if a continuing message is
             # interrupted by a regular message before it has completed, such as
             # when a progress bar is interrupted with an informational message.
-            print(**options)  # start the informational message on a new line
+            _print(**options)  # start the informational message on a new line
             stream_info.interrupted = True
         if terminated:
             stream_info.empty_line = True
@@ -2668,11 +2683,11 @@ class Inform:
         if multiline:
             head = ': '.join(cull([header, culprit]))
             if head:
-                print('%s:\n%s' % (head, indent(message)), **options)
+                _print('%s:\n%s' % (head, indent(message)), **options)
             else:
-                print(indent(message), **options)
+                _print(indent(message), **options)
         else:
-            print(': '.join(cull([header, culprit, message])), **options)
+            _print(': '.join(cull([header, culprit, message])), **options)
 
     # done {{{2
     def done(self, exit=True):
@@ -2735,7 +2750,7 @@ class Inform:
             self.termination_callback()
         if is_str(status):
             log(status)
-            print(status, file=sys.stderr)
+            _print(status, file=sys.stderr)
             status = self.error_status
         self.close_logfile(status)
         if exit:
