@@ -6,8 +6,8 @@ Releases
 Latest development release
 --------------------------
 
-    | Version: 1.27.1
-    | Released: 2022-10-26
+    | Version: 1.27.2
+    | Released: 2023-03-08
 
 - Added type hints.
 
