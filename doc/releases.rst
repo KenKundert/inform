@@ -9,11 +9,22 @@ Latest development release
     | Version: 1.27.2
     | Released: 2023-03-08
 
+
+1.28 (2023-03-20)
+-----------------
+
+- Use critical urgency by default with notifier if message is an error.
+- Ignore BrokenPipeError.
+- Add *full_width* argument to :func:`render_bar`.
+- Require secondary arguments to :class:`Color` be keyword arguments.
+- Require secondary arguments to :class:`plural` be keyword arguments.
+- Add *max_col_width* parameter to :func:`columns`.
 - Added type hints.
 
 .. warning::
 
-    :class:`Color` now requires secondary arguments to be specified by name.
+    :class:`Color` and :class:`plural` now requires secondary arguments to be 
+    specified by name.
 
 
 1.27 (2022-09-15)
