@@ -373,6 +373,7 @@ Documentation
    user
    examples
    api
+   accessories
    releases
 
 *  :ref:`genindex`

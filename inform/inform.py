@@ -1925,10 +1925,18 @@ def ccc(*args, **kwargs):
     _debug(frame_depth, args, kwargs=dict(sep='\n'))
 
 
-def sss():
-    "Print a stack trace."
+def sss(ignore_exceptions=True):
+    """Print a stack trace
+
+    Args:
+        ignore_exceptions: (bool)
+            If true, the stack trace will exclude the path through exceptions.
+    """
     import traceback
-    tb = traceback.extract_stack()
+    if ignore_exceptions:
+        tb = traceback.extract_stack()
+    else:
+        tb = traceback.extract_tb(sys.exc_info()[2])
     stacktrace = []
     for filename, lineno, funcname, text in tb[:-1]:
         filename = 'File {!r}'.format(filename) if filename else None
@@ -2710,6 +2718,18 @@ class Inform:
         else:
             return 0
 
+    # _compute_exit_status {{{2
+    def _compute_exit_status(self, requested_status):
+        if requested_status is None:
+            return self.error_status if self.errors_accrued() else 0
+        if requested_status is True:
+            return self.error_status
+        if is_str(requested_status):
+            log(requested_status)
+            _print(requested_status, file=sys.stderr)
+            return self.error_status
+        return requested_status
+
     # terminate {{{2
     def terminate(self, status=None, exit=True):
         """Terminate the program with specified exit status.
@@ -2742,16 +2762,9 @@ class Inform:
             | 2: error
             | 3: panic
         """
-        if status is None:
-            status = self.error_status if self.errors_accrued() else 0
-        elif status is True:
-            status = self.error_status
+        status = self._compute_exit_status(status)
         if self.termination_callback:
             self.termination_callback()
-        if is_str(status):
-            log(status)
-            _print(status, file=sys.stderr)
-            status = self.error_status
         self.close_logfile(status)
         if exit:
             raise SystemExit(status)

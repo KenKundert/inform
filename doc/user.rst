@@ -2122,7 +2122,7 @@ good way of confirming that a line of code has been reached.
 sss
 """
 
-.. py:function:: sss()
+.. py:function:: sss(ignore_exceptions)
    :noindex:
 
 :func:`sss` prints a stack trace, which can answer the *How did I get here?* 
