@@ -650,11 +650,13 @@ To configure *Inform* to generate a logfile you can specify the logfile to
 :class:`Inform` or to :meth:`Inform.set_logfile`.  The logfile can be specified 
 as a string, a *pathlib.Path*, an open stream, or as a Boolean. If *True*, 
 a logfile is created and named *./<prog_name>.log*.  If *False*, no logfile is 
-created.  In addition, if you want to defer the decision on what should be the 
-logfile without losing the log messages that occur before the ultimate 
-destination of those messages is set, you can use an instance of 
-:class:`LoggingCache`, which simply saves the messages in memory until it is
-replaced, at which point they are transferred to the new logfile.  For example:
+created.
+
+You may want to defer the decision on what should be the logfile without losing 
+the log messages that occur before the ultimate destination of those messages is 
+set. You can do so using an instance of :class:`LoggingCache`, which simply 
+saves the messages in memory until it is replaced, at which point they are 
+transferred to the new logfile.  For example:
 
 .. code-block:: python
 
@@ -673,7 +675,13 @@ replaced, at which point they are transferred to the new logfile.  For example:
         This message is not cached.
 
 An existing logfile will be renamed before creating the logfile if you specify 
-*prev_logfile_suffix* to :class:`Inform`.
+*prev_logfile_suffix* to :class:`Inform`.  In many cases, this does not provide 
+enough persistence for the logged information.  In that case you can use `ntlog 
+<https://github.com/KenKundert/ntlog>`_, which accumulates the contents of 
+multiple logfiles into a `NestedText <https://nestedtext.org>`_ file.  It allows 
+you to place limits on how many logs to retain in order to keep the logfile 
+reasonably sized.  Visit the :ref:`accessories page <ntlog accessory>` for 
+examples on how to use *ntlog*.
 
 
 Message Destination
