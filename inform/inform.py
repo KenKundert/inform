@@ -744,8 +744,10 @@ def dedent(text, strip_nl=None, *, bolm=None, wrap=False):
 
     strip_nl = None:
         strip_nl is used to strip off a single leading or trailing newline.
-        strip_nl may be None, 's', 'e', or 'b' representing neither,
-        start, end, or both. True may also be passed, which is equivalent to 'b'.
+        strip_nl may be None, 'l', 't', or 'b' representing neither,
+        leading, trailing, or both. True may also be passed, which is equivalent to 'b'.
+        Can also use 's' (start) as synonym for 'l' and 'e' (end) as
+        synonym for 't'.
 
     wrap (bool or int):
         If true the string is wrapped using a width of 70. If an integer value
@@ -803,11 +805,11 @@ def dedent(text, strip_nl=None, *, bolm=None, wrap=False):
             dedented = '\n' + ' '*len(bolm) + dedented[l:]
 
     # remove leading newline if desired
-    if strip_nl in ['s', 'b', 'True'] and dedented[0] == '\n':
+    if strip_nl in ['s', 'b', 'l', 'True'] and dedented[0] == '\n':
         dedented = dedented[1:]
 
     # remove trailing newline if desired
-    if strip_nl in ['e', 'b', 'True'] and dedented[-1] == '\n':
+    if strip_nl in ['e', 'b', 't', 'True'] and dedented[-1] == '\n':
         dedented = dedented[:-1]
 
     # wrap text to desired width
@@ -2019,7 +2021,7 @@ class InformantFactory:
             ...     header_color = 'red'
             ... )
 
-        *success* and *failure* are both informants. Once created, the can be
+        *success* and *failure* are both informants. Once created, they can be
         used to give messages to the user::
 
             >>> results = [
