@@ -165,6 +165,7 @@ try:
         narrate('not found:', config_filepath)
 
     # Get cryptocurrency prices {{{1
+    prices = {}  # type: dict[str, Quantity]
     if coins:
         import requests
 
@@ -178,7 +179,8 @@ try:
             cache_valid = age < max_coin_price_age
         if cache_valid:
             contents = prices_cache.read_text()  # type: dict[str, Quantity]
-            prices = Quantity.extract(contents)  # type: dict[str, Quantity]
+            p = Quantity.extract(contents)       # type: dict[str, Quantity]
+            prices = p
             narrate('coin prices are current:', prices_cache)
         else:
             narrate('updating coin prices')
@@ -212,8 +214,6 @@ try:
                 prices_cache.write_text(contents)
                 narrate('updating coin prices:', prices_cache)
         prices['USD'] = Quantity(1, '$')
-    else:
-        prices = {}
 
     # Build account summaries {{{1
     narrate('running avendesora')

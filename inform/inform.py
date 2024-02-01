@@ -4,7 +4,7 @@
 # Utilities for communicating directly with the user.
 # Documentation can be found at inform.readthedocs.io.
 #
-# Copyright (c) 2014-2023 Kenneth S. Kundert
+# Copyright (c) 2014-2024 Kenneth S. Kundert
 # This software is licensed under the `MIT Licents <https://mit-license.org>`_.
 
 # Imports {{{1
