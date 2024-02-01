@@ -5,7 +5,7 @@
 Accessories
 ===========
 
-.. _ntlog accessory:
+.. _inform ntlog accessory:
 
 Logging with ntLog
 ------------------

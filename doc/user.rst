@@ -680,8 +680,8 @@ enough persistence for the logged information.  In that case you can use `ntlog
 <https://github.com/KenKundert/ntlog>`_, which accumulates the contents of 
 multiple logfiles into a `NestedText <https://nestedtext.org>`_ file.  It allows 
 you to place limits on how many logs to retain in order to keep the logfile 
-reasonably sized.  Visit the :ref:`accessories page <ntlog accessory>` for 
-examples on how to use *ntlog*.
+reasonably sized.  Visit the :ref:`accessories page <inform ntlog accessory>` 
+for examples on how to use *ntlog*.
 
 
 Message Destination

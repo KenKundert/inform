@@ -16,6 +16,9 @@ Inform — Print & Logging Utilities
 .. image:: https://img.shields.io/pypi/v/inform.svg
     :target: https://pypi.python.org/pypi/inform
 
+.. image:: https://anaconda.org/conda-forge/inform/badges/version.svg
+    :target: https://anaconda.org/conda-forge/inform
+
 .. image:: https://img.shields.io/pypi/pyversions/inform.svg
     :target: https://pypi.python.org/pypi/inform/
 
