@@ -9,6 +9,8 @@ Latest development release
     | Version: 1.28.2
     | Released: 2023-11-08
 
+- Change *strip_nl* keys for :func:`dedent()`.
+
 
 1.28 (2023-03-20)
 -----------------
