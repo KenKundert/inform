@@ -1,27 +1,7 @@
 Inform — Print & Logging Utilities
 ==================================
 
-..  image:: https://github.com/KenKundert/inform/actions/workflows/build.yaml/badge.svg
-    :target: https://github.com/KenKundert/inform/actions/workflows/build.yaml
-
-.. image:: https://pepy.tech/badge/inform/month
-    :target: https://pepy.tech/project/inform
-
-.. image:: https://img.shields.io/readthedocs/inform.svg
-   :target: https://inform.readthedocs.io/en/latest/?badge=latest
-
-.. image:: https://img.shields.io/coveralls/KenKundert/inform.svg
-    :target: https://coveralls.io/r/KenKundert/inform
-
-.. image:: https://img.shields.io/pypi/v/inform.svg
-    :target: https://pypi.python.org/pypi/inform
-
-.. image:: https://anaconda.org/conda-forge/inform/badges/version.svg
-    :target: https://anaconda.org/conda-forge/inform
-
-.. image:: https://img.shields.io/pypi/pyversions/inform.svg
-    :target: https://pypi.python.org/pypi/inform/
-
+|build status| |downloads| |rtd status| |coverage| |pypi version| |anaconda version| |python version|
 
 :Author: Ken Kundert
 :Version: 1.28.2
@@ -62,8 +42,6 @@ stable version of the code from `PyPI <https://pypi.python.org>`_ using::
 
 You can find the latest development version of the source code on
 `Github <https://github.com/KenKundert/inform>`_.
-
-Supported in Python2.7, Python3.5, Python3.6, Python3.7 and Python3.8.
 
 
 Introduction
@@ -438,3 +416,27 @@ returned. For example:
    pass: signalman
 
 When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
+
+
+.. |build status| image:: https://github.com/KenKundert/inform/actions/workflows/build.yaml/badge.svg
+    :target: https://github.com/KenKundert/inform/actions/workflows/build.yaml
+
+.. |downloads| image:: https://pepy.tech/badge/inform/month
+    :target: https://pepy.tech/project/inform
+
+.. |rtd status| image:: https://img.shields.io/readthedocs/inform.svg
+   :target: https://inform.readthedocs.io/en/latest/?badge=latest
+
+.. |coverage| image:: https://img.shields.io/coveralls/KenKundert/inform.svg
+    :target: https://coveralls.io/r/KenKundert/inform
+
+.. |pypi version| image:: https://img.shields.io/pypi/v/inform.svg
+    :target: https://pypi.python.org/pypi/inform
+
+.. |anaconda version| image:: https://anaconda.org/conda-forge/inform/badges/version.svg
+    :target: https://anaconda.org/conda-forge/inform
+
+.. |python version| image:: https://img.shields.io/pypi/pyversions/inform.svg
+    :target: https://pypi.python.org/pypi/inform/
+
+
