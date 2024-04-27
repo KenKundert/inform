@@ -13,10 +13,10 @@ Logging with ntLog
 `ntLog <https://github.com/KenKundert/ntlog>`_ is a log file aggregation 
 utility.
 
-Unlike daemons, *Inform* based applications tend to run on demand.  If it 
-generates a log file, each run over-writes over a previously generated logfile.  
-This can be problematic if you are interested in keeping a log of events that do 
-not occur during each run.
+Unlike daemons, *Inform* based applications tend to run on demand.  If the 
+application generates a log file, each run over-writes over a previously 
+generated logfile.  This can be problematic if you are interested in keeping 
+a log of events that do not occur during each run.
 
 *ntlog* is a utility that accumulates logfiles into `NestedText 
 <https://nestedtext.org>`_ file.  It provides *NTlog*, a class whose instances 

@@ -2464,11 +2464,11 @@ class Inform:
 
         if prev_logfile_suffix and not self.logfile_copied:
             try:
-                prev_logfile = logfile + prev_logfile_suffix
+                prev_logfile = str(logfile) + prev_logfile_suffix
                 if os.path.exists(prev_logfile) and os.path.isfile(prev_logfile):
                     os.unlink(prev_logfile)
-                if os.path.exists(logfile) and os.path.isfile(logfile):
-                    os.rename(logfile, prev_logfile)
+                if os.path.exists(str(logfile)) and os.path.isfile(str(logfile)):
+                    os.rename(str(logfile), prev_logfile)
                     self.logfile_copied = True
             except OSError:
                 pass
@@ -3186,7 +3186,7 @@ class Error(Exception):
             tuple even if there is only one component.
         """
         exception_codicil = self.kwargs.get('codicil', getattr(self, 'codicil', ()))
-        if not is_collection(exception_codicil):
+        if exception_codicil and not is_collection(exception_codicil):
             exception_codicil = (exception_codicil,)
         if codicil:
             if not is_collection(codicil):
@@ -3246,7 +3246,7 @@ class Error(Exception):
         raise
 
     # render {{{3
-    def render(self, template=None):
+    def render(self, template=None, include_codicil=True):
         """Convert exception to a string for use in an error message.
 
         Args:
@@ -3260,12 +3260,22 @@ class Error(Exception):
                 positional arguments of the exception are joined using *sep* and
                 that is returned.
 
+            include_codicil (bool):
+                Include the codicil in the rendered message.
+
         Returns:
             The formatted message with any culprits.
         """
         message = self.get_message(template)
         culprit = join_culprit(self.get_culprit())
-        return "%s: %s" % (culprit, message) if culprit else message
+        message = f"{culprit}: {message}" if culprit else message
+        if include_codicil:
+            codicil = self.get_codicil()
+            if codicil:
+                # codicil = '\n\n'.join(cull(codicil))
+                codicil = '\n'.join(codicil)
+                return f"{message}\n{indent(codicil)}"
+        return message
 
     def __str__(self):
         return self.render()

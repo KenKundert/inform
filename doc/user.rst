@@ -1801,10 +1801,12 @@ Examples::
     >>> f"{plural([0]):# thing/s}"
     '1 thing'
 
-    >>> f"{plural(1):!agree}"
-    'agrees'
-    >>> f"{plural(2):!agree}"
-    'agree'
+    >>> sellers = ['Samson']
+    >>> buyers = ['Reuben', 'Cherise']
+    >>> print(f"{plural(sellers):Seller} {plural(sellers):!offer} the following terms:")
+    Seller offers the following terms:
+    >>> print(f"{plural(buyers):Buyer} {plural(buyers):!agree} to the following terms:")
+    Buyers agree to the following terms:
 
 Finally, you can use the *format* method to directly produce a descriptive 
 string::

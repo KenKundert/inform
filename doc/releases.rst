@@ -9,7 +9,12 @@ Latest development release
     | Version: 1.28.2
     | Released: 2023-11-08
 
+
+1.29 (2024-04-27)
+-----------------
+
 - Change *strip_nl* keys for :func:`dedent()`.
+- Added *include_codicil* argument to :meth:`Error.render()`.
 
 
 1.28 (2023-03-20)

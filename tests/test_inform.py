@@ -2,12 +2,11 @@
 
 # Imports {{{1
 from inform import (
-    Inform, InformantFactory, Error, codicil, display, done, error,
+    Inform, InformantFactory, Error, codicil, dedent, display, done, error,
     errors_accrued, fatal, log, output, terminate, terminate_if_errors, warn,
     set_culprit, add_culprit, get_culprit, join_culprit
 )
 from contextlib import contextmanager
-from textwrap import dedent
 import sys
 import re
 import pytest
@@ -247,7 +246,10 @@ def test_pardon():
             assert err.get_codicil() == ('putz',)
             assert join_culprit(err.get_culprit()) == 'nutz'
             assert err.extra == 'foo'
-            assert str(err) == 'nutz: hey now!'
+            assert str(err) == dedent("""
+                nutz: hey now!
+                    putz
+            """, strip_nl="b")
             assert errors_accrued() == 0  # errors don't accrue until reported
 
         try:
@@ -264,11 +266,25 @@ def test_pardon():
             assert err.get_codicil() == ('putz', 'toodle')
             assert join_culprit(err.get_culprit()) == 'nutz, crunch'
             assert err.extra == 'foo'
-            assert str(err) == 'nutz, crunch: hey now!'
+            assert str(err) == dedent("""
+                nutz, crunch: hey now!
+                    putz
+                    toodle
+            """, strip_nl="b")
             assert err.get_message() == 'hey now!'
             assert err.get_message('{extra}, {}') == 'foo, hey now!'
-            assert err.render() == 'nutz, crunch: hey now!'
-            assert err.render('{extra}, {}') == 'nutz, crunch: foo, hey now!'
+            assert err.render() == dedent("""
+                nutz, crunch: hey now!
+                    putz
+                    toodle
+            """, strip_nl="b")
+            assert err.render(include_codicil=False) == 'nutz, crunch: hey now!'
+            assert err.render('{extra}, {}', include_codicil=False) == 'nutz, crunch: foo, hey now!'
+            assert err.render('{extra}, {}') == dedent("""
+                nutz, crunch: foo, hey now!
+                    putz
+                    toodle
+            """, strip_nl="b")
             assert errors_accrued() == 0  # errors don't accrue until reported
             try:
                 err.terminate()
