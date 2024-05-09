@@ -26,6 +26,8 @@ STREAM_POLICIES = {
         # stderr is used on final termination message
     'header': lambda i, so, se: se if i.severity else so,
         # stderr is used on all messages that include headers
+    'errors': lambda i, so, se: se if i.is_error else so,
+        # stderr is used on all errors
 }
 BAR_CHARS = '▏▎▍▌▋▊▉█'
 NUM_BAR_CHARS = len(BAR_CHARS)
@@ -1355,7 +1357,7 @@ def columns(
             The minimum number of spaces between columns.  Default is 2.
 
         min_col_width (int):
-            The minimum number of spaces between columns.  Default is 1.
+            The minimum width of a column.  Default is 1.
 
     **Example**::
 

@@ -1,7 +1,7 @@
 Inform — Print & Logging Utilities
 ==================================
 
-|build status| |downloads| |rtd status| |coverage| |pypi version| |anaconda version| |python version|
+|downloads| |build status| |coverage| |rtd status| |pypi version| |anaconda version| |python version|
 
 :Author: Ken Kundert
 :Version: 1.29

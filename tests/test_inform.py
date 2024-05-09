@@ -400,18 +400,55 @@ def test_possess():
             'hey now!',
             'hey now!',
         ]
-        err = [
+        wrn = [
             'Aiko aiko all day',
             'jockomo feeno na na nay',
             'jockomo feena nay.',
         ]
+        err = [
+            "My spy dog saw you spy dog sittin' by the fi-yo.",
+        ]
         display(*out)
-        warn(*err, sep=', ')
+        warn(*wrn, sep=', ')
+        error(*err, sep=', ')
 
-        assert msg.errors_accrued() == 0
-        assert errors_accrued(True) == 0
-        assert strip(stdout) == ' '.join(out)
-        assert strip(stderr) == 'warning: ' + ', '.join(err)
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == '\n'.join([
+            ' '.join(out),
+        ])
+        assert strip(stderr) == '\n'.join([
+            'warning: ' + ', '.join(wrn),
+            'error: ' + ', '.join(err)
+        ])
+
+def test_bower():
+    with messenger(stream_policy='errors') as (msg, stdout, stderr, logfile):
+        out = [
+            'hey now!',
+            'hey now!',
+        ]
+        wrn = [
+            'Aiko aiko all day',
+            'jockomo feeno na na nay',
+            'jockomo feena nay.',
+        ]
+        err = [
+            "My spy dog saw you spy dog sittin' by the fi-yo.",
+        ]
+        display(*out)
+        warn(*wrn, sep=', ')
+        error(*err, sep=', ')
+
+        assert msg.errors_accrued() == 1
+        assert errors_accrued(True) == 1
+        assert strip(stdout) == '\n'.join([
+            ' '.join(out),
+            'warning: ' + ', '.join(wrn)
+        ])
+        assert strip(stderr) == '\n'.join([
+            'error: ' + ', '.join(err)
+        ])
 
 def test_unbuckle():
     with messenger() as (msg, stdout, stderr, logfile):
