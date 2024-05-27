@@ -6,8 +6,8 @@ Releases
 Latest development release
 --------------------------
 
-    | Version: 1.29
-    | Released: 2024-04-27
+    | Version: 1.29.1
+    | Released: 2024-05-26
 
 - Added :class:`truth` utility class.
 - Added *errors* *stream_policy*.
