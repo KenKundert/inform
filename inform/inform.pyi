@@ -128,6 +128,26 @@ class plural:
 
     def __format__(self, formatter: str) -> str: ...
 
+    def __int__(self) -> int: ...
+
+class truth:
+    def __init__(
+        self,
+        value: bool,
+        *,
+        interpolate: str = ...,
+        slash: str = ...
+    ) -> None:
+        ...
+
+    def format(self, formatter: str) -> str: ...
+
+    def __format__(self, formatter: str) -> str: ...
+
+    def __str__(self) -> str: ...
+
+    def __bool__(self) -> bool: ...
+
 def full_stop(
     sentence: str | Exception,
     end: str = ...,

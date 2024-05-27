@@ -6,6 +6,7 @@ from .inform import (
     # user utility functions and classes
     columns, conjoin, dedent, did_you_mean, fmt, format_range, full_stop,
     os_error, parse_range, plural, ProgressBar, render, render_bar, title_case,
+    truth,
 
     # debug functions
     aaa, ccc, ddd, ppp, sss, vvv,

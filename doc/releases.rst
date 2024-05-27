@@ -9,6 +9,8 @@ Latest development release
     | Version: 1.29
     | Released: 2024-04-27
 
+- Added :class:`truth` utility class.
+- Added *errors* *stream_policy*.
 
 1.29 (2024-04-27)
 -----------------

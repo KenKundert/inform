@@ -1732,11 +1732,11 @@ that no items are processed and so the progress bar is not printed.
 plural
 """"""
 
-.. py:class:: plural(count, num='#')
+.. py:class:: plural(value, *, num='#', invert="!', slash='/')
    :noindex:
 
 Used with python format strings to conditionally format a phrase depending
-on whether it refers to a singular or plural number of things.
+on whether *value* consists of a singular or plural number of things.
 
 The format specification has three sections, separated by '/'.  The first
 section is always included, the last section is included if the given number
@@ -1807,6 +1807,12 @@ Examples::
     Seller offers the following terms:
     >>> print(f"{plural(buyers):Buyer} {plural(buyers):!agree} to the following terms:")
     Buyers agree to the following terms:
+
+    Converting *plural* to an integer returns the count.
+    >>> int(plural(5))
+    5
+    >>> int(plural(['a', 'b', 'c']))
+    3
 
 Finally, you can use the *format* method to directly produce a descriptive 
 string::
@@ -1979,6 +1985,68 @@ properly.
     >>> headline = 'CDC warns about “aggressive” rats as coronavirus shuts down restaurants'
     >>> display(title_case(headline))
     CDC Warns About “Aggressive” Rats as Coronavirus Shuts Down Restaurants
+
+
+.. _truth desc:
+
+truth
+"""""
+
+.. py:class:: truth(value, *, interpolate='%', slash='/')
+   :noindex:
+
+Used with python format strings to conditionally format a phrase depending
+on whether *value* is true or false.
+
+The format string has two sections, separated by '/'.  The first section is
+included only if the given value is true and the last section is included
+only if the given value is false.
+
+Both sections are optional.  If the last section is not given it is left
+blank.  If both sections are not given, 'yes' is returned for true and 'no'
+for false.
+
+If either section contains %, it is replaced by the value.
+
+Converting truth to a string returns 'yes' or 'no'.
+Converting truth to a Boolean returns True or False.
+
+**Examples**::
+
+    >>> from inform import truth
+
+    >>> f"account is {truth(True):past due/current}."
+    'account is past due.'
+
+    >>> f"account is {truth(False):past due/current}."
+    'account is current.'
+
+    >>> paid = truth("20 July 1969")
+    >>> is_overdue = truth(True)
+    >>> f"last payment: {paid:%/not received}{is_overdue: — overdue}"
+    'last payment: 20 July 1969 — overdue'
+
+    >>> paid.format('%')
+    '20 July 1969'
+
+    >>> paid = truth(None)
+    >>> f"last payment: {paid:%/not received}{is_overdue: — overdue}"
+    'last payment: not received — overdue'
+
+    >>> paid.format('%')
+    ''
+
+    >>> f"in arrears: {is_overdue}"
+    'in arrears: yes'
+
+    >>> bool(is_overdue)
+    True
+
+    >>> str(is_overdue)
+    'yes'
+
+If '/', or '%' are inconvenient, you can change them by passing the
+*slash* and *interpolate* arguments to truth().
 
 
 Debugging Functions

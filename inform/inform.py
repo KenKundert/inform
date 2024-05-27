@@ -1181,7 +1181,7 @@ def format_range(
 
 # plural {{{2
 class plural:
-    """Conditionally format a phrase depending on whether it refers to a singular or plural number of things.
+    """Conditionally format a phrase depending on whether value consists of a singular or plural number of things.
 
     The format string has three sections, separated by '/'.  The first section 
     is always included, the last section is included if the given number is 
@@ -1239,6 +1239,13 @@ class plural:
         >>> f"{plural(2):!agree}"
         'agree'
 
+    Converting plural to an integer returns the count.
+
+        >>> int(plural(5))
+        5
+        >>> int(plural(['a', 'b', 'c']))
+        3
+
     If '/', '#', or '!' are inconvenient, you can change them by passing the
     *slash*, *num* and *invert* arguments to plural().
 
@@ -1247,7 +1254,10 @@ class plural:
     """
 
     def __init__(self, value, *, num='#', invert='!', slash='/'):
+        from collections.abc import Sized
+
         self.value = value
+        self.count = len(value) if isinstance(value, Sized) else value
         self.symbol = num
         self.invert = invert
         self.slash = slash
@@ -1269,16 +1279,11 @@ class plural:
         return self.__format__(formatter)
 
     def __format__(self, formatter):
-        from collections.abc import Sized
-
-        value = self.value
-        number = len(value) if isinstance(value, Sized) else value
-
         if formatter[0:1] == self.invert:
             formatter = formatter[1:]
-            use_singular = (number != 1)
+            use_singular = (self.count != 1)
         else:
-            use_singular = (number == 1)
+            use_singular = (self.count == 1)
 
         always, _, suffixes = formatter.partition(self.slash)
         if suffixes:
@@ -1286,13 +1291,103 @@ class plural:
         else:
             singular, plural = '', 's'
 
-        # Don't replace the symbol until the very end, because it's possible 
+        # Don't replace the symbol until the very end because it's possible 
         # that this step could introduce extra separators (e.g. if the number 
         # is a fraction).
         out = always + (singular if use_singular else plural)
-        return out.replace(self.symbol, str(number))
+        return out.replace(self.symbol, str(self.count))
+
+    def __int__(self):
+        return self.count
 
 
+# truth {{{2
+class truth:
+    """Conditionally format a phrase depending on whether it is true or false.
+
+    The format string has two sections, separated by '/'.  The first section is
+    included only if the given value is true and the last section is included
+    only if the given value is false.
+
+    Both sections are optional.  If the last section is not given it is left
+    blank.  If both sections are not given, 'yes' is returned for true and 'no'
+    for false.
+
+    If either section contains %, it is replaced by the value.
+
+    Converting truth to a string returns 'yes' or 'no'.
+    Converting truth to a Boolean returns True or False.
+
+    **Examples**::
+
+        >>> from inform import truth
+
+        >>> f"account is {truth(True):past due/current}."
+        'account is past due.'
+
+        >>> f"account is {truth(False):past due/current}."
+        'account is current.'
+
+        >>> paid = truth("20 July 1969")
+        >>> is_overdue = truth(True)
+        >>> f"last payment: {paid:%/not received}{is_overdue: — overdue}"
+        'last payment: 20 July 1969 — overdue'
+
+        >>> paid.format('%')
+        '20 July 1969'
+
+        >>> paid = truth(None)
+        >>> f"last payment: {paid:%/not received}{is_overdue: — overdue}"
+        'last payment: not received — overdue'
+
+        >>> paid.format('%')
+        ''
+
+        >>> f"in arrears: {is_overdue}"
+        'in arrears: yes'
+
+        >>> bool(is_overdue)
+        True
+
+        >>> str(is_overdue)
+        'yes'
+
+    If '/', or '%' are inconvenient, you can change them by passing the
+    *slash* and *interpolate* arguments to truth().
+    """
+
+    def __init__(self, value, *, interpolate='%', slash='/'):
+        self.value = value
+        self.interpolate = interpolate
+        self.slash = slash
+
+    def format(self, formatter):
+        """Expand truth to a string.
+
+        You can use this method to directly expand truth to a string without
+        needing to use f-strings or the string format method.
+
+        **Examples**::
+
+            >>> truth(True).format('yes/no')
+            'yes'
+
+        """
+        return self.__format__(formatter)
+
+    def __format__(self, formatter):
+        value = self.value
+        use_if_true, _, use_if_false = formatter.partition(self.slash)
+        if not (use_if_true or use_if_false):
+            use_if_true, use_if_false = 'yes', 'no'
+        out = use_if_true if bool(value) else use_if_false
+        return out.replace(self.interpolate, str(value))
+
+    def __str__(self):
+        return 'yes' if self.value else 'no'
+
+    def __bool__(self):
+        return bool(self.value)
 
 # full_stop {{{2
 def full_stop(sentence, end='.', allow='.?!'):
@@ -2305,6 +2400,9 @@ class Inform:
                     output is largely data that might be fed into another
                     program through a pipeline). In this case stderr is used for
                     error messages so they do not pollute the data stream.
+                'errors':
+                    stderr is used for all errors, stdout is used otherwise.
+                    This is also commonly used for programs that act as filters.
 
             May also be a function that returns the stream and takes three
             arguments: the active informant, Inform's stdout, and Inform's
