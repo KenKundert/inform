@@ -11,6 +11,7 @@ Latest development release
 
 - Added :class:`truth` utility class.
 - Added *errors* *stream_policy*.
+- Added :meth:`Error.set_culprit()` method.
 
 1.29 (2024-04-27)
 -----------------
