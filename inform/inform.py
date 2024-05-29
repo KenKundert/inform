@@ -3265,6 +3265,27 @@ class Error(Exception):
             return culprit + exception_culprit
         return exception_culprit
 
+    # set_culprit {{{3
+    def set_culprit(self, culprit=None):
+        """Set the culprit.
+
+        Set the existing culprit for this exception.
+        The new culprit replaces any previously existing culprit.
+
+        Args:
+            culprit (string, number or tuple of strings and numbers):
+                A culprit or collection of culprits that is prepended to the
+                culprit of this exception.
+
+        """
+        exception_culprit = self.kwargs.get('culprit', ())
+        if not is_collection(exception_culprit):
+            exception_culprit = (exception_culprit,)
+        if culprit is not None:
+            if not is_collection(culprit):
+                culprit = (culprit,)
+            self.kwargs['culprit'] = culprit
+
     # get_codicil {{{3
     def get_codicil(self, codicil=None):
         """Get the codicils.
