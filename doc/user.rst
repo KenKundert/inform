@@ -1761,19 +1761,28 @@ Here is a typical usage::
 
     >>> from inform import plural, conjoin
 
-    >>> astronauts = ['John Glenn']
-    >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
+    >>> astronauts = plural(['John Glenn'])
+    >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}"
     'The astronaut: John Glenn'
 
-    >>> astronauts = ['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins']
-    >>> f"The {plural(astronauts):astronaut/s}: {conjoin(astronauts)}"
+    >>> astronauts = plural(['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins'])
+    >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}"
     'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
 
 The count can be inserted into the output by placing # into the format 
-specification.
+specification.  You change the way the count is rendered by passing a function 
+to *render_num*:
 
-If using '#' or '!' is inconvenient, you can change them by specifying the 
-*num* or *invert* to *plural()*.
+    >>> from num2words import num2words
+
+    >>> f"He has {plural(1):# /wife/wives}."
+    'He has 1 wife.'
+
+    >>> f"He has {plural(42, render_num=num2words):# /wife/wives}."
+    'He has forty-two wives.'
+
+If using '#' or '!' is inconvenient, you can change them by specifying the *num* 
+or *invert* to *plural()*.
 
 Examples::
 
@@ -1797,29 +1806,22 @@ Examples::
     >>> f"{plural(2):# /is/are}"
     '2 are'
 
-    >>> f"{plural([]):# thing/s}"
-    '0 things'
-    >>> f"{plural([0]):# thing/s}"
-    '1 thing'
+    You can access the originally specified value using the *value* attribute.
 
-    >>> sellers = ['Samson']
-    >>> buyers = ['Reuben', 'Cherise']
-    >>> print(f"{plural(sellers):Seller} {plural(sellers):!offer} the following terms:")
-    Seller offers the following terms:
-    >>> print(f"{plural(buyers):Buyer} {plural(buyers):!agree} to the following terms:")
-    Buyers agree to the following terms:
+    >>> sellers = plural(['Samson'])
+    >>> buyers = plural(['Reuben', 'Cherise'])
 
-    Converting *plural* to an integer returns the count.
-    >>> int(plural(5))
-    5
-    >>> int(plural(['a', 'b', 'c']))
-    3
+    >>> print(f"The {sellers:seller} ({conjoin(sellers.value)}) {sellers:!offer} the following terms:")
+    The seller (Samson) offers the following terms:
+
+    >>> print(f"The {buyers:buyer} ({conjoin(buyers.value)}) {buyers:!agree} to the following terms:")
+    The buyers (Reuben and Cherise) agree to the following terms:
 
 Finally, you can use the *format* method to directly produce a descriptive 
 string::
 
-    >>> plural(2).format("/a cactus/# cacti")
-    '2 cacti'
+    >>> plural(2).format("/a goose/# geese")
+    '2 geese'
 
 The original implementation is from `Veedrac
 <http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.

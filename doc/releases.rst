@@ -10,8 +10,9 @@ Latest development release
     | Released: 2024-05-29
 
 - Added :class:`truth` utility class.
+- Added *render_num* argument to :class:`plural`.
 - Added *errors* *stream_policy*.
-- Added :meth:`Error.set_culprit()` method.
+
 
 1.29 (2024-04-27)
 -----------------

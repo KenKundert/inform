@@ -1244,12 +1244,25 @@ class plural:
         >>> f"{plural(2):!run}"
         'run'
 
-    Converting plural to an integer returns the number of items.
+        >>> pronoun = 'He'
+        >>> tenants = plural(['John'])
+        >>> print(f"{tenants:/{pronoun}/They} {tenants:!sing}.".capitalize())
+        He sings.
 
-        >>> int(plural(5))
-        5
-        >>> int(plural(['a', 'b', 'c']))
-        3
+        >>> tenants = plural(['John', 'Paul', 'George', 'Ringo'])
+        >>> print(f"{tenants:/{pronoun}/They} {tenants:!sing}.".capitalize())
+        They sing.
+
+    You can specify a function for *render_num* to customize the conversion of
+    the count to a string.
+
+        >>> from num2words import num2words
+
+        >>> f"He has {plural(1, render_num=num2words):# /wife/wives}."
+        'He has one wife.'
+
+        >>> f"He has {plural(42, render_num=num2words):# /wife/wives}."
+        'He has forty-two wives.'
 
     You can access the originally specified value using the *value* attribute.
 
@@ -1263,6 +1276,15 @@ class plural:
         >>> agreement.format(tenants=tenants, names=conjoin(tenants.value))
         'Tenants (Tawna and Barbara) agree to ...'
 
+    You can access the number of items using the *count* attribute.
+
+        >>> plural(5).count
+        5
+        >>> plural(['a', 'b', 'c']).count
+        3
+        >>> plural(1/2).count
+        0.5
+
     If '/', '#', or '!' are inconvenient, you can change them by passing the
     *slash*, *num* and *invert* arguments to plural().
 
@@ -1270,12 +1292,13 @@ class plural:
     http://stackoverflow.com/questions/21872366/plural-string-formatting
     """
 
-    def __init__(self, value, *, num='#', invert='!', slash='/'):
+    def __init__(self, value, *, render_num=str, num='#', invert='!', slash='/'):
         from collections.abc import Sized
 
         self.value = value
         self.count = len(value) if isinstance(value, Sized) else value
-        self.symbol = num
+        self.render_num = render_num
+        self.num = num
         self.invert = invert
         self.slash = slash
 
@@ -1308,14 +1331,11 @@ class plural:
         else:
             singular, plural = '', 's'
 
-        # Don't replace the symbol until the very end because it's possible 
-        # that this step could introduce extra separators (e.g. if the number 
-        # is a fraction).
+        # Don't replace the number symbol until the very end because it's
+        # possible that this step could introduce extra separators (e.g. if the
+        # number is a fraction).
         out = always + (singular if use_singular else plural)
-        return out.replace(self.symbol, str(self.count))
-
-    def __int__(self):
-        return self.count
+        return out.replace(self.num, self.render_num(self.count))
 
 
 # truth {{{2
