@@ -916,38 +916,6 @@ culprits of the exception. Regardless of how many there are, they are always
 returned as a culprit. It also accepts a culprit as an argument, which is 
 returned along with and before the culprit from the exception.
 
-You can also replace the culprit using :meth:`Error.set_culprit`.  This is most 
-often used to add culprits when reraising and exception:
-
-..  code-block:: python
-
-   >>> from inform import Error
-
-   >>> def read_param(line, parameters):
-   ...    name, value = line.split(' = ')
-   ...    try:
-   ...        parameters[name] = float(value)
-   ...    except ValueError:
-   ...        raise Error('expected a number, found:', value, culprit=name)
-
-   >>> def read_params(lines):
-   ...    parameters = {}
-   ...    for lineno, line in enumerate(lines):
-   ...        try:
-   ...            read_param(line, parameters)
-   ...        except Error as e:
-   ...            e.set_culprit(e.get_culprit(lineno+1))
-   ...            raise e
-   ...    return parameters
-
-   >>> filename = 'parameters'
-   >>> with open(filename) as f:
-   ...    try:
-   ...        parameters = read_params(lines)
-   ...    except Error as e:
-   ...        e.terminate(culprit=e.get_culprit(filename))
-   myprog error: parameters, 3, c: expected a number, found: ack
-
 Also available is :meth:`Error.get_codicil()`, which behaves similarly except 
 with codicils rather than culprits and the argument is added after the codicil 
 from the exception rather than before.

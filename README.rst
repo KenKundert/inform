@@ -38,7 +38,7 @@ You can find the documentation on `ReadTheDocs
 <https://inform.readthedocs.io>`_. You can download and install the latest
 stable version of the code from `PyPI <https://pypi.python.org>`_ using::
 
-    pip3 install --user --upgrade inform
+    pip3 install inform
 
 You can find the latest development version of the source code on
 `Github <https://github.com/KenKundert/inform>`_.

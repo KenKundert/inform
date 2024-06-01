@@ -1209,42 +1209,59 @@ class plural:
         >>> f"{plural(2):thing}"
         'things'
 
-        >>> f"{plural(1):thing/s}"
-        'thing'
-        >>> f"{plural(2):thing/s}"
-        'things'
+        >>> f"{plural(1):bush/es}"
+        'bush'
+        >>> f"{plural(2):bush/es}"
+        'bushes'
 
-        >>> f"{plural(1):# thing/s}"
-        '1 thing'
-        >>> f"{plural(2):# thing/s}"
-        '2 things'
+        >>> f"{plural(1):/goose/geese}"
+        'goose'
+        >>> f"{plural(2):/goose/geese}"
+        'geese'
+
+        >>> f"{plural(1):# ox/en}"
+        '1 ox'
+        >>> f"{plural(2):# ox/en}"
+        '2 oxen'
 
         >>> f"{plural(1):/a cactus/# cacti}"
         'a cactus'
         >>> f"{plural(2):/a cactus/# cacti}"
         '2 cacti'
 
+        >>> f"{plural([]):# bus/es}"
+        '0 buses'
+        >>> f"{plural([0]):# bus/es}"
+        '1 bus'
+
         >>> f"{plural(1):# /is/are}"
         '1 is'
         >>> f"{plural(2):# /is/are}"
         '2 are'
 
-        >>> f"{plural([]):# thing/s}"
-        '0 things'
-        >>> f"{plural([0]):# thing/s}"
-        '1 thing'
+        >>> f"{plural(1):!run}"
+        'runs'
+        >>> f"{plural(2):!run}"
+        'run'
 
-        >>> f"{plural(1):!agree}"
-        'agrees'
-        >>> f"{plural(2):!agree}"
-        'agree'
-
-    Converting plural to an integer returns the count.
+    Converting plural to an integer returns the number of items.
 
         >>> int(plural(5))
         5
         >>> int(plural(['a', 'b', 'c']))
         3
+
+    You can access the originally specified value using the *value* attribute.
+
+        >>> agreement = "{tenants:Tenant} ({names}) {tenants:!agree} to ..."
+
+        >>> tenants = plural(["Hayden Fair"])
+        >>> agreement.format(tenants=tenants, names=conjoin(tenants.value))
+        'Tenant (Hayden Fair) agrees to ...'
+
+        >>> tenants = plural(["Tawna", "Barbara"])
+        >>> agreement.format(tenants=tenants, names=conjoin(tenants.value))
+        'Tenants (Tawna and Barbara) agree to ...'
 
     If '/', '#', or '!' are inconvenient, you can change them by passing the
     *slash*, *num* and *invert* arguments to plural().
@@ -3265,27 +3282,6 @@ class Error(Exception):
             return culprit + exception_culprit
         return exception_culprit
 
-    # set_culprit {{{3
-    def set_culprit(self, culprit=None):
-        """Set the culprit.
-
-        Set the existing culprit for this exception.
-        The new culprit replaces any previously existing culprit.
-
-        Args:
-            culprit (string, number or tuple of strings and numbers):
-                A culprit or collection of culprits that is prepended to the
-                culprit of this exception.
-
-        """
-        exception_culprit = self.kwargs.get('culprit', ())
-        if not is_collection(exception_culprit):
-            exception_culprit = (exception_culprit,)
-        if culprit is not None:
-            if not is_collection(culprit):
-                culprit = (culprit,)
-            self.kwargs['culprit'] = culprit
-
     # get_codicil {{{3
     def get_codicil(self, codicil=None):
         """Get the codicils.
@@ -3362,7 +3358,7 @@ class Error(Exception):
 
     # reraise {{{3
     def reraise(self, **new_kwargs):
-        "Re-raise the exception."
+        "Re-raise the exception with replaced arguments."
         self.kwargs.update(new_kwargs)
         raise
 
