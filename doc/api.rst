@@ -101,6 +101,9 @@ User Utilities
 .. autoclass:: inform.plural
     :members:
 
+.. autoclass:: inform.truth
+    :members:
+
 .. autofunction:: inform.render
 
 .. autofunction:: inform.render_bar

@@ -9,6 +9,111 @@
 User's Guide
 ============
 
+The main purpose of *Inform* is to present messages to the user of command line 
+programs.  With it you can easily output attractive, informative, and consistent 
+messages.  In addition, the error messages are given in a style that is 
+consistent with the long traditions of Unix.
+
+It does so by providing a collection of print functions, referred to as 
+informants, to print different types of messages: output text, narration, 
+warnings, errors, etc.  All of the informants have a similar use model and share 
+a common control class.  Also included are a collection of utilities that are 
+often used to construct messages.
+
+
+.. _message structure:
+
+Message Structure
+-----------------
+
+Messages produced by *Inform* have a common structure:
+
+.. code-block:: python
+
+    >>> from inform import error
+    >>> error('this is the message', culprit='culprit', codicil='codicil')
+    error: culprit: this is the message
+        codicil
+
+There are several parts to this message:
+
+severity:
+
+    The severity indicates the type of the message.  Examples include *warning*, 
+    *error*, etc.  The severity is optional.
+
+culprit:
+
+    The culprit identifies the subject of the message.
+
+header:
+
+    If a severity is included with a message, it is placed into a header along 
+    with the culprit.  If both the header and message are short, they are 
+    combined into a single line.  Otherwise, the header is given alone on 
+    a line.  The message starts on the next line and is indented.
+
+    The header often starts with the program name.  This makes it possible to 
+    identify the source of the message when your program is called as part of 
+    a pipeline or script.
+
+message:
+
+    When reporting an issue the message describes the issue.  Otherwise it is 
+    arbitrary bit of text.
+
+codicil:
+
+    An additional bit of text that gives additional context or perhaps helpful 
+    suggestions.  It follows the message and is indented.
+
+If the message does not have a severity, and so does not have a header, the 
+culprit is merged into the message and the codicil is not indented:
+
+.. code-block:: python
+
+    >>> from inform import display
+    >>> display('this is the message', culprit='culprit', codicil='codicil')
+    culprit: this is the message
+    codicil
+
+There can be multiple culprits and codicils.  When multiple culprits are given, 
+they generally represent a hierarchical path to the actual culprit:
+
+.. code-block:: python
+
+    >>> from inform import error
+    >>> error(
+    ...     'this is line one of the message',
+    ...     'this is line two of the message',
+    ...     culprit=('culprit-1', 'culprit-2'),
+    ...     codicil=('codicil one', 'codicil two'),
+    ...     sep='\n'
+    ... )
+    error: culprit-1, culprit-2:
+        this is line one of the message
+        this is line two of the message
+            codicil one
+            codicil two
+
+Here is a typical message that employs multiple culprits and codicils::
+
+    nt2json error: address.nt, 4: invalid indentation.
+        An indent may only follow a dictionary or list item that does not
+        already have a value.
+            3 ❬    address: Home❭
+            4 ❬        > 3636 Buffalo Ave❭
+                   ▲
+
+In this case the culprit is "address.nt, 4", the filename and line number where 
+the error was found.  It has a brief single line message ("invalid 
+indentation.").  It also has two codicils.  The first is two lines long and 
+gives a more detailed explanation of the issue.  The second is three lines long 
+and gives the relevant lines in the source file with a pointer to the error.  
+Notice that the header also includes the name of the program that detected the 
+error ("nt2json").
+
+
 .. _using informants:
 
 Using Informants
@@ -1733,28 +1838,25 @@ that no items are processed and so the progress bar is not printed.
 plural
 """"""
 
-.. py:class:: plural(value, *, num='#', invert="!', slash='/')
+.. py:class:: plural(value, *, render_num=str, num='#', invert="!', slash='/')
    :noindex:
 
-Used with python format strings to conditionally format a phrase depending
-on whether *value* consists of a singular or plural number of things.
+Used with Python format strings to conditionally format a phrase depending
+on the number of items that *value* represents.
 
-The format specification has three sections, separated by '/'.  The first
-section is always included, the last section is included if the given number
-is plural, and the middle section, which can be omitted, is included if the
-given number is singular.  If there is only one section, it is used as is
-for the singular case and an 's' is added to it for the plural case.
-If any of the sections contain a '#', it is replaced by the number of
-things.
+The format specification has multiple sections, separated by '/'.  The first
+section is always included and the remaining sections specify what should be 
+added based on whether there is one, many, or no items.  If there is only one 
+section, then an 's' is appended if there are many or no items.  If there are 
+two sections, then the second section is appended if there are many or no items.
+If any of the sections contain a '#', it is replaced by the number of items.
 
 You may provide either a number (e.g. 0, 1, 2, ...) or any object that
-implements `__len__()` (e.g. list, dict, set, ...).  In the latter case,
-the length of the object will be used to decide whether to use the singular
-of plural form.  Only 1 is considered to be singular; every other number is
-considered plural.
+implements `__len__()` (e.g. list, dict, set, ...) as the value.  In the latter 
+case, the length of the object then decides which form to use.
 
-If the format string starts with '!' then it is removed and the sense of
-plurality is reversed (the plural form is used for one thing, and the
+If the format string starts with a '!' it is removed and the sense of
+plurality is reversed (the plural form is used for one thing and the
 singular form is used otherwise). This is useful when pluralizing verbs.
 
 Here is a typical usage::
@@ -1762,69 +1864,37 @@ Here is a typical usage::
     >>> from inform import plural, conjoin
 
     >>> astronauts = plural(['John Glenn'])
+    >>> f"{astronauts:/One astronaut/# astronauts/No astronauts} {astronauts:!train}."
+    'One astronaut trains.'
+
     >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}"
     'The astronaut: John Glenn'
 
     >>> astronauts = plural(['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins'])
+    >>> f"{astronauts:/One astronaut/# astronauts/No astronauts} {astronauts:!train}."
+    '3 astronauts train.'
+
     >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}"
     'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
 
-The count can be inserted into the output by placing # into the format 
-specification.  You change the way the count is rendered by passing a function 
-to *render_num*:
+    >>> astronauts = plural([])
+    >>> f"{astronauts:/One astronaut/# astronauts/No astronauts} {astronauts:!sleep}."
+    'No astronauts sleep.'
+
+You change the way the count is rendered by passing a function to *render_num*:
 
     >>> from num2words import num2words
 
-    >>> f"He has {plural(1):# /wife/wives}."
-    'He has 1 wife.'
+    >>> f"He has {plural(1, render_num=num2words):# /wife/wives}."
+    'He has one wife.'
 
     >>> f"He has {plural(42, render_num=num2words):# /wife/wives}."
     'He has forty-two wives.'
 
-If using '#' or '!' is inconvenient, you can change them by specifying the *num* 
-or *invert* to *plural()*.
-
-Examples::
-
-    >>> f"{plural(1):# thing}"
-    '1 thing'
-    >>> f"{plural(2):# thing}"
-    '2 things'
-
-    >>> f"{plural(1):# thing/s}"
-    '1 thing'
-    >>> f"{plural(2):# thing/s}"
-    '2 things'
-
-    >>> f"{plural(1):/a cactus/# cacti}"
-    'a cactus'
-    >>> f"{plural(2):/a cactus/# cacti}"
-    '2 cacti'
-
-    >>> f"{plural(1):# /is/are}"
-    '1 is'
-    >>> f"{plural(2):# /is/are}"
-    '2 are'
-
-    You can access the originally specified value using the *value* attribute.
-
-    >>> sellers = plural(['Samson'])
-    >>> buyers = plural(['Reuben', 'Cherise'])
-
-    >>> print(f"The {sellers:seller} ({conjoin(sellers.value)}) {sellers:!offer} the following terms:")
-    The seller (Samson) offers the following terms:
-
-    >>> print(f"The {buyers:buyer} ({conjoin(buyers.value)}) {buyers:!agree} to the following terms:")
-    The buyers (Reuben and Cherise) agree to the following terms:
-
-Finally, you can use the *format* method to directly produce a descriptive 
-string::
+You can also use the *format* method to directly produce a descriptive string::
 
     >>> plural(2).format("/a goose/# geese")
     '2 geese'
-
-The original implementation is from `Veedrac
-<http://stackoverflow.com/questions/21872366/plural-string-formatting>`_.
 
 
 .. _render desc:

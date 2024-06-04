@@ -1181,76 +1181,67 @@ def format_range(
 
 # plural {{{2
 class plural:
-    """Conditionally format a phrase depending on whether value consists of a singular or plural number of things.
+    """Conditionally format a phrase depending on the number of things.
 
-    The format string has three sections, separated by '/'.  The first section 
-    is always included, the last section is included if the given number is 
-    plural, and the middle section (which can be omitted) is included if the 
-    given number is singular.  If there is only one section, it is used as is
-    for the singular case and an 's' is added to it for the plural case.
+    You may provide the count directly by specifying a number (e.g. 0, 1, 2,
+    ...) for the value.  Or the value may be an object that implements
+    `__len__()` (e.g. list, dict, set, ...) in which case the count is the
+    length is taken to be the count.
+
+    The format string has one to four sections separated by '/' with the various
+    section being included in the output depending on the count.  
+
+        ALWAYS
+        ALWAYS/MANY
+        ALWAYS/ONE/MANY
+        ALWAYS/ONE/MANY/NONE
+
+    The first section, ALWAYS, is always included, the rest are appended to
+    ALWAYS as appropriate based on the count.  If no other sections are given,
+    then an 's' appended to ALWAYS except when the count is 1.  Otherwise MANY
+    is added if the count is two or more.  It is also used if NONE is not given
+    and the count is zero.  ONE is added if available and the count is 1.
+    Finally NONE is added if available and the value is zero.
+
     If any of the sections contain a '#', it is replaced by the number of things.
 
-    You may provide either a number (e.g. 0, 1, 2, ...) or any object that 
-    implements `__len__()` (e.g. list, dict, set, ...).  In the latter case, 
-    the length of the object will be used to decide whether to use the singular 
-    of plural form.  Only 1 is considered to be singular; every other number is 
-    considered plural.
-
-    If the format string starts with '!' then it is removed and the
-    sense of plurality is reversed (the plural form is used for one thing, and
-    the singular form is used otherwise). This is useful when pluralizing verbs.
+    If the format string starts with an '!' then it is removed and the sense of
+    plurality reverses.  The plural form is used if the value is 1 and the
+    singular form is used otherwise.  In this situation, NONE is ignored.  This
+    is useful when pluralizing verbs.
 
     **Examples**::
 
         >>> from inform import plural
 
-        >>> f"{plural(1):thing}"
-        'thing'
-        >>> f"{plural(2):thing}"
-        'things'
+        >>> f"{plural(1):thing}, {plural(2):thing}"
+        'thing, things'
 
-        >>> f"{plural(1):bush/es}"
-        'bush'
-        >>> f"{plural(2):bush/es}"
-        'bushes'
+        >>> f"{plural(1):bush/es}, {plural(2):bush/es}"
+        'bush, bushes'
 
-        >>> f"{plural(1):/goose/geese}"
-        'goose'
-        >>> f"{plural(2):/goose/geese}"
-        'geese'
+        >>> f"{plural(1):/goose/geese}, {plural(2):/goose/geese}"
+        'goose, geese'
 
-        >>> f"{plural(1):# ox/en}"
-        '1 ox'
-        >>> f"{plural(2):# ox/en}"
-        '2 oxen'
+        >>> f"{plural(1):# ox/en}, {plural(2):# ox/en}"
+        '1 ox, 2 oxen'
 
-        >>> f"{plural(1):/a cactus/# cacti}"
-        'a cactus'
-        >>> f"{plural(2):/a cactus/# cacti}"
-        '2 cacti'
+        >>> none = plural(0)
+        >>> one = plural(1)
+        >>> many = plural(9)
+        >>> f"{none:/a cactus/# cacti/no cacti}, {one:/a cactus/# cacti/no cacti}, {many:/a cactus/# cacti/no cacti}"
+        'no cacti, a cactus, 9 cacti'
 
-        >>> f"{plural([]):# bus/es}"
-        '0 buses'
-        >>> f"{plural([0]):# bus/es}"
-        '1 bus'
-
-        >>> f"{plural(1):# /is/are}"
-        '1 is'
-        >>> f"{plural(2):# /is/are}"
-        '2 are'
-
-        >>> f"{plural(1):!run}"
-        'runs'
-        >>> f"{plural(2):!run}"
-        'run'
+        >>> f"{none:!# run}, {one:!# run}, {many:!# run}"
+        '0 run, 1 runs, 9 run'
 
         >>> pronoun = 'He'
-        >>> tenants = plural(['John'])
-        >>> print(f"{tenants:/{pronoun}/They} {tenants:!sing}.".capitalize())
+        >>> singers = plural(['John'])
+        >>> print(f"{singers:/{pronoun}/They} {singers:!sing}.".capitalize())
         He sings.
 
-        >>> tenants = plural(['John', 'Paul', 'George', 'Ringo'])
-        >>> print(f"{tenants:/{pronoun}/They} {tenants:!sing}.".capitalize())
+        >>> singers = plural(['John', 'Paul', 'George', 'Ringo'])
+        >>> print(f"{singers:/{pronoun}/They} {singers:!sing}.".capitalize())
         They sing.
 
     You can specify a function for *render_num* to customize the conversion of
@@ -1319,22 +1310,39 @@ class plural:
         return self.__format__(formatter)
 
     def __format__(self, formatter):
-        if formatter[0:1] == self.invert:
+        inverted = formatter[0:1] == self.invert
+        if inverted:
             formatter = formatter[1:]
-            use_singular = (self.count != 1)
-        else:
-            use_singular = (self.count == 1)
 
-        always, _, suffixes = formatter.partition(self.slash)
-        if suffixes:
-            singular, _, plural = suffixes.rpartition(self.slash)
+        components = formatter.split(self.slash)
+        num_components = len(components)
+        always = components[0]
+        if num_components == 1:
+            singular, plural, none = '', 's', 's'
+        elif num_components == 2:
+            plural = components[1]
+            singular, none = '', plural
+        elif num_components >= 3:
+            singular = components[1]
+            plural = components[2]
+            none = plural if num_components == 3 else components[3]
+            if num_components > 4:
+                 raise ValueError("format specification has too many components.")
+
+        if inverted:
+            singular, plural, none = plural, singular, singular
+
+        if self.count > 1:
+            suffix = plural
+        elif self.count == 1:
+            suffix = singular
         else:
-            singular, plural = '', 's'
+            suffix = none
 
         # Don't replace the number symbol until the very end because it's
         # possible that this step could introduce extra separators (e.g. if the
         # number is a fraction).
-        out = always + (singular if use_singular else plural)
+        out = always + suffix
         return out.replace(self.num, self.render_num(self.count))
 
 
