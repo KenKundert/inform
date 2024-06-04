@@ -1332,12 +1332,12 @@ class plural:
         if inverted:
             singular, plural, none = plural, singular, singular
 
-        if self.count > 1:
-            suffix = plural
-        elif self.count == 1:
+        if self.count == 1:
             suffix = singular
-        else:
+        elif self.count == 0:
             suffix = none
+        else:
+            suffix = plural
 
         # Don't replace the number symbol until the very end because it's
         # possible that this step could introduce extra separators (e.g. if the

@@ -626,18 +626,18 @@ def test_render():
 
 
 def test_plural():
-    assert '{:cart/s}'.format(plural(0)) == 'carts'
-    assert '{:cart/s}'.format(plural(1)) == 'cart'
-    assert '{:cart/s}'.format(plural(2)) == 'carts'
     assert '{:cart}'.format(plural(0)) == 'carts'
     assert '{:cart}'.format(plural(1)) == 'cart'
     assert '{:cart}'.format(plural(2)) == 'carts'
-    assert '{:# cart/s}'.format(plural(0)) == '0 carts'
-    assert '{:# cart/s}'.format(plural(1)) == '1 cart'
-    assert '{:# cart/s}'.format(plural(2)) == '2 carts'
+    assert '{:bush/es}'.format(plural(0)) == 'bushes'
+    assert '{:bush/es}'.format(plural(1)) == 'bush'
+    assert '{:bush/es}'.format(plural(2)) == 'bushes'
     assert '{:# cart}'.format(plural(0)) == '0 carts'
     assert '{:# cart}'.format(plural(1)) == '1 cart'
     assert '{:# cart}'.format(plural(2)) == '2 carts'
+    assert '{:# bush/es}'.format(plural(0)) == '0 bushes'
+    assert '{:# bush/es}'.format(plural(1)) == '1 bush'
+    assert '{:# bush/es}'.format(plural(2)) == '2 bushes'
     assert '{:/baby/babies}'.format(plural(0)) == 'babies'
     assert '{:bab/y/ies}'.format(plural(0)) == 'babies'
     assert '{:/baby/babies}'.format(plural(1)) == 'baby'
@@ -687,19 +687,44 @@ def test_plural():
     assert '{:!# boy/s}'.format(plural(range(0))) == '0 boy'
     assert '{:!# boy/s}'.format(plural(range(1))) == '1 boys'
     assert '{:!# boy/s}'.format(plural(range(2))) == '2 boy'
-    assert '{:~@ cart|s}'.format(plural(0, invert='~', num='@', slash='|')) == '0 cart'
-    assert '{:~@ cart|s}'.format(plural(1, invert='~', num='@', slash='|')) == '1 carts'
-    assert '{:~@ cart|s}'.format(plural(2, invert='~', num='@', slash='|')) == '2 cart'
+    assert '{:~@ bush|es}'.format(plural(0, invert='~', num='@', slash='|')) == '0 bush'
+    assert '{:~@ bush|es}'.format(plural(1, invert='~', num='@', slash='|')) == '1 bushes'
+    assert '{:~@ bush|es}'.format(plural(2, invert='~', num='@', slash='|')) == '2 bush'
     assert plural(2, invert='~', num='@', slash='|').format('~@ cart|s') == '2 cart'
+
 
 def test_plural_fraction():
     from fractions import Fraction
 
-    assert '{:# day/s}'.format(plural(Fraction(0,2))) == '0 days'
-    assert '{:# day/s}'.format(plural(Fraction(1,2))) == '1/2 days'
-    assert '{:# day/s}'.format(plural(Fraction(2,2))) == '1 day'
-    assert '{:# day/s}'.format(plural(Fraction(3,2))) == '3/2 days'
-    assert '{:# day/s}'.format(plural(Fraction(4,2))) == '2 days'
+    assert '{:# day}'.format(plural(Fraction(0,2))) == '0 days'
+    assert '{:# day}'.format(plural(Fraction(1,2))) == '1/2 days'
+    assert '{:# day}'.format(plural(Fraction(2,2))) == '1 day'
+    assert '{:# day}'.format(plural(Fraction(3,2))) == '3/2 days'
+    assert '{:# day}'.format(plural(Fraction(4,2))) == '2 days'
+    assert '{:# ox/en}'.format(plural(Fraction(0,2))) == '0 oxen'
+    assert '{:# ox/en}'.format(plural(Fraction(1,2))) == '1/2 oxen'
+    assert '{:# ox/en}'.format(plural(Fraction(2,2))) == '1 ox'
+    assert '{:# ox/en}'.format(plural(Fraction(3,2))) == '3/2 oxen'
+    assert '{:# ox/en}'.format(plural(Fraction(4,2))) == '2 oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(Fraction(0,2))) == 'no oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(Fraction(1,2))) == '1/2 oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(Fraction(2,2))) == 'an ox'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(Fraction(3,2))) == '3/2 oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(Fraction(4,2))) == '2 oxen'
+
+def test_plural_words():
+    from num2words import num2words
+
+    assert '{:# day}'.format(plural(0, render_num=num2words)) == 'zero days'
+    assert '{:# day}'.format(plural(1, render_num=num2words)) == 'one day'
+    assert '{:# day}'.format(plural(2, render_num=num2words)) == 'two days'
+    assert '{:# ox/en}'.format(plural(0, render_num=num2words)) == 'zero oxen'
+    assert '{:# ox/en}'.format(plural(1, render_num=num2words)) == 'one ox'
+    assert '{:# ox/en}'.format(plural(2, render_num=num2words)) == 'two oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(0, render_num=num2words)) == 'no oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(1, render_num=num2words)) == 'an ox'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(2, render_num=num2words)) == 'two oxen'
+    assert '{:/an ox/# oxen/no oxen}'.format(plural(42, render_num=num2words)) == 'forty-two oxen'
 
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
