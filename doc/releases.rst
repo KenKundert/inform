@@ -6,8 +6,8 @@ Releases
 Latest development release
 --------------------------
 
-    | Version: 1.29.3
-    | Released: 2024-06-04
+    | Version: 1.29.4
+    | Released: 2024-06-05
 
 - Added :class:`truth` utility class.
 - Added *render_num* argument to :class:`plural`.

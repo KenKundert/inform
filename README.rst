@@ -4,8 +4,8 @@ Inform — Print & Logging Utilities
 |downloads| |build status| |coverage| |rtd status| |pypi version| |anaconda version| |python version|
 
 :Author: Ken Kundert
-:Version: 1.29.3
-:Released: 2024-06-04
+:Version: 1.29.4
+:Released: 2024-06-05
 
 A package that provides specialized print functions that are used when 
 communicating with the user. It allows you to easily print attractive, 
