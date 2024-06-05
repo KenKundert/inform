@@ -12,6 +12,7 @@ Latest development release
 - Added :class:`truth` utility class.
 - Added *render_num* argument to :class:`plural`.
 - Added *errors* *stream_policy*.
+- Improved handling of *BrokenPipeErrors*.
 
 
 1.29 (2024-04-27)

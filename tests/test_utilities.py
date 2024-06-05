@@ -726,6 +726,12 @@ def test_plural_words():
     assert '{:/an ox/# oxen/no oxen}'.format(plural(2, render_num=num2words)) == 'two oxen'
     assert '{:/an ox/# oxen/no oxen}'.format(plural(42, render_num=num2words)) == 'forty-two oxen'
 
+def test_plural_exception():
+    with pytest.raises(ValueError) as exception:
+        oxen = plural(42)
+        f"{oxen:/an ox/# oxen/no oxen/}"
+    assert str(exception.value) == "format specification has too many components."
+
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
     assert full_stop('hey now.') == 'hey now.'
@@ -1602,7 +1608,7 @@ def test_prophet(capsys):
             okay=('⋅', None),
             warn=('–', None),
             fail=('+', None),
-            error=('×', None)
+            error=('×', "red")
         )
         with ProgressBar(len(repos), markers=markers) as progress:
             display('Progress:')
@@ -1614,7 +1620,7 @@ def test_prophet(capsys):
         captured = capsys.readouterr()
         assert captured[0] == dedent("""
         Progress:
-        ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3××××××2––––––1⋅⋅⋅⋅⋅⋅0
+        ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3\x1b[0;31m××××××2\x1b[0m––––––1⋅⋅⋅⋅⋅⋅0
         """).lstrip()
 
 def test_stylus(capsys):

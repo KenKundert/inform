@@ -43,18 +43,17 @@ These are used to configure inform for doctests:
 # Inform Utilities {{{1
 # _print {{{2
 def _print(*args, **kwargs):
-    "This is the system print function except that it ignores BrokenPipeError"
+    "This is the system print function with handling for BrokenPipeError"
     try:
         print(*args, **kwargs)
     except BrokenPipeError:
-        # must close the stream
-        # if not _io.TextIOWrapper prints an “exception ignored” message
+        # try to ignore further writing to this stream to avoid another BPE
         stream = kwargs.get('file', sys.stdout)
-        try:
-            # this raises the BrokenPipeError exception yet again
-            stream.close()
-        except BrokenPipeError:
-            pass
+        if stream == sys.stdout:
+            sys.stdout = None
+        elif stream == sys.stderr:
+            sys.stderr = None
+        raise
 
 # indent {{{2
 def indent(text, leader='    ', first=0, stops=1, sep='\n'):
@@ -413,7 +412,7 @@ class LoggingCache:
     def write(self, text):
         self.log.write(text)
 
-    def flush(self):
+    def flush(self):  # pragma: no cover
         pass
 
     def drain(self):
