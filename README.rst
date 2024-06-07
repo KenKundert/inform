@@ -155,8 +155,7 @@ the handler if needed. For example:
 
 .. code-block:: python
 
-    >>> from difflib import get_close_matches
-    >>> from inform import Error, codicil, conjoin, fmt
+    >>> from inform import Error, did_you_mean
 
     >>> known_names = 'alpha beta gamma delta epsilon'.split()
     >>> name = 'alfa'
@@ -165,10 +164,8 @@ the handler if needed. For example:
     ...     if name not in known_names:
     ...         raise Error(name, template="name '{}' is not defined.")
     ... except Error as e:
-    ...     candidates = get_close_matches(e.args[0], known_names, 1, 0.6)
-    ...     candidates = conjoin(candidates, conj=' or ')
-    ...     e.report()
-    ...     codicil(fmt('Did you mean {candidates}?'))
+    ...     candidates = did_you_mean(e.args[0], known_names)
+    ...     e.report(codicil = f"Did you mean {candidates}?")
     myprog error: name 'alfa' is not defined.
         Did you mean alpha?
 
@@ -176,11 +173,14 @@ the handler if needed. For example:
 Utilities
 ---------
 
-Several utility functions are provided for your convenience. They are often 
-helpful when creating messages.
+Several utility functions and classes are provided for your convenience. They 
+are often helpful when creating messages.
+
+dedent:
+    Dedents a block of text.
 
 indent:
-    Indents the text.
+    Indents a block of text.
 
 conjoin:
     Like ''.join(), but allows you to specify a conjunction that is placed 
@@ -194,6 +194,10 @@ conjoin:
 
         >>> conjoin(['a', 'b', 'c'], conj=' or ')
         'a, b or c'
+
+did_you_mean:
+    Given a word and list of candidates, returns the candidate that is most 
+    similar to the word.
 
 cull:
     Strips items from a collection that have a particular value.
@@ -215,9 +219,30 @@ render:
 plural:
     Produces either the singular or plural form of a word based on a count.
 
+truth:
+    Like plural, but for Booleans.
+
 full_stop:
     Adds a period to the end of the string if needed (if the last character is 
     not a period, question mark or exclamation mark).
+
+title_case:
+    Converts the initial letters in the words of a string to upper case while 
+    maintaining any letters that are already upper case, such as acronyms.
+
+format_range, parse_range:
+    Converts a set of numbers to and from a succinct, readable string that 
+    summarizes the set.  For example:
+
+    .. code-block:: python
+
+        >>> from inform import format_range, parse_range
+
+        >>> format_range({1, 2, 3, 5})
+        '1-3,5'
+
+        >>> parse_range('1-3,5')
+        {1, 2, 3, 5}
 
 columns:
     Distribute array over enough columns to fill the screen.
@@ -237,185 +262,19 @@ is_collection:
 is_mapping:
     Returns *True* if its argument is a mapping (are dictionary like).
 
-For example:
+Color:
+    A class is used to add color to text.
 
-.. code-block:: python
+Info:
+    A utility class that automatically converts all keyword arguments into 
+    attributes.
 
-    >>> from inform import Inform, display, error, conjoin, cull, fmt, os_error
+ProgessBar:
+    A class that produces an interruptable progress bar.
 
-    >>> Inform(prog_name=False)
-    <...>
-    >>> filenames = cull(['a', 'b', None, 'd'])
-    >>> filetype = 'CSV'
-    >>> display(
-    ...     fmt(
-    ...         'Reading {filetype} files: {names}.',
-    ...         names=conjoin(filenames),
-    ...     )
-    ... )
-    Reading CSV files: a, b and d.
-
-    >>> contents = {}
-    >>> for name in filenames:
-    ...     try:
-    ...         with open(name) as f:
-    ...             contents[name] = f.read()
-    ...     except IOError as e:
-    ...         error(os_error(e))
-    error: a: no such file or directory.
-    error: b: no such file or directory.
-    error: d: no such file or directory.
-
-Notice that *filetype* was not explicitly passed into *fmt()* even though it was 
-explicitly called out in the format string.  *filetype* can be left out of the 
-argument list because if *fmt* does not find a named argument in its argument 
-list, it will look for a variable of the same name in the local scope.
-
-Here is an example of render():
-
-.. code-block:: python
-
-    >>> from inform import render, display
-    >>> s1='alpha string'
-    >>> s2='beta string'
-    >>> n=42
-    >>> S={s1, s2}
-    >>> L=[s1, n, S]
-    >>> d = {1:s1, 2:s2}
-    >>> D={'s': s1, 'n': n, 'S': S, 'L': L, 'd':d}
-    >>> display('D', '=', render(D, True))
-    D = {
-        'L': [
-            'alpha string',
-            42,
-            {'alpha string', 'beta string'},
-        ],
-        'S': {'alpha string', 'beta string'},
-        'd': {1: 'alpha string', 2: 'beta string'},
-        'n': 42,
-        's': 'alpha string',
-    }
-
-Finally, here is an example of full_stop and columns. It prints out the phonetic 
-alphabet.
-
-.. code-block:: python
-
-    >>> from inform import columns, full_stop
-    >>> title = 'Display the NATO phonetic alphabet'
-    >>> words = """
-    ...     Alfa Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliett Kilo
-    ...     Lima Mike November Oscar Papa Quebec Romeo Sierra Tango Uniform
-    ...     Victor Whiskey X-ray Yankee Zulu
-    ... """.split()
-    >>> display(full_stop(title), columns(words), sep='\n')
-    Display the NATO phonetic alphabet.
-        Alfa      Echo      India     Mike      Quebec    Uniform   Yankee
-        Bravo     Foxtrot   Juliett   November  Romeo     Victor    Zulu
-        Charlie   Golf      Kilo      Oscar     Sierra    Whiskey
-        Delta     Hotel     Lima      Papa      Tango     X-ray
-
-Debugging Functions
-"""""""""""""""""""
-The debugging functions are intended to be used when you want to print something 
-out when debugging your program.  They are colorful to make it easier to find 
-them among the program's normal output, and a header is added that describes 
-the location they were called from. This makes it easier to distinguish several 
-debug message and also makes it easy to find and remove the functions once you 
-are done debugging.
-
-ppp:
-    This function is very similar to the normal Python print function.
-
-    .. code:: python
-
-        >>> from inform import ppp, ddd, sss, vvv
-        >>> a = 1
-        >>> b = 'this is a test'
-        >>> c = (2, 3)
-        >>> d = {'a': a, 'b': b, 'c': c}
-        >>> ppp(a, b, c)
-        DEBUG: <doctest README.rst[52]>, 1, __main__: 1 this is a test (2, 3)
-
-ddd:
-    This function is pretty prints all of both the unnamed and named arguments.
-
-    .. code:: python
-
-        >>> ddd(a, b, c=c, d=d)
-        DEBUG: <doctest README.rst[53]>, 1, __main__:
-            1
-            'this is a test'
-            c = (2, 3)
-            d = {
-                'a': 1,
-                'b': 'this is a test',
-                'c': (2, 3),
-            }
-
-    If you give named arguments, the name is prepended to its value.
-
-
-vvv:
-    This function prints variables from the calling scope. If no arguments are 
-    given, then all the variables are printed. You can optionally give specific 
-    variables on the argument list and only those variables are printed.
-
-    .. code:: python
-
-        >>> vvv(b, d)
-        DEBUG: <doctest README.rst[54]>, 1, __main__:
-            b = 'this is a test'
-            d = {
-                'a': 1,
-                'b': 'this is a test',
-                'c': (2, 3),
-            }
-
-
-sss:
-    This function prints a stack trace, which can answer the *How did I get 
-    here?* question better than a simple print function.
-
-    .. code:: python
-
-        >> def foo():
-        ..     sss()
-        ..     print('CONTINUING')
-
-        >> foo()
-        DEBUG: <doctest README.rst[93]>:2, __main__.foo():
-            Traceback (most recent call last):
-                ...
-        CONTINUING
-
-
-Color Class
-"""""""""""
-
-The Color class creates colorizers, which are used to render text in 
-a particular color.  They are like the Python print function in that they take 
-any number of unnamed arguments that are converted to strings and then joined 
-into a single string. The string is then coded for the chosen color and 
-returned. For example:
-
-.. code-block:: python
-
-   >> from inform import Color, display
-
-   >> green = Color('green')
-   >> red = Color('red')
-   >> success = green('pass:')
-   >> failure = red('FAIL:')
-
-   >> failures = {'outrigger': True, 'signalman': False}
-   >> for name, fails in failures.items():
-   ..     result = failure if fails else success
-   ..     display(result, name)
-   FAIL: outrigger
-   pass: signalman
-
-When the messages print, the 'pass:' will be green and 'FAIL:' will be red.
+render_bar:
+    Converts generates a text bar whose width is controlled by a normalized 
+    value.
 
 
 .. |build status| image:: https://github.com/KenKundert/inform/actions/workflows/build.yaml/badge.svg

@@ -14,7 +14,7 @@ def test_README():
         # code used in doctests assumes python3.6
         return
     rv = doctest.testfile('../README.rst', optionflags=doctest.ELLIPSIS)
-    assert rv.attempted == 55
+    assert rv.attempted == 29
     assert rv.failed == 0
 
 def test_inform():
@@ -34,7 +34,7 @@ def test_manual():
         '../doc/examples.rst': 0,
         '../doc/index.rst': 35,
         '../doc/releases.rst': 0,
-        '../doc/user.rst': 265,
+        '../doc/user.rst': 264,
     }
     found = glob.glob('../doc/*.rst')
     for f in found:

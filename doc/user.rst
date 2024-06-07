@@ -949,8 +949,7 @@ the handler if needed. For example:
 
 .. code-block:: python
 
-    >>> from difflib import get_close_matches
-    >>> from inform import Error, codicil, conjoin, fmt
+    >>> from inform import Error, did_you_mean
 
     >>> known_names = 'alpha beta gamma delta epsilon'.split()
     >>> name = 'alfa'
@@ -959,10 +958,8 @@ the handler if needed. For example:
     ...     if name not in known_names:
     ...         raise Error(name, choices=known_names, template="name '{}' is not defined.")
     ... except Error as e:
-    ...     candidates = get_close_matches(e.args[0], e.choices, 1, 0.6)
-    ...     candidates = conjoin(candidates, conj=' or ')
-    ...     e.report()
-    ...     codicil(fmt('Did you mean {candidates}?'))
+    ...     candidates = did_you_mean(e.args[0], e.choices)
+    ...     e.report(codicil=f"Did you mean {candidates}?")
     myprog error: name 'alfa' is not defined.
         Did you mean alpha?
 
@@ -1388,7 +1385,7 @@ format_range
 .. py:function:: format_range(items)
    :noindex:
 
-func:`format_range` can be used to create a succinct, readable string 
+:func:`format_range` can be used to create a succinct, readable string 
 representing a set of numbers.
 
 .. code-block:: python
@@ -1645,7 +1642,7 @@ parse_range
 .. py:function:: parse_range(items)
    :noindex:
 
-func:`parse_range` can be used to parse sets of numbers from user-inputted 
+:func:`parse_range` can be used to parse sets of numbers from user-inputted 
 strings.
 
 .. code-block:: python
