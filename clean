@@ -11,4 +11,4 @@ rm -rf .eggs .pytest_cache .cache dist .build inform.egg.info
 rm -rf **/{__pycache__,*.pyc,*.pyo}
 rm -rf tests/{htmlcov,.cache,.coverage,.pytest_cache}
 rm -rf doc/.build .hypothesis tests/.hypothesis
-rm -rf .tox
+rm -rf .tox .mypycache

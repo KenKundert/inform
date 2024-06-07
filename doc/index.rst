@@ -255,9 +255,6 @@ constructing messages.
 
 .. list-table::
 
-   * - :ref:`aaa desc`
-     - Pretty prints, then returns, its argument; used when debugging code.
-
    * - :ref:`color desc`
      - Used to color messages sent to the console.
 
@@ -271,11 +268,19 @@ constructing messages.
    * - :ref:`cull desc`
      - Strips uninteresting value from collections.
 
-   * - :ref:`ddd desc`
-     - Pretty prints its arguments, used when debugging code.
+   * - :ref:`dedent desc`
+     - Dedents a block of text.
+
+   * - :ref:`did_you_mean desc`
+     - Given a word and list of candidates, returns the candidate that is most 
+       similar to the word.
 
    * - :ref:`fmt desc`
      - Similar to format(), but can pull arguments from the local scope.
+
+   * - :ref:`format_range desc`
+     - Converts a set of numbers to a succinct, readable string that summarizes 
+       the set.
 
    * - :ref:`full_stop desc`
      - Add a period to end of string if it has no other punctuation.
@@ -304,11 +309,12 @@ constructing messages.
    * - :ref:`os_error desc`
      - Generates clean messages for operating system errors
 
+   * - :ref:`parse_range desc`
+     - Converts a set of numbers from a succinct, readable string that␣
+       summarizes the set.
+
    * - :ref:`plural desc`
      - Pluralizes a word if needed.
-
-   * - :ref:`ppp desc`
-     - Print function, used when debugging code.
 
    * - :ref:`progressbar desc`
      - Used to generate progress bars.
@@ -317,11 +323,15 @@ constructing messages.
      - Converts many of the built-in Python data types into attractive, compact, 
        and easy to read strings.
 
-   * - :ref:`sss desc`
-     - Prints stack trace, used when debugging code.
+   * - :ref:`render_bar desc`
+     - Generates a text bar whose width is controlled by a normalized value.
 
-   * - :ref:`vvv desc`
-     - Print all variables that have given value, used when debugging code.
+   * - :ref:`title_case desc`
+     - Converts the initial letters in the words of a string to upper case while 
+       maintaining any letters that are already upper case, such as acronyms.
+
+   * - :ref:`truth desc`
+     - Like plural, but for Booleans.
 
 One of the most used is *os_error*.  It converts *OSError* exceptions into 
 a simple well formatted string that can be used to describe the exception to the 
@@ -336,6 +346,25 @@ user.
     ... except OSError as e:
     ...     error(os_error(e))
     error: config: no such file or directory.
+
+*Inform* provides a collection of debugging functions.
+
+.. list-table::
+
+   * - :ref:`aaa desc`
+     - Pretty prints, then returns, its argument; used when debugging code.
+
+   * - :ref:`ddd desc`
+     - Pretty prints its arguments, used when debugging code.
+
+   * - :ref:`ppp desc`
+     - Print function, used when debugging code.
+
+   * - :ref:`sss desc`
+     - Prints stack trace, used when debugging code.
+
+   * - :ref:`vvv desc`
+     - Print all variables that have given value, used when debugging code.
 
 
 Generic Exception
@@ -362,6 +391,13 @@ used when reporting errors:
     ... except Error as e:
     ...     e.report()
     error: config: no such file or directory.
+
+The exception accepts both unnamed and named arguments.  All are recorded and 
+available for later use.
+
+*template* may be added to the class as an attribute, in which case it acts as 
+the default template for the exception (used to format the exception arguments 
+into an error message).
 
 
 Documentation
