@@ -38,32 +38,32 @@ To get the prerequisites for this example, run::
 .. code-block:: python
 
     #!/usr/bin/env python3
-    # Description
     """
     fdb
 
-    Search through all python files in current working directory and all
-    subdirectories and edit those that contain any Inform debug functions (aaa,
-    ddd, ppp, sss, vvv).  Use *n* to search for debug functions, and *^n* to go
-    to next file.  Going to the next file automatically writes the current file
+    Search through all python files in current working directory and all 
+    subdirectories and edit those that contain any Inform debug functions (aaa, 
+    ddd, ppp, sss, vvv).  Use *n* to search for debug functions, and *^n* to go 
+    to next file.  Going to the next file automatically writes the current file 
     if any changes were made.
 
     Usage:
         fdb [options]
 
     Options:
-        -l, --list   list the files rather than edit them
+        -l, --list              list the files rather than edit them
+        -c, --ignore-comments   ignore debug functions that are commented out
+        -t, --ignore-tests      ignore test files (files that begin with `test_`)
     """
 
-    # Imports
     from docopt import docopt
     from inform import display, os_error, terminate                    ## inform
     import re
-    from shlib import lsf, Run
+    from shlib import lsf, Run, set_prefs
 
-    # Globals
     debug_functions = 'aaa ddd ppp sss vvv'.split()
-    finder = re.compile(r'\b({})\('.format('|'.join(debug_functions)))
+    find_all = re.compile(r'\b({})\('.format('|'.join(debug_functions)))
+    find_no_comments = re.compile(r'^[^#]*\b({})\('.format('|'.join(debug_functions)), re.M)
     vim = 'vim'
     vim_search = r'\<\({}\)('.format(r'\|'.join(debug_functions))
     vim_flags = 'aw nofen'.split()   # autowrite, disable folds
@@ -73,13 +73,17 @@ To get the prerequisites for this example, run::
     # name of the new file so you know where you are.
     next_file_map = 'map <C-N> :silent next +//<CR> :file<CR>'
     search_pattern = 'silent /{}'.format(vim_search)
+    set_prefs(use_inform=True)
 
-    # Main
     cmdline = docopt(__doc__)
 
     # determine which files contains any debug function
     matches = []
     for filepath in lsf(select='**/*.py', reject='inform.py'):
+        if cmdline['--ignore-tests']:
+            if filepath.name.startswith('test_'):
+                continue
+        finder = find_no_comments if cmdline['--ignore-comments'] else find_all
         try:
             contents = filepath.read_text()
             if finder.search(contents):
@@ -98,8 +102,10 @@ To get the prerequisites for this example, run::
         vim,
         '+{}'.format('|'.join([vim_options, next_file_map, search_pattern]))
     ] + matches
-    editor = Run(cmd, modes='soeW*')
-    terminate(editor.status)                                           ## inform
+    try:
+        Run(cmd, modes='soeW')
+    except Error as e:                                                 ## inform
+        e.terminate()                                                  ## inform
 
 
 ..  _addsshkeys:
