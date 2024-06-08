@@ -25,6 +25,7 @@ simply and cleanly print different types of messages.  For example:
 .. code-block:: python
 
     >>> from inform import display, error, os_error
+
     >>> display('This is a plain message.')
     This is a plain message.
 
@@ -72,7 +73,7 @@ Installation
 
 Install the latest stable version with::
 
-   pip3 install --user inform
+   pip3 install inform
 
 Requires Python2.7 or Python3.3 or better.
 
@@ -201,12 +202,13 @@ Besides the four informants already described, *Inform* provides several others,
 including :ref:`log informant`, :ref:`codicil informant`, :ref:`comment 
 informant`, :ref:`narrate informant`, :ref:`output informant`, :ref:`notify 
 informant`, :ref:`debug informant` and :ref:`panic informant`.  Informants in 
-general can write to the log file, to the standard output, or to a notifier.  
-They can add headers and specify the color of the header and the message. They 
-can also continue the previous message or they can terminate the program.  Each 
-informant embodies a predefined set of these choices. In addition, they are 
-affected by options passed to the active informer (described next), which is 
-often used to enable or disable informants based on various verbosity options.
+general can write to the log file, to the standard output or standard error, or 
+to a notifier.  They can add headers and specify the color of the header and the 
+message. They can also continue the previous message or they can terminate the 
+program.  Each informant embodies a predefined set of these choices. In 
+addition, they are affected by options passed to the active informer (described 
+next), which is often used to enable or disable informants based on various 
+verbosity options.
 
 
 Controlling Informants
@@ -310,7 +312,7 @@ constructing messages.
      - Generates clean messages for operating system errors
 
    * - :ref:`parse_range desc`
-     - Converts a set of numbers from a succinct, readable string that␣
+     - Converts a set of numbers from a succinct, readable string that 
        summarizes the set.
 
    * - :ref:`plural desc`
