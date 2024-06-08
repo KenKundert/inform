@@ -352,12 +352,12 @@ stderr, some in stdout).
 
 .. code-block:: python
 
-    from inform import Error, narrate, os_error
+    from inform import Error, narrate, os_error                        ## inform
     from subprocess import Popen, PIPE
 
     def run(cmd, stdin='', accept=0):
         "Run a command and capture its output."
-        narrate('running:', cmd)
+        narrate('running:', cmd)                                       ## inform
 
         try:
             process = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -366,12 +366,12 @@ stderr, some in stdout).
             stderr = stderr.decode('utf8')
             status = process.returncode
         except OSError as e:
-            raise Error(msg=os_error(e), cmd=cmd, template = '{msg}')
+            raise Error(msg=os_error(e), cmd=cmd, template='{msg}')    ## inform
 
         # check exit status
-        narrate('completion status:', status)
+        narrate('completion status:', status)                          ## inform
         if status < 0 or status > accept:
-            raise Error(
+            raise Error(                                               ## inform
                 msg = 'unexpected exit status',
                 status = status,
                 stdout = stdout.rstrip(),
@@ -383,8 +383,8 @@ stderr, some in stdout).
 
     try:
         status, stdout, stderr = run('unobtanium')
-    except Error as e:
-        e.terminate(culprit=e.cmd, codicil=e.stderr)
+    except Error as e:                                                 ## inform
+        e.terminate(culprit=e.cmd, codicil=e.stderr)                   ## inform
 
 The output to this command would be something like this::
 
@@ -458,7 +458,7 @@ To get the prerequisites for this example, run::
     # Imports
     from avendesora import PasswordGenerator, PasswordError
     from avendesora.gpg import PythonFile
-    from inform import (
+    from inform import (                                               ## inform
         conjoin, display, done, error, fatal, is_str, join, narrate, os_error, 
         render_bar, terminate, warn, Color, Error, Inform,
     )
@@ -512,10 +512,10 @@ To get the prerequisites for this example, run::
                     return age.days
                 except:
                     pass
-        warn(
+        warn(                                                          ## inform
             'could not compute age of account value',
             '(updated missing or misformatted).',
-            culprit=profile
+            culprit = profile
         )
 
     # colorize text
@@ -529,24 +529,25 @@ To get the prerequisites for this example, run::
         settings_dir = Path(user_config_dir(prog_name))
         cache_dir = user_cache_dir(prog_name)
         Quantity.set_prefs(prec=2)
-        Inform(logfile=Path(cache_dir, 'log'))
-        display.log = False   # do not log normal output
+        Inform(logfile=Path(cache_dir, 'log'))                         ## inform
+        display.log = False   # do not log normal output               ## inform
 
         # Read generic settings
         config_filepath = Path(settings_dir, config_filename)
         if config_filepath.exists():
-            narrate('reading:', config_filepath)
+            narrate('reading:', config_filepath)                       ## inform
             settings = PythonFile(config_filepath)
             settings.initialize()
             locals().update(settings.run())
         else:
-            narrate('not found:', config_filepath)
+            narrate('not found:', config_filepath)                     ## inform
 
         # Read command line and process options
         available=set(p.stem for p in settings_dir.glob('*.prof'))
         available.add(default_profile)
         if len(available) > 1:
             choose_from = f'Choose <profile> from {conjoin(sorted(available))}.'
+                                                                       ## inform
             default = f'The default is {default_profile}.'
             available_profiles = f'{choose_from} {default}\n'
         else:
@@ -558,7 +559,7 @@ To get the prerequisites for this example, run::
         show_updated = cmdline['--updated']
         profile = cmdline['<profile>'] if cmdline['<profile>'] else default_profile
         if profile not in available:
-            fatal(
+            fatal(                                                     ## inform
                 'unknown profile.', choose_from, template=('{} {}', '{}'), 
                 culprit=profile
             )
@@ -566,18 +567,18 @@ To get the prerequisites for this example, run::
         # Read profile settings
         config_filepath = Path(user_config_dir(prog_name), profile + '.prof')
         if config_filepath.exists():
-            narrate('reading:', config_filepath)
+            narrate('reading:', config_filepath)                       ## inform
             settings = PythonFile(config_filepath)
             settings.initialize()
             locals().update(settings.run())
         else:
-            narrate('not found:', config_filepath)
+            narrate('not found:', config_filepath)                     ## inform
 
         # Process the settings
-        if is_str(date_formats):
+        if is_str(date_formats):                                       ## inform
             date_formats = [date_formats]
-        asset_color = Color(asset_color)
-        debt_color = Color(debt_color)
+        asset_color = Color(asset_color)                               ## inform
+        debt_color = Color(debt_color)                                 ## inform
 
         # Get cryptocurrency prices
         if coins:
@@ -594,9 +595,9 @@ To get the prerequisites for this example, run::
             if cache_valid:
                 contents = prices_cache.read_text()
                 prices = Quantity.extract(contents)
-                narrate('coin prices are current:', prices_cache)
+                narrate('coin prices are current:', prices_cache)      ## inform
             else:
-                narrate('updating coin prices')
+                narrate('updating coin prices')                        ## inform
                 # download latest asset prices from cryptocompare.com
                 currencies = dict(
                     fsyms=','.join(coins),     # from symbols
@@ -612,26 +613,28 @@ To get the prerequisites for this example, run::
                     # a variety based on how it fails, and if the exception is not 
                     # caught the thread dies.
                     raise Error('cannot access cryptocurrency prices:', codicil=str(e))
+                                                                       ## inform
                 except KeyboardInterrupt:
-                    done()
+                    done()                                             ## inform
 
                 try:
                     data = r.json()
                 except:
                     raise Error('cryptocurrency price download was garbled.')
+                                                                       ## inform
                 prices = {k: Quantity(v['USD'], '$') for k, v in data.items()}
 
                 if prices_cache:
                     contents = '\n'.join('{} = {}'.format(k,v) for k,v in 
                     prices.items())
                     prices_cache.write_text(contents)
-                    narrate('updating coin prices:', prices_cache)
+                    narrate('updating coin prices:', prices_cache)     ## inform
             prices['USD'] = Quantity(1, '$')
         else:
             prices = {}
 
         # Build account summaries
-        narrate('running avendesora')
+        narrate('running avendesora')                                  ## inform
         pw = PasswordGenerator()
         totals = {}
         accounts = {}
@@ -646,7 +649,7 @@ To get the prerequisites for this example, run::
             if not data:
                 continue
             if type(data) != dict:
-                error(
+                error(                                                 ## inform
                     'expected a dictionary.',
                     culprit=(account_name, avendesora_fieldname)
                 )
@@ -691,7 +694,7 @@ To get the prerequisites for this example, run::
                     desc = k
                 if age and age > max_account_value_age:
                     desc += f' ({age//30} months old)'
-            accounts[account_name] = join(
+            accounts[account_name] = join(                             ## inform
                 total, desc.replace('_', ' '),
                 template=('{:7q} {}', '{:7q}'), remove=(None,'')
             )
@@ -704,13 +707,13 @@ To get the prerequisites for this example, run::
             grand_total = grand_total.add(total)
 
         # Summarize by account
-        display('By Account:')
+        display('By Account:')                                         ## inform
         for name in sorted(accounts):
             summary = accounts[name]
-            display(f'{name:>{width+2}s}: {summary}')
+            display(f'{name:>{width+2}s}: {summary}')                  ## inform
 
         # Summarize by investment type
-        display('\nBy Type:')
+        display('\nBy Type:')                                          ## inform
         largest_share = max(v for v in totals.values() if v.units == '$')
         barwidth = screen_width - width - 18
         for asset_type in sorted(totals, key=lambda k: totals[k], reverse=True):
@@ -718,22 +721,23 @@ To get the prerequisites for this example, run::
             if value.units != '$':
                 continue
             share = value/grand_total
-            bar = render_bar(value/largest_share, barwidth)
+            bar = render_bar(value/largest_share, barwidth)            ## inform
             asset_type = asset_type.replace('_', ' ')
             display(f'{asset_type:>{width+2}s}: {value:>7s} ({share:>5.1%}) {bar}')
-        display(
+                                                                       ## inform
+        display(                                                       ## inform
             f'\n{"TOTAL":>{width+2}s}:',
             f'{grand_total:>7s} (assets = {total_assets}, debt = {total_debt})'
         )
 
     # Handle exceptions
     except OSError as e:
-        error(os_error(e))
+        error(os_error(e))                                             ## inform
     except KeyboardInterrupt:
-        terminate('Killed by user.')
-    except (PasswordError, Error) as e:
-        e.terminate()
-    done()
+        terminate('Killed by user.')                                   ## inform
+    except (PasswordError, Error) as e:                                ## inform
+        e.terminate()                                                  ## inform
+    done()                                                             ## inform
 
 The output of this program should look something like this::
 
