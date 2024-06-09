@@ -25,10 +25,14 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "hypothesis",
+    "mypy",
+    "num2words",
+    "pylama",
     "pytest",
     "pytest-cov",
+    "quantiphy",
     "tox",
-    "pylama",
 ]
 
 [project.urls]

@@ -3040,8 +3040,8 @@ class Inform:
             ...    lines = f.read().splitlines()
             ...    num_lines = count_lines(lines)
             warning: pyproject.toml, 25: empty line.
-            warning: pyproject.toml, 33: empty line.
-            warning: pyproject.toml, 39: empty line.
+            warning: pyproject.toml, 37: empty line.
+            warning: pyproject.toml, 43: empty line.
 
         """
         return self.CulpritContextManager(self, culprit, append=False)
