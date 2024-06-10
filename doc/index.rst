@@ -77,6 +77,10 @@ Install the latest stable version with::
 
 Requires Python2.7 or Python3.3 or better.
 
+Alternately, *Inform* is also available in *Conda*.  Install it with::
+
+    conda install inform --channel conda-forge
+
 The source code is available from `GitHub <https://github.com/KenKundert/inform>`_.
 You can download the repository and install using::
 
