@@ -1,6 +1,6 @@
 [project]
 name = "inform"
-version = '1.30'
+version = '1.31'
 description = 'print & logging utilities for communicating with user'
 readme = "README.rst"
 keywords = ["inform", "logging", "printing"]
