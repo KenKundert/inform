@@ -9,6 +9,16 @@ Latest development release
     | Version: 1.30
     | Released: 2024-06-07
 
+
+1.31 (2024-08-05)
+-----------------
+
+- Improved documentation.
+
+
+1.30 (2024-06-07)
+-----------------
+
 - Added :class:`truth` utility class.
 - Added *render_num* argument to :class:`plural`.
 - Added *errors* *stream_policy*.
