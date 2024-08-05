@@ -26,6 +26,7 @@ from .inform import (
     render as render,
     render_bar as render_bar,
     title_case as title_case,
+    truth as truth,
 
     # debug functions
     aaa as aaa,
