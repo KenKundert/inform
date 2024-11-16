@@ -372,7 +372,7 @@ class Color:
 
     # __repr {{{3
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.color!r})'
+        return f'{self.__class__.__name__}({self.color!r}, scheme={self.scheme})'
 
 
 # LoggingCache class {{{2
@@ -1344,6 +1344,8 @@ class plural:
         out = always + suffix
         return out.replace(self.num, self.render_num(self.count))
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.count})"
 
 # truth {{{2
 class truth:
@@ -1430,17 +1432,23 @@ class truth:
     def __str__(self):
         return 'yes' if self.value else 'no'
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self!s})"
+
     def __bool__(self):
         return bool(self.value)
 
 # full_stop {{{2
-def full_stop(sentence, end='.', allow='.?!'):
+def full_stop(sentence, end='.', allow='.?!', remove=r'\\'):
     """Add period to end of string if it is needed.
 
     A full stop (a period) is added if there is no terminating punctuation at the
     end of the string.  The argument is first converted to a string, and then
     any white space at the end of the string is removed before looking for
-    terminal punctuation.  The return value is always a string.
+    terminal punctuation.  If the last character is in *allow* then no further
+    modifications performed.  If the last character is in *remove*, it is
+    removed and no further modifications performed.  Otherwise the *end* is
+    appended.  The return value is always a string.
 
     **Examples**::
 
@@ -1454,6 +1462,9 @@ def full_stop(sentence, end='.', allow='.?!'):
         >>> full_stop('Is the file is out of date?')
         'Is the file is out of date?'
 
+        >>> full_stop(f"invalid character found: {''}§", remove=r'§')
+        'invalid character found: '
+
     You can override the allowed and desired endings::
 
         >>> cases = '1, 3 9, 12.'.split()
@@ -1462,6 +1473,8 @@ def full_stop(sentence, end='.', allow='.?!'):
 
     """
     sentence = str(sentence).rstrip()
+    if sentence[-1:] in remove:
+        return sentence[:-1]
     try:
         return sentence if sentence[-1] in allow else sentence + end
     except IndexError:
@@ -1663,7 +1676,8 @@ class ProgressBar:
 
         width (int):
             The maximum width of the bar, the largest factor of 10 that
-            is less than or equal to this value is used.
+            is less than or equal to this value is used.  If width is less than
+            or equal to zero, it is added to the current width of the terminal.
 
         informant (informant):
             Which informant to use when outputting the progress bar.  By
@@ -1744,6 +1758,9 @@ class ProgressBar:
         self, stop, start=0, *,
         log=False, prefix=None, width=79, informant=True, markers={}
     ):
+        if width <= 0:
+            width = os.get_terminal_size().columns + width
+
         self.major = width//10
         self.width = 10*self.major
 
@@ -2729,6 +2746,12 @@ class Inform:
             if action._write_output(self):
                 cs = self.colorscheme if Color.isTTY(options['file']) else None
                 self._show_msg(
+                    # should probably not be passing in the color scheme as it
+                    # overrides a scheme explicitly specified in the color
+                    # class.  However if I change it it creates numerous errors
+                    # in the tests.  I did not have the time to resolve them, so
+                    # I am leaving it for now.  This results in an awkward bit
+                    # of code in assimilate/overdue.py.
                     header_color(header, scheme=cs) if header else header,
                     header_color(culprit, scheme=cs) if culprit else culprit,
                     messege_color(message, scheme=cs) if message else message,

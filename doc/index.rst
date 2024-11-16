@@ -85,7 +85,7 @@ The source code is available from `GitHub <https://github.com/KenKundert/inform>
 You can download the repository and install using::
 
     git clone https://github.com/KenKundert/inform.git
-    pip3 install --user inform
+    pip3 install inform
 
 
 Issues

@@ -775,7 +775,7 @@ def test_is_mapping():
 
 def test_color():
     assert Color('white', scheme='dark')('') == ''
-    assert repr(Color('white', scheme='dark')) == "Color('white')"
+    assert repr(Color('white', scheme='dark')) == "Color('white', scheme=dark)"
 
     assert Color('black', scheme='dark')('black') == '\x1b[0;30mblack\x1b[0m'
     assert Color('red', scheme='dark')('red') == '\x1b[0;31mred\x1b[0m'

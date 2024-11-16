@@ -33,7 +33,7 @@ end of the line.
 
 To get the prerequisites for this example, run::
 
-    > pip3 install --user --upgrade docopt inform shlib
+    > pip3 install --upgrade docopt inform shlib
 
 .. code-block:: python
 
@@ -132,7 +132,7 @@ a subclass of *Error*.
 
 To get the prerequisites for this example, run::
 
-    > pip3 install --user --upgrade avendesora docopt inform pathlib pexpect
+    > pip3 install --upgrade avendesora docopt inform pathlib pexpect
 
 You will also have to update the *SSHkeys* variable below and add the requisite 
 alias and keyfile attributes to the Avendesora accounts that contain your SSH 
@@ -224,7 +224,7 @@ end of the line.
 
 To get the prerequisites for this example, run::
 
-    > pip3 install --user --upgrade docopt inform quantiphy arrow requests
+    > pip3 install --upgrade docopt inform quantiphy arrow requests
 
 You will also have to tailor the values of the *system*, *api_key* and *user_id* 
 variables to your account.
@@ -403,7 +403,7 @@ liabilities that together make up ones networth.
 
 To get the prerequisites for this example, run::
 
-    > pip3 install --user --upgrade docopt inform quantiphy arrow requests appdirs
+    > pip3 install --upgrade docopt inform quantiphy arrow requests appdirs
 
 .. code-block:: python
 
