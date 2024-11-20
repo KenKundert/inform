@@ -10,6 +10,13 @@ Latest development release
     | Released: 2024-08-05
 
 
+1.32 (2024-11-??)
+-----------------
+
+- Added *remove* argument to :func:`full_stop`.
+- Support negative widths in :class:`ProgressBar`.
+
+
 1.31 (2024-08-05)
 -----------------
 

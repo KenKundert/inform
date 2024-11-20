@@ -55,6 +55,15 @@ def _print(*args, **kwargs):
             sys.stderr = None
         raise
 
+# get_datetime {{{2
+def get_datetime():
+    now = arrow.now()
+    try:
+        return now.strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
+    except ValueError:
+        # there are variations between the implementations of strftime()
+        return str(now)
+
 # indent {{{2
 def indent(text, leader='    ', first=0, stops=1, sep='\n'):
     r"""Add indentation.
@@ -2661,7 +2670,7 @@ class Inform:
         # otherwise write header to log file
         if self.prog_name and self.version:
             log('version: %s' % self.version, culprit=self.prog_name)
-        now = arrow.now().strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
+        now = get_datetime()
         if self.argv is None:
             # self.argv may be None, False or a list. None implies that argv was
             # not available when inform was first loaded (as when loaded from
@@ -2692,7 +2701,7 @@ class Inform:
         elif status is not None:
             assert 0 <= status < 128
             log('terminates with status {}.'.format(status), culprit=prog_name)
-        now = arrow.now().strftime("on %A, %-d %B %Y at %-I:%M:%S %p %Z")
+        now = get_datetime()
         log('log closed {}.'.format(now), culprit=prog_name)
         self.logfile.close()
         self.logfile = None
