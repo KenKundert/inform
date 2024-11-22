@@ -10,7 +10,7 @@ Latest development release
     | Released: 2024-11-19
 
 
-1.32 (2024-11-??)
+1.32 (2024-11-22)
 -----------------
 
 - Added *remove* argument to :func:`full_stop`.
