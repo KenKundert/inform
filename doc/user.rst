@@ -2098,7 +2098,6 @@ Args:
 
 Example:
     >>> from inform import tree
-
     >>> addresses = {
     ...     "Katheryn McDaniel": {
     ...         'position': 'president',
@@ -2114,7 +2113,6 @@ Example:
     ...         ]
     ...     }
     ... }
-
     >>> print(tree(addresses, squeeze=True))
     Katheryn McDaniel
     ├── position: president
