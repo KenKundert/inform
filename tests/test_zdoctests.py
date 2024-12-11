@@ -21,8 +21,9 @@ def test_inform():
     if sys.version_info < (3, 6):
         # code used in doctests assumes python3.6
         return
+
     rv = doctest.testfile('../inform/inform.py', optionflags=doctest.ELLIPSIS)
-    assert rv.attempted == 157
+    assert rv.attempted == 173
     assert rv.failed == 0
 
 def test_manual():
@@ -34,7 +35,7 @@ def test_manual():
         '../doc/examples.rst': 0,
         '../doc/index.rst': 35,
         '../doc/releases.rst': 0,
-        '../doc/user.rst': 264,
+        '../doc/user.rst': 275,
     }
     found = glob.glob('../doc/*.rst')
     for f in found:

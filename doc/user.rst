@@ -2,7 +2,7 @@
 
 .. Initialize Inform and suppress outputting of program name
 
-    >>> from inform import Inform, Color
+    >>> from inform import Inform, Color, plural, truth
     >>> inform = Inform(prog_name=False)
 
 
@@ -1835,26 +1835,47 @@ that no items are processed and so the progress bar is not printed.
 plural
 """"""
 
-.. py:class:: plural(value, *, render_num=str, num='#', invert="!', slash='/')
+.. py:class:: plural(value, *, formatter=None, render_num=str, num='#', invert="!', slash='/')
    :noindex:
 
 Used with Python format strings to conditionally format a phrase depending
 on the number of items that *value* represents.
 
-The format specification has multiple sections, separated by '/'.  The first
-section is always included and the remaining sections specify what should be 
-added based on whether there is one, many, or no items.  If there is only one 
-section, then an 's' is appended if there are many or no items.  If there are 
-two sections, then the second section is appended if there are many or no items.
-If any of the sections contain a '#', it is replaced by the number of items.
-
 You may provide either a number (e.g. 0, 1, 2, ...) or any object that
 implements `__len__()` (e.g. list, dict, set, ...) as the value.  In the latter 
 case, the length of the object then decides which form to use.
 
+You specify a format string to control how the value is converted to a
+string.  The format string can either be included in the format section of a
+Python string expansion or can be specified using the *formatter* argument.
+For example:
+
+    >>> f"{plural(17):# item}"
+    '17 items'
+
+    >>> items = plural(17, formatter="# item")
+    >>> str(items)
+    '17 items'
+
+The format string has one to four sections separated by '/' with the various
+section being included in the output depending on the count.
+
+    | ALWAYS
+    | ALWAYS/MANY
+    | ALWAYS/ONE/MANY
+    | ALWAYS/ONE/MANY/NONE
+
+The first section, ALWAYS, is always included, the rest are appended to
+ALWAYS as appropriate based on the count.  If no other sections are given,
+then an 's' appended to ALWAYS except when the count is 1.  Otherwise MANY
+is added if the count is two or more.  It is also used if NONE is not given
+and the count is zero.  ONE is added if available and the count is 1.
+Finally NONE is added if available and the value is zero.
+
 If the format string starts with a '!' it is removed and the sense of
 plurality is reversed (the plural form is used for one thing and the
-singular form is used otherwise). This is useful when pluralizing verbs.
+singular form is used otherwise). In this situation, NONE is ignored. This is 
+useful when pluralizing verbs.
 
 Here is a typical usage::
 
@@ -1864,15 +1885,15 @@ Here is a typical usage::
     >>> f"{astronauts:/One astronaut/# astronauts/No astronauts} {astronauts:!train}."
     'One astronaut trains.'
 
-    >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}"
-    'The astronaut: John Glenn'
+    >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}."
+    'The astronaut: John Glenn.'
 
     >>> astronauts = plural(['Neil Armstrong', 'Buzz Aldrin', 'Michael Collins'])
     >>> f"{astronauts:/One astronaut/# astronauts/No astronauts} {astronauts:!train}."
     '3 astronauts train.'
 
-    >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}"
-    'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins'
+    >>> f"The {astronauts:astronaut}: {conjoin(astronauts.value)}."
+    'The astronauts: Neil Armstrong, Buzz Aldrin and Michael Collins.'
 
     >>> astronauts = plural([])
     >>> f"{astronauts:/One astronaut/# astronauts/No astronauts} {astronauts:!sleep}."
@@ -2057,16 +2078,78 @@ properly.
     CDC Warns About “Aggressive” Rats as Coronavirus Shuts Down Restaurants
 
 
+.. _tree desc:
+
+tree
+"""""
+
+Render a data hierarchy as a tree.
+
+.. py:function:: tree(data, squeeze=False)
+   :noindex:
+
+Args:
+    data (hierarchy of dictionaries, lists, strings):
+        The hierarchy to be rendered.  Keys are converted to strings.
+        Falsy values are converted to empty strings.
+    squeeze (bool):
+        If True, an extra level of hierarchy is not added for string
+        values.
+
+Example:
+    >>> from inform import tree
+
+    >>> addresses = {
+    ...     "Katheryn McDaniel": {
+    ...         'position': 'president',
+    ...         'address': '138 Almond Street\nTopeka, Kansas 20697',
+    ...         'phone': {
+    ...             'cell': '1-210-555-5297',
+    ...             'work': '1-210-555-8470',
+    ...         },
+    ...         'email': 'KateMcD@aol.com',
+    ...         'additional roles': [
+    ...             'board member',
+    ...             'chair of strategy subcommittee'
+    ...         ]
+    ...     }
+    ... }
+
+    >>> print(tree(addresses, squeeze=True))
+    Katheryn McDaniel
+    ├── position: president
+    ├── address: 138 Almond Street
+    │            Topeka, Kansas 20697
+    ├── phone
+    │   ├── cell: 1-210-555-5297
+    │   └── work: 1-210-555-8470
+    ├── email: KateMcD@aol.com
+    └── additional roles
+        ├── board member
+        └── chair of strategy subcommittee
+
 .. _truth desc:
 
 truth
 """""
 
-.. py:class:: truth(value, *, interpolate='%', slash='/')
+.. py:class:: truth(value, *, formatter=None, interpolate='%', slash='/')
    :noindex:
 
 Used with python format strings to conditionally format a phrase depending
 on whether *value* is true or false.
+
+You specify a format string to control how the value is converted to a
+string.  The format string can either be included in the format section of a
+Python string expansion or can be specified using the *formatter* argument.
+For example:
+
+    >>> f"{truth(True):aye/no}"
+    'aye'
+
+    >>> response = truth(True, formatter="aye/no")
+    >>> str(response)
+    'aye'
 
 The format string has two sections, separated by '/'.  The first section is
 included only if the given value is true and the last section is included
@@ -2078,7 +2161,6 @@ for false.
 
 If either section contains %, it is replaced by the value.
 
-Converting truth to a string returns 'yes' or 'no'.
 Converting truth to a Boolean returns True or False.
 
 **Examples**::
@@ -2114,6 +2196,10 @@ Converting truth to a Boolean returns True or False.
 
     >>> str(is_overdue)
     'yes'
+
+    >>> in_german = truth(True, formatter="ja/nein")
+    >>> str(in_german)
+    'ja'
 
 If '/', or '%' are inconvenient, you can change them by passing the
 *slash* and *interpolate* arguments to truth().

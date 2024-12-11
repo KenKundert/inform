@@ -4,7 +4,7 @@
 from inform import (
     Inform, InformantFactory, Error, codicil, dedent, display, done, error,
     errors_accrued, fatal, log, output, terminate, terminate_if_errors, warn,
-    set_culprit, add_culprit, get_culprit, join_culprit
+    set_culprit, add_culprit, get_culprit, join_culprit, tree
 )
 from contextlib import contextmanager
 import sys
@@ -860,6 +860,97 @@ def test_stripy():
             ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
+
+def test_tree():
+    with messenger() as (msg, stdout, stderr, logfile):
+        data = data = dict(
+            str = 'text',
+            mlstr = dedent("""
+                    line 1
+                    line 2
+                """).strip(),
+            alist = [1, 2, 3],
+            adict = {1: 'one', 2: 'two', 3: 'three', 'four': None}
+        )
+        result = tree(data, squeeze=True)
+        expected = dedent('''
+            str: text
+            mlstr: line 1
+                   line 2
+            alist
+            ├── 1
+            ├── 2
+            └── 3
+            adict
+            ├── 1: one
+            ├── 2: two
+            ├── 3: three
+            └── four
+        ''').strip()
+        assert result == expected
+
+        result = tree(data)
+        expected = dedent('''
+            str
+            └── text
+            mlstr
+            └── line 1
+                line 2
+            alist
+            ├── 1
+            ├── 2
+            └── 3
+            adict
+            ├── 1
+            │   └── one
+            ├── 2
+            │   └── two
+            ├── 3
+            │   └── three
+            └── four
+        ''').strip()
+        assert result == expected
+
+        result = tree(dict(root=data), squeeze=True)
+        expected = dedent('''
+            root
+            ├── str: text
+            ├── mlstr: line 1
+            │          line 2
+            ├── alist
+            │   ├── 1
+            │   ├── 2
+            │   └── 3
+            └── adict
+                ├── 1: one
+                ├── 2: two
+                ├── 3: three
+                └── four
+        ''').strip()
+        assert result == expected
+
+        result = tree(dict(root=data))
+        expected = dedent('''
+            root
+            ├── str
+            │   └── text
+            ├── mlstr
+            │   └── line 1
+            │       line 2
+            ├── alist
+            │   ├── 1
+            │   ├── 2
+            │   └── 3
+            └── adict
+                ├── 1
+                │   └── one
+                ├── 2
+                │   └── two
+                ├── 3
+                │   └── three
+                └── four
+        ''').strip()
+        assert result == expected
 
 def test_capsys_out(capsys):
     output('hello world')

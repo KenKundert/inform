@@ -28,6 +28,9 @@ STREAM_POLICIES = {
         # stderr is used on all messages that include headers
     'errors': lambda i, so, se: se if i.is_error else so,
         # stderr is used on all errors
+    'all': lambda i, so, se: se,
+        # stderr is used for all informant that do not explicitly set stream
+        # by default no informants explicitly set stream
 }
 BAR_CHARS = '▏▎▍▌▋▊▉█'
 NUM_BAR_CHARS = len(BAR_CHARS)
@@ -35,7 +38,7 @@ NUM_BAR_CHARS = len(BAR_CHARS)
 """
 These are used to configure inform for doctests:
 
->>> from inform import Inform, Info
+>>> from inform import Inform, Info, plural, truth
 >>> inform = Inform(prog_name=False, logfile=False)
 
 """
@@ -46,7 +49,7 @@ def _print(*args, **kwargs):
     "This is the system print function with handling for BrokenPipeError"
     try:
         print(*args, **kwargs)
-    except BrokenPipeError:
+    except BrokenPipeError:  # pragma: no cover
         # try to ignore further writing to this stream to avoid another BPE
         stream = kwargs.get('file', sys.stdout)
         if stream == sys.stdout:
@@ -60,7 +63,7 @@ def get_datetime():
     now = arrow.now()
     try:
         return now.strftime("%A, %-d %B %Y at %-I:%M:%S %p %Z")
-    except ValueError:
+    except ValueError:  # pragma: no cover
         # there are variations between the implementations of strftime()
         return str(now)
 
@@ -432,6 +435,67 @@ class LoggingCache:
 
 
 # User Utilities {{{1
+# Info class {{{2
+class Info:
+    """Generic Data Structure Class
+
+    When instantiated, it converts the provided keyword arguments to attributes.  
+    Unknown attributes evaluate to None.
+
+    **Example**::
+
+        >>> class Orwell(Info):
+        ...     pass
+
+        >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
+        >>> print(str(george))
+        Orwell(
+            peace='war',
+            freedom='slavery',
+            ignorance='strength',
+        )
+
+        >>> george.peace
+        'war'
+
+        >>> george.happiness
+
+    """
+    def __init__(self, **kwargs):
+        self.__dict__ = kwargs
+
+    def _inform_get_kwargs(self):
+        return {k:v for k, v in self.__dict__.items() if not k.startswith('_')}
+
+    def __getattr__(self, name):
+        if name.startswith('_'):
+            raise AttributeError(name)
+        return self.__dict__.get(name)
+
+    def get(self, name, default=None):
+        return self.__dict__.get(name, default)
+
+    def render(self, template):
+        """Render class to a string
+
+        Args:
+            template (str):
+                The template string is returned with any instances of {name}
+                replaced by the value of the corresponding attribute.
+
+        **Example**::
+
+            >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
+            'Peace is war. Freedom is slavery. Ignorance is strength.'
+
+        """
+
+        return template.format(**self.__dict__)
+
+    def __repr__(self):
+        return render(self)
+
+
 # join {{{2
 def join(*args, **kwargs):
     """Combines arguments into a string.
@@ -1196,8 +1260,20 @@ class plural:
     `__len__()` (e.g. list, dict, set, ...) in which case the count is the
     length is taken to be the count.
 
+    You specify a format string to control how the value is converted to a
+    string.  The format string can either be included in the format section of a
+    Python string expansion or can be specified using the *formatter* argument.
+    For example:
+
+        >>> f"{plural(17):# item}"
+        '17 items'
+
+        >>> items = plural(17, formatter="# item")
+        >>> str(items)
+        '17 items'
+
     The format string has one to four sections separated by '/' with the various
-    section being included in the output depending on the count.  
+    section being included in the output depending on the count.
 
         ALWAYS
         ALWAYS/MANY
@@ -1287,11 +1363,28 @@ class plural:
     If '/', '#', or '!' are inconvenient, you can change them by passing the
     *slash*, *num* and *invert* arguments to plural().
 
+    Applying str() to a *plural* object uses the *formatter* constructor argument:
+
+        >>> bears = plural(5, formatter="# bear")
+        >>> str(bears)
+        '5 bears'
+
+    If *default* is not specified, the count is returned:
+
+        >>> str(plural(5))
+        '5'
+
+        >>> str(plural(1))
+        '1'
+
+        >>> str(plural(0))
+        '0'
+
     The original implementation is from Veedrac on Stack Overflow: 
     http://stackoverflow.com/questions/21872366/plural-string-formatting
     """
 
-    def __init__(self, value, *, render_num=str, num='#', invert='!', slash='/'):
+    def __init__(self, value, formatter=None, *, render_num=str, num='#', invert='!', slash='/'):
         from collections.abc import Sized
 
         self.value = value
@@ -1300,8 +1393,11 @@ class plural:
         self.num = num
         self.invert = invert
         self.slash = slash
+        if formatter is None:
+            formatter = "/#/#/#"
+        self.formatter = formatter
 
-    def format(self, formatter):
+    def format(self, formatter=None):
         """Expand plural to a string.
 
         You can use this method to directly expand plural to a string without
@@ -1315,9 +1411,14 @@ class plural:
             '3 cacti'
 
         """
+        if formatter is None:
+            formatter = self.formatter
         return self.__format__(formatter)
 
-    def __format__(self, formatter):
+    def __format__(self, formatter=None):
+        if not formatter:
+            formatter = self.formatter
+
         inverted = formatter[0:1] == self.invert
         if inverted:
             formatter = formatter[1:]
@@ -1335,7 +1436,7 @@ class plural:
             plural = components[2]
             none = plural if num_components == 3 else components[3]
             if num_components > 4:
-                 raise ValueError("format specification has too many components.")
+                raise ValueError("format specification has too many components.")
 
         if inverted:
             singular, plural, none = plural, singular, singular
@@ -1353,12 +1454,27 @@ class plural:
         out = always + suffix
         return out.replace(self.num, self.render_num(self.count))
 
+    def __str__(self):
+        return self.format()
+
     def __repr__(self):
         return f"{self.__class__.__name__}({self.count})"
 
 # truth {{{2
 class truth:
     """Conditionally format a phrase depending on whether it is true or false.
+
+    You specify a format string to control how the value is converted to a
+    string.  The format string can either be included in the format section of a
+    Python string expansion or can be specified using the *formatter* argument.
+    For example:
+
+        >>> f"{truth(True):aye/no}"
+        'aye'
+
+        >>> response = truth(True, formatter="aye/no")
+        >>> str(response)
+        'aye'
 
     The format string has two sections, separated by '/'.  The first section is
     included only if the given value is true and the last section is included
@@ -1370,7 +1486,6 @@ class truth:
 
     If either section contains %, it is replaced by the value.
 
-    Converting truth to a string returns 'yes' or 'no'.
     Converting truth to a Boolean returns True or False.
 
     **Examples**::
@@ -1407,16 +1522,25 @@ class truth:
         >>> str(is_overdue)
         'yes'
 
+        >>> in_german = truth(True, formatter="ja/nein")
+        >>> str(in_german)
+        'ja'
+
     If '/', or '%' are inconvenient, you can change them by passing the
     *slash* and *interpolate* arguments to truth().
     """
 
-    def __init__(self, value, *, interpolate='%', slash='/'):
+    def __init__(self, value, formatter=None, *, interpolate='%', slash='/'):
         self.value = value
         self.interpolate = interpolate
         self.slash = slash
+        if formatter:
+            use_if_true, _, use_if_false = formatter.partition(self.slash)
+            self.defaults = use_if_true, use_if_false
+        else:
+            self.defaults = 'yes', 'no'
 
-    def format(self, formatter):
+    def format(self, formatter=None):
         """Expand truth to a string.
 
         You can use this method to directly expand truth to a string without
@@ -1432,17 +1556,18 @@ class truth:
 
     def __format__(self, formatter):
         value = self.value
-        use_if_true, _, use_if_false = formatter.partition(self.slash)
-        if not (use_if_true or use_if_false):
-            use_if_true, use_if_false = 'yes', 'no'
+        if formatter:
+            use_if_true, _, use_if_false = formatter.partition(self.slash)
+        else:
+            use_if_true, use_if_false = self.defaults
         out = use_if_true if bool(value) else use_if_false
         return out.replace(self.interpolate, str(value))
 
     def __str__(self):
-        return 'yes' if self.value else 'no'
+        return self.defaults[0] if self.value else self.defaults[1]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self!s})"
+        return f"{self.__class__.__name__}({bool(self.value)})"
 
     def __bool__(self):
         return bool(self.value)
@@ -1484,11 +1609,7 @@ def full_stop(sentence, end='.', allow='.?!', remove=r'\\'):
     sentence = str(sentence).rstrip()
     if sentence[-1:] in remove:
         return sentence[:-1]
-    try:
-        return sentence if sentence[-1] in allow else sentence + end
-    except IndexError:
-        # this occurs when sentence is empty string
-        return sentence
+    return sentence if sentence[-1] in allow else sentence + end
 
 
 # columns {{{2
@@ -1599,65 +1720,130 @@ def render_bar(value, width=72, full_width=False):
     return bar
 
 
-# Info class {{{2
-class Info:
-    """Generic Data Structure Class
+# tree {{{2
+# _gen_connectors {{{3
+def _gen_connectors(width):
+    space = " "     # This is a non-breaking space, needed with variable width fonts
+    line = "─"      # This is horizontal rule
+    connector_seeds = dict(
+        item = "├",
+        last_item = "└",
+        lead = "│",
+        last_lead = space,
+    )
+    pad = space if width > 1 else ''
 
-    When instantiated, it converts the provided keyword arguments to attributes.  
-    Unknown attributes evaluate to None.
+    def extend(seed):
+        fill = space if seed in [space, "│"] else line
+        # return seed + (width - 2)*fill + pad
+        return offset*space + seed + (width - 2 - offset)*fill + pad
 
-    **Example**::
+    return Info(**{k: extend(v) for k, v in connector_seeds.items()})
 
-        >>> class Orwell(Info):
-        ...     pass
+nav_width = 4  # the width of the column that holds a vertical bar
+offset = 0     # how many spaces to shift the vertical bars to the right
+connectors = _gen_connectors(nav_width)
 
-        >>> george = Orwell(peace='war', freedom='slavery', ignorance='strength')
-        >>> print(str(george))
-        Orwell(
-            peace='war',
-            freedom='slavery',
-            ignorance='strength',
-        )
-
-        >>> george.peace
-        'war'
-
-        >>> george.happiness
-
+# tree {{{3
+def tree(data, squeeze=False):
     """
-    def __init__(self, **kwargs):
-        self.__dict__ = kwargs
-
-    def _inform_get_kwargs(self):
-        return {k:v for k, v in self.__dict__.items() if not k.startswith('_')}
-
-    def __getattr__(self, name):
-        if name.startswith('_'):
-            raise AttributeError(name)
-        return self.__dict__.get(name)
-
-    def get(self, name, default=None):
-        return self.__dict__.get(name, default)
-
-    def render(self, template):
-        """Render class to a string
+        Render a data hierarchy as a tree.
 
         Args:
-            template (str):
-                The template string is returned with any instances of {name}
-                replaced by the value of the corresponding attribute.
+            data (hierarchy of dictionaries, lists, strings):
+                The hierarchy to be rendered.  Keys are converted to strings.
+                Falsy values are converted to empty strings.
+            squeeze (bool):
+                If True, an extra level of hierarchy is not added for string
+                values.
 
-        **Example**::
+        Example:
+            >>> from inform import tree
 
-            >>> george.render('Peace is {peace}. Freedom is {freedom}. Ignorance is {ignorance}.')
-            'Peace is war. Freedom is slavery. Ignorance is strength.'
+            >>> addresses = {
+            ...     "Katheryn McDaniel": {
+            ...         'position': 'president',
+            ...         'address': '138 Almond Street\nTopeka, Kansas 20697',
+            ...         'phone': {
+            ...             'cell': '1-210-555-5297',
+            ...             'work': '1-210-555-8470',
+            ...         },
+            ...         'email': 'KateMcD@aol.com',
+            ...         'additional roles': [
+            ...             'board member',
+            ...             'chair of strategy subcommittee'
+            ...         ]
+            ...     }
+            ... }
 
-        """
+            >>> print(tree(addresses, squeeze=True))
+            Katheryn McDaniel
+            ├── position: president
+            ├── address: 138 Almond Street
+            │            Topeka, Kansas 20697
+            ├── phone
+            │   ├── cell: 1-210-555-5297
+            │   └── work: 1-210-555-8470
+            ├── email: KateMcD@aol.com
+            └── additional roles
+                ├── board member
+                └── chair of strategy subcommittee
 
-        return template.format(**self.__dict__)
+    """
+    return _tree(data, squeeze, top=True)
 
-    def __repr__(self):
-        return render(self)
+# _tree {{{3
+def _tree(data, squeeze, top=False, leader=''):
+    lines = []
+    if hasattr(data, 'items'):
+        last = len(data) - 1
+        for i, item in enumerate(data.items()):
+            key, value = item
+            key = str(key)
+            # determine key-leader-supplement and item-leader-supplement
+            if top:
+                kls = ''
+                ils = ''
+            elif i < last:
+                kls = connectors.item
+                ils = connectors.lead
+            else:
+                kls = connectors.last_item
+                ils = connectors.last_lead
+
+            indented_key = leader + kls + key
+            if is_collection(value) or not squeeze:
+                # append subhierarchy to those already processed
+                lines += [
+                    indented_key,
+                    _tree(value, squeeze, leader=leader+ils) if value else None
+                ]
+            else:
+                # the value is a scalar, so squeeze key & value on one line
+                intro_cont = leader + ils + (len(key)+2)*' '
+                if value:
+                    v = indent(str(value), leader=intro_cont, first=-1, stops=1)
+                    lines += [f"{indented_key}: {v}"]
+                else:
+                    lines += [indented_key]
+        return '\n'.join(l for l in lines if l)
+
+    elif not is_collection(data):
+        data = [indent(data, leader=leader + nav_width*' ', stops=1, first=-1)]
+
+    if top:
+        joiner = '\n'
+        terminator = '\n'
+        items = conjoin(data, sep='\n', conj='\n')
+    else:
+        joiner = '\n' + leader + connectors.item
+        terminator = '\n' + leader + connectors.last_item
+        connector = connectors.item if len(data) > 1 else connectors.last_item
+        items = leader + connector + conjoin(data, sep=joiner, conj=terminator)
+
+    if items:
+        lines.append(items)
+    return '\n'.join(lines)
 
 
 # ProgressBar class {{{2
@@ -1768,7 +1954,10 @@ class ProgressBar:
         log=False, prefix=None, width=79, informant=True, markers={}
     ):
         if width <= 0:
-            width = os.get_terminal_size().columns + width
+            try:
+                width = os.get_terminal_size().columns + width
+            except OSError:
+                width=79
 
         self.major = width//10
         self.width = 10*self.major
@@ -2008,7 +2197,7 @@ def ddd(*args, **kwargs):
         try:
             try:
                 name = arg.__class__.__name__ + ' object'
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 try:
                     name = arg.__name__
                 except AttributeError:
@@ -2162,8 +2351,8 @@ class InformantFactory:
 
         stream (stream):
             Output stream to use. Typically sys.stdout or sys.stderr. If not
-            specified, the stream to use will be determine by stream policy of
-            active informer.
+            specified, the stream to use will be determined by the stream policy
+            of the active informer.
 
         clone (informant):
             Clone the attributes of the given informer. Any explicitly specified
@@ -2535,7 +2724,10 @@ class Inform:
         self.length_thresh = length_thresh
         self.culprit_sep = culprit_sep
         if is_str(stream_policy):
-            self.stream_policy = STREAM_POLICIES[stream_policy]
+            try:
+                self.stream_policy = STREAM_POLICIES[stream_policy]
+            except KeyError:
+                raise Error('unknown stream policy.', culprit=stream_policy)
         else:
             self.stream_policy = stream_policy
         self.notifier = notifier
@@ -2803,12 +2995,12 @@ class Inform:
             continuing = kwargs.get('continuing', False),
         )
             # sep is handled in _render_message
-        if sys.version[0] == '2':
+        if sys.version[0] == '2':  # pragma: no cover
             opts.pop('flush')  # flush is not supported in python2
         if 'file' in kwargs:
             opts['file'] = kwargs['file']
         else:
-            opts['file'] = self.stream_policy(action, self.stdout, self.stderr)
+            opts['file'] = action.stream or self.stream_policy(action, self.stdout, self.stderr)
         return opts
 
     # _render_message {{{2

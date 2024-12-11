@@ -1,11 +1,12 @@
 # encoding: utf8
 
 from inform import (
-    Color, Error, Info, LoggingCache, columns, conjoin, did_you_mean, comment, cull,
-    dedent, display, done, error, fatal, fmt, full_stop, indent, Inform,
+    Color, Error, Info, LoggingCache, columns, conjoin, did_you_mean, comment,
+    cull, dedent, display, done, error, fatal, fmt, full_stop, indent, Inform,
     is_collection, is_iterable, is_mapping, is_str, join, get_prog_name,
     get_informer, narrate, os_error, output, plural, render, terminate,
-    title_case, warn, ddd, ppp, sss, vvv, ProgressBar, parse_range, format_range
+    title_case, truth, warn, ddd, ppp, sss, vvv, ProgressBar, parse_range,
+    format_range
 )
 from textwrap import dedent as tw_dedent
 import sys
@@ -31,7 +32,7 @@ def test_debug(capsys):
     ddd(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 31, tests.test_utilities.test_debug():
+        DEBUG: test_utilities.py, 32, tests.test_utilities.test_debug():
             'a'
             'b'
             'c'
@@ -40,7 +41,7 @@ def test_debug(capsys):
     ddd(a=a, b=b, c=c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 40, tests.test_utilities.test_debug():
+        DEBUG: test_utilities.py, 41, tests.test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -49,13 +50,13 @@ def test_debug(capsys):
     ppp(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 49, tests.test_utilities.test_debug(): a b c
+        DEBUG: test_utilities.py, 50, tests.test_utilities.test_debug(): a b c
     """).lstrip()
 
     vvv(a, b, c)
     captured = capsys.readouterr()
     assert captured[0] == dedent("""
-        DEBUG: test_utilities.py, 55, tests.test_utilities.test_debug():
+        DEBUG: test_utilities.py, 56, tests.test_utilities.test_debug():
             a = 'a'
             b = 'b'
             c = 'c'
@@ -63,7 +64,11 @@ def test_debug(capsys):
 
     sss()
     captured = capsys.readouterr()
-    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 64, tests.test_utilities.test_debug():"
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 65, tests.test_utilities.test_debug():"
+
+    sss(ignore_exceptions=False)
+    captured = capsys.readouterr()
+    assert captured[0].split('\n')[0] == "DEBUG: test_utilities.py, 69, tests.test_utilities.test_debug()"
 
 def test_indent():
     text=dedent('''
@@ -692,6 +697,24 @@ def test_plural():
     assert '{:~@ bush|es}'.format(plural(2, invert='~', num='@', slash='|')) == '2 bush'
     assert plural(2, invert='~', num='@', slash='|').format('~@ cart|s') == '2 cart'
 
+    bushes = plural(0, formatter='/a bush/# bushes/no bushes')
+    assert bushes.format() == 'no bushes'
+    assert f"{bushes}" == 'no bushes'
+    assert str(bushes) == 'no bushes'
+    assert repr(bushes) == 'plural(0)'
+    bushes = plural(1, formatter='/a bush/# bushes/no bushes')
+    assert bushes.format() == 'a bush'
+    assert f"{bushes}" == 'a bush'
+    assert str(bushes) == 'a bush'
+    assert repr(bushes) == 'plural(1)'
+    bushes = plural(2, formatter='/a bush/# bushes/no bushes')
+    assert bushes.format() == '2 bushes'
+    assert f"{bushes}" == '2 bushes'
+    assert str(bushes) == '2 bushes'
+    assert repr(bushes) == 'plural(2)'
+
+    bushes = plural(0, formatter='/a bush/# bushes/no bushes')
+
 
 def test_plural_fraction():
     from fractions import Fraction
@@ -731,6 +754,20 @@ def test_plural_exception():
         oxen = plural(42)
         f"{oxen:/an ox/# oxen/no oxen/}"
     assert str(exception.value) == "format specification has too many components."
+
+def test_truth():
+    assert f'{truth(True)}' == 'yes'
+    assert f'{truth(False)}' == 'no'
+    assert f'{truth(True):aye/no}' == 'aye'
+    assert f'{truth(False):aye/no}' == 'no'
+    t = truth(True, formatter='ja/nein')
+    assert t.format() == 'ja'
+    assert str(t) == 'ja'
+    assert repr(t) == 'truth(True)'
+    t = truth(False, formatter='ja/nein')
+    assert t.format() == 'nein'
+    assert str(t) == 'nein'
+    assert repr(t) == 'truth(False)'
 
 def test_full_stop():
     assert full_stop('hey now') == 'hey now.'
@@ -877,6 +914,10 @@ def test_columns():
 
 def test_stream_policy(capsys):
     with Inform(stream_policy='termination', prog_name=False):
+        display('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hey now!\n'
+        assert captured[1] == ''
         warn('hey now!')
         captured = capsys.readouterr()
         assert captured[0] == 'warning: hey now!\n'
@@ -887,6 +928,10 @@ def test_stream_policy(capsys):
         assert captured[1] == ''
 
     with Inform(stream_policy='header', prog_name=False):
+        display('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hey now!\n'
+        assert captured[1] == ''
         warn('hey now!')
         captured = capsys.readouterr()
         assert captured[0] == ''
@@ -895,6 +940,38 @@ def test_stream_policy(capsys):
         captured = capsys.readouterr()
         assert captured[0] == ''
         assert captured[1] == 'error: hey now!\n'
+
+    with Inform(stream_policy='errors', prog_name=False):
+        display('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'hey now!\n'
+        assert captured[1] == ''
+        warn('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == 'warning: hey now!\n'
+        assert captured[1] == ''
+        error('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+    with Inform(stream_policy='all', prog_name=False):
+        display('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'hey now!\n'
+        warn('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'warning: hey now!\n'
+        error('hey now!')
+        captured = capsys.readouterr()
+        assert captured[0] == ''
+        assert captured[1] == 'error: hey now!\n'
+
+    with pytest.raises(Error) as exception:
+        Inform(stream_policy='toenail')
+    assert str(exception.value) == "toenail: unknown stream policy."
 
     def policy(i, so, se):
         return se if i.severity == 'error' else so
@@ -1132,6 +1209,9 @@ def test_prog_name(capsys):
         assert informer.prog_name == 'curly'
         assert get_prog_name() == 'curly'
         assert get_informer() == informer
+        error("nutz")
+        captured = capsys.readouterr()
+        assert captured[0] == 'curly error: nutz\n'
     assert get_informer() == prev_informer
 
     with Inform(argv=['curly']) as informer:
@@ -1139,6 +1219,39 @@ def test_prog_name(capsys):
         assert informer.prog_name == 'curly'
         assert get_prog_name() == 'curly'
         assert get_informer() == informer
+        error("nutz")
+        captured = capsys.readouterr()
+        assert captured[0] == 'curly error: nutz\n'
+    assert get_informer() == prev_informer
+
+    with Inform(argv=['curly'], prog_name=True) as informer:
+        assert informer.get_prog_name() == 'curly'
+        assert informer.prog_name == 'curly'
+        assert get_prog_name() == 'curly'
+        assert get_informer() == informer
+        error("nutz")
+        captured = capsys.readouterr()
+        assert captured[0] == 'curly error: nutz\n'
+    assert get_informer() == prev_informer
+
+    with Inform(argv=[], prog_name=True) as informer:
+        assert informer.get_prog_name() == None
+        assert informer.prog_name == None
+        assert get_prog_name() == None
+        assert get_informer() == informer
+        error("nutz")
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: nutz\n'
+    assert get_informer() == prev_informer
+
+    with Inform(argv=['curly'], prog_name=False) as informer:
+        assert informer.get_prog_name() == 'curly'
+        assert informer.prog_name == 'curly'
+        assert get_prog_name() == 'curly'
+        assert get_informer() == informer
+        error("nutz")
+        captured = capsys.readouterr()
+        assert captured[0] == 'error: nutz\n'
     assert get_informer() == prev_informer
 
 def test_informer_attributes(capsys):
@@ -1519,6 +1632,20 @@ def test_world(capsys):
             hello 40
             ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅
             hello 50
+            ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
+            after
+        """).lstrip()
+
+def test_dockland(capsys):
+    # ProgressBar: integer
+    with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
+        display('before')
+        for i in ProgressBar(50, width=-1):
+            pass
+        display('after')
+        captured = capsys.readouterr()
+        assert captured[0] == dedent("""
+            before
             ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
             after
         """).lstrip()

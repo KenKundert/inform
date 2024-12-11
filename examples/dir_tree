@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""
+Display file hierarchy as a tree.
+
+usage:
+    dir_tree [options] [<path>]
+
+options:
+    -s, --squeeze   do not add extra level of hierarchy for string values
+
+If <filename> is not given, NestedText input is taken from stdin.
+"""
+
+from docopt import docopt
+from shlib import ls
+from inform import tree
+
+file_tree = tree
+
+def file_hierarchy(top):
+    result = {}
+    for each in sorted(ls(top), key=lambda p: str(p)):
+        if each.is_dir():
+            subdir = file_hierarchy(each)
+            result[each.stem + '/'] = file_hierarchy(each)
+        else:
+            result[each.name] = None
+    if result:
+        return result
+
+cmdline = docopt(__doc__)
+top = cmdline['<path>']
+hierarchy = file_hierarchy(top)
+print(tree({top: hierarchy}))
