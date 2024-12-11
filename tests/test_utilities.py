@@ -5,7 +5,7 @@ from inform import (
     cull, dedent, display, done, error, fatal, fmt, full_stop, indent, Inform,
     is_collection, is_iterable, is_mapping, is_str, join, get_prog_name,
     get_informer, narrate, os_error, output, plural, render, terminate,
-    title_case, truth, warn, ddd, ppp, sss, vvv, ProgressBar, parse_range,
+    title_case, tree, truth, warn, ddd, ppp, sss, vvv, ProgressBar, parse_range,
     format_range
 )
 from textwrap import dedent as tw_dedent
@@ -1810,9 +1810,26 @@ def test_oblong():
         assert render_bar(0.66, 25) == '████████████████▌'
 
 
-@parametrize('given', ['a', '\na', 'a\n', '\na\n', '\na\nb\n'])
+@parametrize('given', ['', 'a', '\na', 'a\n', '\na\n', '\na\nb\n'])
 def test_dedent_compatibility(given):
      assert dedent(given) == tw_dedent(given)
+     assert dedent(given, strip_nl='b') == tw_dedent(given).strip()
+     assert dedent(given, strip_nl='l') == tw_dedent(given).lstrip()
+     assert dedent(given, strip_nl='t') == tw_dedent(given).rstrip()
+     assert dedent(given, strip_nl='s') == tw_dedent(given).lstrip()
+     assert dedent(given, strip_nl='e') == tw_dedent(given).rstrip()
+     assert dedent(given, strip_nl='r') == tw_dedent(given).rstrip()
+     assert dedent(given, strip_nl=True) == tw_dedent(given).strip()
+     assert dedent(given, strip_nl=False) == tw_dedent(given)
+
+     given = '''
+         ◊   Diaspar
+             Lys
+     '''
+     assert dedent(given, bolm='◊', strip_nl='b') == "    Diaspar\n    Lys"
+
+     given = '\nDiaspar\nLys\n'
+     assert dedent(given, strip_nl='b', wrap=True) == "Diaspar Lys"
 
 
 def test_render_tuples():
@@ -1820,6 +1837,96 @@ def test_render_tuples():
      assert render((0,)) == '(0,)'
      assert render((0,1)) == '(0, 1)'
      assert render((0,1,2)) == '(0, 1, 2)'
+
+def test_tree():
+    data = data = dict(
+        str = 'text',
+        mlstr = dedent("""
+                line 1
+                line 2
+            """).strip(),
+        alist = [1, 2, 3],
+        adict = {1: 'one', 2: 'two', 3: 'three', 'four': None}
+    )
+    result = tree(data, squeeze=True)
+    expected = dedent('''
+        str: text
+        mlstr: line 1
+               line 2
+        alist
+        ├── 1
+        ├── 2
+        └── 3
+        adict
+        ├── 1: one
+        ├── 2: two
+        ├── 3: three
+        └── four
+    ''').strip()
+    assert result == expected
+
+    result = tree(data)
+    expected = dedent('''
+        str
+        └── text
+        mlstr
+        └── line 1
+            line 2
+        alist
+        ├── 1
+        ├── 2
+        └── 3
+        adict
+        ├── 1
+        │   └── one
+        ├── 2
+        │   └── two
+        ├── 3
+        │   └── three
+        └── four
+    ''').strip()
+    assert result == expected
+
+    result = tree(dict(root=data), squeeze=True)
+    expected = dedent('''
+        root
+        ├── str: text
+        ├── mlstr: line 1
+        │          line 2
+        ├── alist
+        │   ├── 1
+        │   ├── 2
+        │   └── 3
+        └── adict
+            ├── 1: one
+            ├── 2: two
+            ├── 3: three
+            └── four
+    ''').strip()
+    assert result == expected
+
+    result = tree(dict(root=data))
+    expected = dedent('''
+        root
+        ├── str
+        │   └── text
+        ├── mlstr
+        │   └── line 1
+        │       line 2
+        ├── alist
+        │   ├── 1
+        │   ├── 2
+        │   └── 3
+        └── adict
+            ├── 1
+            │   └── one
+            ├── 2
+            │   └── two
+            ├── 3
+            │   └── three
+            └── four
+    ''').strip()
+    assert result == expected
 
 
 if __name__ == '__main__':
