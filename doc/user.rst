@@ -1424,7 +1424,7 @@ punctuation, but may not.
     ...     raise Error('not found', culprit='marbles')
     ... except Error as e:
     ...     error(full_stop(e))
-    myprog error: marbles: insufficient number.
+    myprog error: marbles: insufficient quantity.
 
 
 .. _indent desc:
