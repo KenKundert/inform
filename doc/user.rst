@@ -1420,7 +1420,7 @@ punctuation, but may not.
     ...     if found is False:
     ...         raise Error('not found', culprit='marbles')
     ...     elif found < 3:
-    ...         raise Error('insufficient number.', culprit='marbles')
+    ...         raise Error('insufficient quantity', culprit='marbles')
     ...     raise Error('not found', culprit='marbles')
     ... except Error as e:
     ...     error(full_stop(e))

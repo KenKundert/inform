@@ -9,16 +9,20 @@ Latest development release
     | Version: 1.32
     | Released: 2024-11-22
 
-- Added *defaults* argument to :class:`plural`.
-- Added *defaults* argument to :class:`truth`.
-- Added *all* argument to *stream_policy*.
+
+1.33 (2024-12-11)
+-----------------
+
+- Added *formatter* argument to :class:`plural`.
+- Added *formatter* argument to :class:`truth`.
+- Added *all* *stream_policy*.
 - Added :func:`tree()`  function.
 
 
 1.32 (2024-11-22)
 -----------------
 
-- Added *remove* argument to :func:`full_stop`.
+- Added *remove* argument to :func:`full_stop()`.
 - Support negative widths in :class:`ProgressBar`.
 
 
