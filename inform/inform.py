@@ -29,7 +29,7 @@ STREAM_POLICIES = {
     'errors': lambda i, so, se: se if i.is_error else so,
         # stderr is used on all errors
     'all': lambda i, so, se: se,
-        # stderr is used for all informant that do not explicitly set stream
+        # stderr is used for all informants that do not explicitly set stream
         # by default no informants explicitly set stream
 }
 BAR_CHARS = '▏▎▍▌▋▊▉█'
@@ -2662,6 +2662,9 @@ class Inform:
                 'errors':
                     stderr is used for all errors, stdout is used otherwise.
                     This is also commonly used for programs that act as filters.
+                'all':
+                    stderr is used for all informants that do not explicitly set stream.
+                    By default no informants explicitly set stream.
 
             May also be a function that returns the stream and takes three
             arguments: the active informant, Inform's stdout, and Inform's
