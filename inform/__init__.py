@@ -1,6 +1,6 @@
 from .inform import (
     # inform utility functions and classes
-    cull, indent, is_collection, is_iterable, is_mapping, is_str, join,
+    cull, indent, is_collection, is_iterable, is_array, is_mapping, is_str, join,
     Color, Info, LoggingCache,
 
     # user utility functions and classes

@@ -9,6 +9,8 @@ Latest development release
     | Version: 1.33
     | Released: 2024-12-11
 
+- Added :func:`is_array`.
+
 
 1.33 (2024-12-11)
 -----------------

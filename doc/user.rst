@@ -797,16 +797,24 @@ You can specify the output stream when creating an informant. If you do not,
 then the stream uses is under the control of *Inform's* *stream_policy* 
 argument.
 
-If *stream_policy* is set to 'termination', then all messages are sent to the 
+If *stream_policy* is set to 'termination' then all messages are sent to the 
 standard output except the final termination message, which is set to standard 
 error.  This is suitable for programs whose output largely consists of status 
 messages rather than data, and so would be unlikely to be used in a pipeline. 
 
-If *stream_policy* is 'header'. then all messages with headers (those messages 
+If *stream_policy* is 'header' then all messages with headers (those messages 
 produced from informants with *severity*) are sent to the standard error stream 
 and all other messages are sent to the standard output. This is more suitable 
 for programs whose output largely consists of data and so would likely be used 
 in a pipeline.
+
+If *stream_policy* is 'errors' then all error messages are sent to the standard 
+error stream and all other messages are sent to the standard output.  This is 
+also commonly used for programs that act s filters.
+
+If *stream_policy* is 'all' stderr is used for all informants that do not 
+explicitly set their stream.  By default, no informants explicitly set their 
+stream, but your can create new informants and explicitly set the stream.
 
 It is also possible for *stream_policy* to be a function that takes three 
 arguments, the informant and the standard output and error streams. It should 
@@ -1534,6 +1542,37 @@ is_iterable
     True
 
 
+.. _is_array desc:
+
+is_array
+""""""""
+
+.. py:function:: is_array(obj)
+   :noindex:
+
+:func:`is_array` returns *True* if its argument is a list or a tuple.  This 
+includes other list-like objects.
+
+.. code-block:: python
+
+    >>> from inform import is_array
+
+    >>> is_array('')  # string
+    False
+
+    >>> is_array([])  # list
+    True
+
+    >>> is_array(())  # tuple
+    True
+
+    >>> is_array({})  # dictionary
+    False
+
+    >>> is_array(set())  # set
+    False
+
+
 .. _is_mapping desc:
 
 is_mapping
@@ -1542,8 +1581,8 @@ is_mapping
 .. py:function:: is_mapping(obj)
    :noindex:
 
-:func:`is_collection` returns *True* if its argument is a mapping.  This 
-includes dictionary and other dictionary-like objects.
+:func:`is_mapping` returns *True* if its argument is a mapping.  This includes 
+dictionary and other dictionary-like objects.
 
 .. code-block:: python
 

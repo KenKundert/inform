@@ -227,8 +227,40 @@ def is_collection(obj):
         >>> is_collection({})  # dictionary
         True
 
+        >>> is_collection(set())  # set
+        True
+
     """
     return is_iterable(obj) and not is_str(obj)
+
+# is_array {{{2
+def is_array(obj):
+    """Identifies objects that are is_array (tuples and arrays).
+
+    Returns *True* if argument is a sequence (tuple or list).
+
+    **Example**::
+
+        >>> from inform import is_array
+        >>> is_array('')  # string
+        False
+
+        >>> is_array([])  # list
+        True
+
+        >>> is_array(())  # tuple
+        True
+
+        >>> is_array({})  # dictionary
+        False
+
+        >>> is_array(set())  # set
+        False
+
+    """
+    from collections.abc import Sequence
+    return isinstance(obj, Sequence) and not is_str(obj)
+
 
 # is_mapping {{{2
 def is_mapping(obj):

@@ -23,7 +23,7 @@ def test_inform():
         return
 
     rv = doctest.testfile('../inform/inform.py', optionflags=doctest.ELLIPSIS)
-    assert rv.attempted == 173
+    assert rv.attempted == 181
     assert rv.failed == 0
 
 def test_manual():

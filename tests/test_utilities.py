@@ -3,10 +3,10 @@
 from inform import (
     Color, Error, Info, LoggingCache, columns, conjoin, did_you_mean, comment,
     cull, dedent, display, done, error, fatal, fmt, full_stop, indent, Inform,
-    is_collection, is_iterable, is_mapping, is_str, join, get_prog_name,
-    get_informer, narrate, os_error, output, plural, render, terminate,
-    title_case, tree, truth, warn, ddd, ppp, sss, vvv, ProgressBar, parse_range,
-    format_range
+    is_collection, is_iterable, is_mapping, is_array, is_str, join,
+    get_prog_name, get_informer, narrate, os_error, output, plural, render,
+    terminate, title_case, tree, truth, warn, ddd, ppp, sss, vvv, ProgressBar,
+    parse_range, format_range
 )
 from textwrap import dedent as tw_dedent
 import sys
@@ -795,6 +795,7 @@ def test_is_iterable():
     assert is_iterable([]) == True
     assert is_iterable(()) == True
     assert is_iterable({}) == True
+    assert is_iterable(set()) == True
 
 def test_is_collection():
     assert is_collection(0) == False
@@ -802,6 +803,7 @@ def test_is_collection():
     assert is_collection([]) == True
     assert is_collection(()) == True
     assert is_collection({}) == True
+    assert is_collection(set()) == True
 
 def test_is_mapping():
     assert is_mapping(0) == False
@@ -809,6 +811,15 @@ def test_is_mapping():
     assert is_mapping([]) == False
     assert is_mapping(()) == False
     assert is_mapping({}) == True
+    assert is_mapping(set()) == False
+
+def test_is_array():
+    assert is_array(0) == False
+    assert is_array('') == False
+    assert is_array([]) == True
+    assert is_array(()) == True
+    assert is_array({}) == False
+    assert is_array(set()) == False
 
 def test_color():
     assert Color('white', scheme='dark')('') == ''
