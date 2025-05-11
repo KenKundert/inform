@@ -10,6 +10,7 @@ Latest development release
     | Released: 2024-12-11
 
 - Added :func:`is_array`.
+- Added :meth:`ProgressBar.override_limit()`.
 
 
 1.33 (2024-12-11)

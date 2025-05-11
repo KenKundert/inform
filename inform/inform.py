@@ -1991,35 +1991,14 @@ class ProgressBar:
             except OSError:
                 width=79
 
+        self.override_limits(stop, start, log)
+
         self.major = width//10
         self.width = 10*self.major
-
-        # process start, stop, log, etc.
-        try:
-            self.iterator = stop
-            stop = len(stop)
-            start = 0
-            log = False
-        except TypeError:
-            self.iterator = None
-        if log:
-            from math import log10
-            start = log10(start)
-            stop = log10(stop)
-        self.reversed = start > stop
-        if self.reversed:
-            start = -start
-            stop = -stop
-        self.start = start
-        self.stop = stop
-        self.log = log
         self.prefix = prefix
         self.informant = display if informant is True else informant
         self.prev_index = 0
         self.started = False
-        self.finished = not bool(stop - start)
-            # if stop == start, just declare progress bar to be done;
-            # doing so avoids the divide by zero problem
         self.informer = get_informer()
 
         # prepare for use of markers
@@ -2032,6 +2011,39 @@ class ProgressBar:
         self.prev_marker = None
         self.use_prev_marker = False
         self.previously_shown = ''
+
+    # override_limits() {{{3
+    def override_limits(self, stop, start, log):
+        """
+        Overrides start, stop, and log settings
+
+        Not normally needed. Generally used to give the limits when they are not
+        known in advance.  Initiate with bogus limits and use this function to
+        override before the first draw operation.
+        """
+        try:
+            self.iterator = stop
+            stop = len(stop)
+            start = 0
+            assert not log
+        except TypeError:
+            self.iterator = None
+
+        if log:
+            from math import log10
+            start = log10(start)
+            stop = log10(stop)
+        self.reversed = start > stop
+        if self.reversed:
+            start = -start
+            stop = -stop
+        self.start = start
+        self.stop = stop
+        self.log = log
+
+        self.finished = stop == start
+            # if stop == start, just declare progress bar to be done;
+            # doing so avoids the divide by zero problem
 
     # draw() {{{3
     def draw(self, abscissa, marker=None):
