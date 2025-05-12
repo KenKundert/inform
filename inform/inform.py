@@ -1501,10 +1501,10 @@ class truth:
     Python string expansion or can be specified using the *formatter* argument.
     For example:
 
-        >>> f"{truth(True):aye/no}"
+        >>> f"{truth(True):aye/nay}"
         'aye'
 
-        >>> response = truth(True, formatter="aye/no")
+        >>> response = truth(True, formatter="aye/nay")
         >>> str(response)
         'aye'
 
