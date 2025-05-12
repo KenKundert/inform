@@ -1307,10 +1307,10 @@ class plural:
     The format string has one to four sections separated by '/' with the various
     section being included in the output depending on the count.
 
-        ALWAYS
-        ALWAYS/MANY
-        ALWAYS/ONE/MANY
-        ALWAYS/ONE/MANY/NONE
+    |   ALWAYS
+    |   ALWAYS/MANY
+    |   ALWAYS/ONE/MANY
+    |   ALWAYS/ONE/MANY/NONE
 
     The first section, ALWAYS, is always included, the rest are appended to
     ALWAYS as appropriate based on the count.  If no other sections are given,
