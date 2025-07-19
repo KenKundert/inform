@@ -80,6 +80,9 @@ User Utilities
 .. autoclass:: inform.ProgressBar
     :members:
 
+.. autoclass:: inform.bar
+    :members:
+
 .. autofunction:: inform.columns
 
 .. autofunction:: inform.conjoin

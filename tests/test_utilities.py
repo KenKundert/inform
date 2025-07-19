@@ -1492,7 +1492,7 @@ def test_filling(capsys):
         stop = 1e-6
         step = 1e-9
         display('before')
-        with ProgressBar(stop, prefix='Progress: ', width=60) as progress:
+        with ProgressBar(stop, prefix='Progress: ', width=70) as progress:
             value = 0
             while value <= stop/2:
                 progress.draw(value)
@@ -1696,13 +1696,13 @@ def test_aerosol(capsys):
     # ProgressBar: empty context manager
     with Inform(prog_name=False, narrate=False, verbose=False, quiet=False, mute=False):
         display('before')
-        for vs in ProgressBar([], prefix='nil: |', width=60):
+        for vs in ProgressBar([], prefix='nil: |', width=66):
             pass
         display('mid 1')
-        for vs in ProgressBar([1], prefix='one: |', width=60):
+        for vs in ProgressBar([1], prefix='one: |', width=66):
             pass
         display('mid 2')
-        for vs in ProgressBar([1,2], prefix='two: |', width=60):
+        for vs in ProgressBar([1,2], prefix='two: |', width=66):
             pass
         display('after')
         captured = capsys.readouterr()

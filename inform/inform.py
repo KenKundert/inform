@@ -4,7 +4,7 @@
 # Utilities for communicating directly with the user.
 # Documentation can be found at inform.readthedocs.io.
 #
-# Copyright (c) 2014-2024 Kenneth S. Kundert
+# Copyright (c) 2014-2025 Kenneth S. Kundert
 # This software is licensed under the `MIT Licents <https://mit-license.org>`_.
 
 # Imports {{{1
@@ -1712,7 +1712,7 @@ def columns(
 
 
 # render bar {{{2
-def render_bar(value, width=72, full_width=False):
+class bar:
     """Render graphic representation of a value in the form of a bar
 
     Args:
@@ -1722,35 +1722,128 @@ def render_bar(value, width=72, full_width=False):
 
         full_width (bool):
             Whether bar should be rendered to fill the whole width using
-            trailing spaces,.  This is useful if you plan to mark the end of the
-            bar.
+            trailing spaces.  This is useful if anything follows the bar on its
+            line, such as if you wish to mark the end of the bar.
+
+        clip (bool):
+            Should the length of the bar be limited to *width* if a value
+            greater than 1 is specified.
+
+    When rendered within a string you can specify a format that overrides the
+    above arguments.  The format strings take the form *WFC* where:
+
+    - *W* is an integer that overrides *width*.
+    - *F* is either 'f' or 'F' overrides *full_width*; is true if capitalized.
+    - *C* is either 'c' or 'C' overrides *clip*; is true if capitalized.
+
     **Examples**::
 
-        >>> from inform import render_bar
+        >>> from inform import bar
 
         >>> assets = {'property': 13_194, 'cash': 2846, 'equities': 19_301}
         >>> total = sum(assets.values())
         >>> for key, value in assets.items():
-        ...     display(f"{key:>8}: ❭{render_bar(value/total, full_width=True)}❬")
-        property: ❭██████████████████████████▉                                             ❬
-            cash: ❭█████▊                                                                  ❬
-        equities: ❭███████████████████████████████████████▎                                ❬
-
+        ...     display(f"{key:>8}: ❭{bar(value/total):60F}❬")
+        property: ❭██████████████████████▍                                     ❬
+            cash: ❭████▊                                                       ❬
+        equities: ❭████████████████████████████████▊                           ❬
 
     """
-    scaled = value*width
-    if scaled > width:
-        scaled = width
-    if scaled < 0:
-        scaled = 0
-    buckets = int(scaled)
-    frac = int((NUM_BAR_CHARS*scaled) % NUM_BAR_CHARS)
-    extra = BAR_CHARS[frac-1:frac]
-    bar = buckets*BAR_CHARS[-1] + extra
-    if full_width:
-        bar += (width - len(bar))*' '
-    return bar
+    def __init__(self, value, width=72, full_width=False, clip=True):
+        self.value = value
+        self.width = width
+        self.full_width = full_width
+        self.clip = clip
 
+    def render(self, value=None, width=None, full_width=None, clip=None):
+        """Render bar to string
+
+        Any arguments given will override those specified when class was
+        instantiated.
+
+        Args:
+            value (real): Should be normalized (fall between 0 and 1)
+
+            width (int): The width of the bar in characters when value is 1.
+
+            full_width (bool):
+                Whether bar should be rendered to fill the whole width using
+                trailing spaces.  This is useful if you plan to mark the end of
+                the bar.
+
+            clip (bool):
+                Should the length of the bar be limited to *width* if a value
+                greater than 1 is specified.
+        """
+
+        value = self.value if value is None else value
+        width = self.width if width is None else width
+        full_width = self.full_width if full_width is None else full_width
+        clip = self.clip if clip is None else clip
+        scaled = value*width
+        if clip and scaled > width:
+            scaled = width
+        if scaled < 0:
+            scaled = 0
+        buckets = int(scaled)
+        frac = int((NUM_BAR_CHARS*scaled) % NUM_BAR_CHARS)
+        extra = BAR_CHARS[frac-1:frac]
+        bar = buckets*BAR_CHARS[-1] + extra
+        if full_width:
+            bar += (width - len(bar))*' '
+        return bar
+
+    def __format__(self, formatter):
+        # format strings take the form WFC where:
+        #     W is an integer indicating desired width
+        #     F is either 'f' or 'F' for full_width, cap is true
+        #     C is either 'c' or 'C' for clip, cap is true
+        value = self.value
+        width = self.width
+        full_width = self.full_width
+        clip = self.clip
+        if formatter:
+            match = re.match(r'(\d*)([fFcC]{0,2})', formatter)
+            try:
+                if match[1]:
+                    width = int(match[1])
+                if 'f' in match[2]:
+                    full_width = False
+                if 'F' in match[2]:
+                    full_width = True
+                if 'c' in match[2]:
+                    clip = False
+                if 'C' in match[2]:
+                    clip = True
+            except (TypeError, ValueError):
+                warn('invalid format string')
+        return self.render(value, width, full_width, clip)
+
+    def __str__(self):
+        return self.render()
+
+def render_bar(value, width=72, full_width=False, clip=True):
+    """Render graphic representation of a value in the form of a bar
+
+    This function is deprecated.  You should instead use::
+
+        bar(value, width, full_width, clip).render()
+
+    Args:
+        value (real): Should be normalized (fall between 0 and 1)
+
+        width (int): The width of the bar in characters when value is 1.
+
+        full_width (bool):
+            Whether bar should be rendered to fill the whole width using
+            trailing spaces.  This is useful if you plan to mark the end of
+            the bar.
+
+        clip (bool):
+            Should the length of the bar be limited to *width* if a value
+            greater than 1 is specified.
+    """
+    return bar(value, width, full_width, clip).render()
 
 # tree {{{2
 # _gen_connectors {{{3
@@ -1905,6 +1998,10 @@ class ProgressBar:
             The maximum width of the bar, the largest factor of 10 that
             is less than or equal to this value is used.  If width is less than
             or equal to zero, it is added to the current width of the terminal.
+            The width includes the width of the prefix.  If you are displaying a
+            succession of progress bars with prefixes, you should make the all
+            the prefixes the same width if you wish to avoid ragged left and
+            right boundaries on the bars.
 
         informant (informant):
             Which informant to use when outputting the progress bar.  By
@@ -1989,7 +2086,10 @@ class ProgressBar:
             try:
                 width = os.get_terminal_size().columns + width
             except OSError:
-                width=79
+                width = 79
+        width -= len(prefix or '')
+        if width < 10:
+            width = 79
 
         self.override_limits(stop, start, log)
 
