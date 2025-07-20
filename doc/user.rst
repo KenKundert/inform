@@ -1714,7 +1714,7 @@ example:
     ...     processed.append(item)
     >>> items = ['i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10']
 
-    >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
+    >>> for item in ProgressBar(items, prefix='Progress: ', width=70):
     ...     process(item)
     Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
 
@@ -1728,7 +1728,7 @@ how many iterations you wish:
 
     >>> for i in ProgressBar(50, prefix='Progress: '):
     ...     process(i)
-    Progress: ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅⋅0
+    Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
 
 Finally, the third illustrates progress through a continuous range:
 
@@ -1813,7 +1813,7 @@ results: *okay*, *warn*, *fail*, *error*.
     ...     for i in range(len(results)):
     ...         status = results[i]
     ...         progress.draw(i+1, status)
-    progress: ⋅⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅⋅7++++++6⋅⋅⋅⋅⋅⋅5++++++4⋅⋅⋅⋅⋅⋅3××××××2−−−−−−1⋅⋅⋅⋅⋅⋅0
+    progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7+++++6⋅⋅⋅⋅⋅5+++++4⋅⋅⋅⋅⋅3×××××2−−−−−1⋅⋅⋅⋅⋅0
 
 In this case color was not used, but you could specify the following to render 
 the markers in color:
@@ -1845,9 +1845,9 @@ The progress bar generally handles interruptions with grace. For example:
     >>> for item in ProgressBar(items, prefix='Progress: ', width=60):
     ...     if item == 'i4':
     ...         warn('bad value.', culprit=item)
-    Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7
+    Progress: ⋅⋅⋅⋅9⋅⋅⋅⋅8⋅⋅⋅⋅7
     myprog warning: i4: bad value.
-    Progress: ⋅⋅⋅⋅⋅9⋅⋅⋅⋅⋅8⋅⋅⋅⋅⋅7⋅⋅⋅⋅⋅6⋅⋅⋅⋅⋅5⋅⋅⋅⋅⋅4⋅⋅⋅⋅⋅3⋅⋅⋅⋅⋅2⋅⋅⋅⋅⋅1⋅⋅⋅⋅⋅0
+    Progress: ⋅⋅⋅⋅9⋅⋅⋅⋅8⋅⋅⋅⋅7⋅⋅⋅⋅6⋅⋅⋅⋅5⋅⋅⋅⋅4⋅⋅⋅⋅3⋅⋅⋅⋅2⋅⋅⋅⋅1⋅⋅⋅⋅0
 
 Notice that the warning started on a new line and the progress bar was restarted 
 from the beginning after the warning.
