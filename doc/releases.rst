@@ -6,8 +6,8 @@ Releases
 Latest development release
 --------------------------
 
-    | Version: 1.35b1
-    | Released: 2025-07-19
+    | Version: 1.35b2
+    | Released: 2025-07-21
 
 - Added :class:`bar`.
 - The width of the *prefix* is now included in the width of the :class:`ProgressBar`.
