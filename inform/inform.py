@@ -1725,16 +1725,26 @@ class bar:
             trailing spaces.  This is useful if anything follows the bar on its
             line, such as if you wish to mark the end of the bar.
 
-        clip (bool):
-            Should the length of the bar be limited to *width* if a value
-            greater than 1 is specified.
+        clip (real):
+            Maximum allowed value.
+            If value is larger than clip, it is plotted as if it equals clip
+            except bar is terminated with the overflow marker.
+
+        overflow (str):
+            The overflow marker.  If value is greater than clip the overflow
+            marker is appended to the bar.  If False, no marker is used.
+            Common values are '➔', '∎', '►', '▞', '▋▍▎▏' or '>>>'.
 
     When rendered within a string you can specify a format that overrides the
-    above arguments.  The format strings take the form *WFC* where:
+    above arguments.  The format strings take the form *WFCO* where:
 
     - *W* is an integer that overrides *width*.
     - *F* is either 'f' or 'F' overrides *full_width*; is true if capitalized.
-    - *C* is either 'c' or 'C' overrides *clip*; is true if capitalized.
+    - *C* is a simple real number, 1 or greater.
+    - *O* is an arbitrary string that becomes the overflow marker.
+
+    The format fields are optional, but if one is given, the one listed before
+    it must also be given.
 
     **Examples**::
 
@@ -1748,62 +1758,61 @@ class bar:
             cash: ❭████▊                                                       ❬
         equities: ❭████████████████████████████████▊                           ❬
 
+    In this second example a clipping value of 2 and an overflow marker is added
+    to the end of the end of the format string.  When the life exceeds 2× the
+    maximum life the overflow marker is added to the end of the bar, which adds
+    a few vertical bars, a newline, and 20 spaced of indent.
+
+        >>> hours = dict(drill01=6, drill02=34, drill03=89, drill04=57)
+        >>> max_life = 40
+        >>> for name, life in hours.items():
+        ...     print(f"{bar(life/max_life):20F2▋▍▎▏\n                    }", name)
+        ███                  drill01
+        █████████████████    drill02
+        ████████████████████████████████████████▋▍▎▏
+                             drill03
+        ████████████████████████████▌ drill04
+
     """
-    def __init__(self, value, width=72, full_width=False, clip=True):
+    def __init__(self, value, width=72, full_width=False, clip=1, overflow=False):
         self.value = value
         self.width = width
         self.full_width = full_width
         self.clip = clip
+        self.overflow = overflow or ''
 
-    def render(self, value=None, width=None, full_width=None, clip=None):
+    def render(self, value=None, width=None, full_width=None, clip=None, overflow=None):
         """Render bar to string
 
-        Any arguments given will override those specified when class was
-        instantiated.
-
-        Args:
-            value (real): Should be normalized (fall between 0 and 1)
-
-            width (int): The width of the bar in characters when value is 1.
-
-            full_width (bool):
-                Whether bar should be rendered to fill the whole width using
-                trailing spaces.  This is useful if you plan to mark the end of
-                the bar.
-
-            clip (bool):
-                Should the length of the bar be limited to *width* if a value
-                greater than 1 is specified.
+        Arguments given override those specified when class was instantiated.
         """
-
         value = self.value if value is None else value
         width = self.width if width is None else width
         full_width = self.full_width if full_width is None else full_width
         clip = self.clip if clip is None else clip
-        scaled = value*width
-        if clip and scaled > width:
-            scaled = width
-        if scaled < 0:
-            scaled = 0
+        overflow = self.overflow if overflow is None else overflow
+
+        scaled = max(min(value, clip), 0)*width
         buckets = int(scaled)
         frac = int((NUM_BAR_CHARS*scaled) % NUM_BAR_CHARS)
-        extra = BAR_CHARS[frac-1:frac]
-        bar = buckets*BAR_CHARS[-1] + extra
+        if value > clip:
+            last = overflow
+        else:
+            last = BAR_CHARS[frac-1:frac]
+        bar = buckets*BAR_CHARS[-1] + last
         if full_width:
             bar += (width - len(bar))*' '
         return bar
 
     def __format__(self, formatter):
-        # format strings take the form WFC where:
+        # format strings take the form WFCO where:
         #     W is an integer indicating desired width
         #     F is either 'f' or 'F' for full_width, cap is true
-        #     C is either 'c' or 'C' for clip, cap is true
-        value = self.value
-        width = self.width
-        full_width = self.full_width
-        clip = self.clip
+        #     C is a simple real number, 1 or greater.
+        #     O is an arbitrary string that will be used as overflow marker
+        value = width = full_width = clip = overflow = None
         if formatter:
-            match = re.match(r'(\d*)([fFcC]{0,2})', formatter)
+            match = re.match(r'(\d*)([fF]?)(\d\.?\d*)?(.*)\Z', formatter, re.S)
             try:
                 if match[1]:
                     width = int(match[1])
@@ -1811,18 +1820,16 @@ class bar:
                     full_width = False
                 if 'F' in match[2]:
                     full_width = True
-                if 'c' in match[2]:
-                    clip = False
-                if 'C' in match[2]:
-                    clip = True
+                clip = float(match[3]) if match[3] else None
+                overflow = match[4] or None
             except (TypeError, ValueError):
                 warn('invalid format string')
-        return self.render(value, width, full_width, clip)
+        return self.render(value, width, full_width, clip, overflow)
 
     def __str__(self):
         return self.render()
 
-def render_bar(value, width=72, full_width=False, clip=True):
+def render_bar(value, width=72, full_width=False, clip=1):
     """Render graphic representation of a value in the form of a bar
 
     This function is deprecated.  You should instead use::
@@ -1839,9 +1846,10 @@ def render_bar(value, width=72, full_width=False, clip=True):
             trailing spaces.  This is useful if you plan to mark the end of
             the bar.
 
-        clip (bool):
-            Should the length of the bar be limited to *width* if a value
-            greater than 1 is specified.
+        clip (real):
+            Maximum allowed value.
+            If value is larger than clip, it is plotted as if it equals clip
+            except bar is terminated with the overflow marker.
     """
     return bar(value, width, full_width, clip).render()
 

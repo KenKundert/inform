@@ -23,8 +23,8 @@ def test_inform():
         return
 
     rv = doctest.testfile('../inform/inform.py', optionflags=doctest.ELLIPSIS)
-    assert rv.attempted in [180, 181]
-        # for some reasons 181 test are run on my laptop, and 180 on github
+    assert rv.attempted in [183, 184]
+        # for some reason 181 test are run on my laptop, and 180 on github
     assert rv.failed == 0
 
 def test_manual():
