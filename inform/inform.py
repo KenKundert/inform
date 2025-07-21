@@ -1720,7 +1720,7 @@ class bar:
 
         width (int): The width of the bar in characters when value is 1.
 
-        full_width (bool):
+        pad (bool):
             Whether bar should be rendered to fill the whole width using
             trailing spaces.  This is useful if anything follows the bar on its
             line, such as if you wish to mark the end of the bar.
@@ -1736,15 +1736,15 @@ class bar:
             Common values are '➔', '∎', '►', '▞', '▋▍▎▏' or '>>>'.
 
     When rendered within a string you can specify a format that overrides the
-    above arguments.  The format strings take the form *WFCO* where:
+    above arguments.  The format strings take the form *WPCO* where:
 
     - *W* is an integer that overrides *width*.
-    - *F* is either 'f' or 'F' overrides *full_width*; is true if capitalized.
+    - *P* is either 'p' or 'P' overrides *pad*; is true if capitalized.
     - *C* is a simple real number, 1 or greater.
     - *O* is an arbitrary string that becomes the overflow marker.
 
-    The format fields are optional, but if one is given, the one listed before
-    it must also be given.
+    The format fields are optional, but if you want to specify *W* and *C* you
+    also need to also specify *P* to separate them.
 
     **Examples**::
 
@@ -1753,7 +1753,7 @@ class bar:
         >>> assets = {'property': 13_194, 'cash': 2846, 'equities': 19_301}
         >>> total = sum(assets.values())
         >>> for key, value in assets.items():
-        ...     display(f"{key:>8}: ❭{bar(value/total):60F}❬")
+        ...     display(f"{key:>8}: ❭{bar(value/total):60P}❬")
         property: ❭██████████████████████▍                                     ❬
             cash: ❭████▊                                                       ❬
         equities: ❭████████████████████████████████▊                           ❬
@@ -1763,32 +1763,32 @@ class bar:
     maximum life the overflow marker is added to the end of the bar, which adds
     a few vertical bars, a newline, and 20 spaced of indent.
 
-        >>> hours = dict(drill01=6, drill02=34, drill03=89, drill04=57)
+        >>> hours = dict(unit_1=6, unit_2=34, unit_3=89, unit_4=57)
         >>> max_life = 40
         >>> for name, life in hours.items():
-        ...     print(f"{bar(life/max_life):20F2▋▍▎▏\n                    }", name)
-        ███                  drill01
-        █████████████████    drill02
+        ...     print(f"{bar(life/max_life):20P2▋▍▎▏\n                    }", name)
+        ███                  unit_1
+        █████████████████    unit_2
         ████████████████████████████████████████▋▍▎▏
-                             drill03
-        ████████████████████████████▌ drill04
+                             unit_3
+        ████████████████████████████▌ unit_4
 
     """
-    def __init__(self, value, width=72, full_width=False, clip=1, overflow=False):
+    def __init__(self, value, width=72, pad=False, clip=1, overflow=False):
         self.value = value
         self.width = width
-        self.full_width = full_width
+        self.pad = pad
         self.clip = clip
         self.overflow = overflow or ''
 
-    def render(self, value=None, width=None, full_width=None, clip=None, overflow=None):
+    def render(self, value=None, width=None, pad=None, clip=None, overflow=None):
         """Render bar to string
 
         Arguments given override those specified when class was instantiated.
         """
         value = self.value if value is None else value
         width = self.width if width is None else width
-        full_width = self.full_width if full_width is None else full_width
+        pad = self.pad if pad is None else pad
         clip = self.clip if clip is None else clip
         overflow = self.overflow if overflow is None else overflow
 
@@ -1800,31 +1800,31 @@ class bar:
         else:
             last = BAR_CHARS[frac-1:frac]
         bar = buckets*BAR_CHARS[-1] + last
-        if full_width:
+        if pad:
             bar += (width - len(bar))*' '
         return bar
 
     def __format__(self, formatter):
-        # format strings take the form WFCO where:
+        # format strings take the form WPCO where:
         #     W is an integer indicating desired width
-        #     F is either 'f' or 'F' for full_width, cap is true
+        #     P is either 'p' or 'P' for pad, cap is true
         #     C is a simple real number, 1 or greater.
         #     O is an arbitrary string that will be used as overflow marker
-        value = width = full_width = clip = overflow = None
+        value = width = pad = clip = overflow = None
         if formatter:
-            match = re.match(r'(\d*)([fF]?)(\d\.?\d*)?(.*)\Z', formatter, re.S)
+            match = re.match(r'(\d*)([pP]?)(\d\.?\d*)?(.*)\Z', formatter, re.S)
             try:
                 if match[1]:
                     width = int(match[1])
-                if 'f' in match[2]:
-                    full_width = False
-                if 'F' in match[2]:
-                    full_width = True
+                if 'p' in match[2]:
+                    pad = False
+                if 'P' in match[2]:
+                    pad = True
                 clip = float(match[3]) if match[3] else None
                 overflow = match[4] or None
             except (TypeError, ValueError):
                 warn('invalid format string')
-        return self.render(value, width, full_width, clip, overflow)
+        return self.render(value, width, pad, clip, overflow)
 
     def __str__(self):
         return self.render()

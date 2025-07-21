@@ -1094,6 +1094,52 @@ Several utility functions are provided for your convenience. They are often
 helpful when creating messages.
 
 
+.. _bar desc:
+
+bar
+"""
+
+.. py:class:: bar(normalized_value, width=72)
+   :noindex:
+
+:class:`bar` produces a graphic representation of a normalized value in the form 
+of a bar.  *normalized_value* is the value to render; it is expected to be 
+a value between 0 and 1.  *width* specifies the maximum width of the bar in 
+characters.
+
+.. code-block:: python
+
+    >>> from inform import bar, display
+
+    >>> for i in range(10):
+    ...     value = 1 - i/9.02
+    ...     display(f'{value:0.3f}: {bar(value, 70)}')
+    1.000: ██████████████████████████████████████████████████████████████████████
+    0.889: ██████████████████████████████████████████████████████████████▏
+    0.778: ██████████████████████████████████████████████████████▍
+    0.667: ██████████████████████████████████████████████▋
+    0.557: ██████████████████████████████████████▉
+    0.446: ███████████████████████████████▏
+    0.335: ███████████████████████▍
+    0.224: ███████████████▋
+    0.113: ███████▉
+    0.002: ▏
+
+You can specify a format string when interpolating the bar into a string to 
+control its width, whether the bar should be padded with terminal spaces, and 
+how to handle overflows.  For example:
+
+.. code-block:: python
+
+    >>> assets = {'property': 13_194, 'cash': 2846, 'equities': 19_301}
+    >>> total = sum(assets.values())
+    >>> for key, value in assets.items():
+    ...     display(f"{key:>8}: ❭{bar(value/total):60P}❬")
+    property: ❭██████████████████████▍                                     ❬
+        cash: ❭████▊                                                       ❬
+    equities: ❭████████████████████████████████▊                           ❬
+
+
 .. _color desc:
 
 Color Class
@@ -2060,40 +2106,11 @@ render_bar
 .. py:function:: render_bar(normalized_value, width=72)
    :noindex:
 
-:func:`render_bar()` produces a graphic representation of a normalized value in 
-the form of a bar.  *normalized_value* is the value to render; it is expected to 
-be a value between 0 and 1.  *width* specifies the maximum width of the line in 
-characters.
+This function is deprecated.  You should instead use:
 
 .. code-block:: python
 
-    >>> from inform import render_bar, display
-    >>> for i in range(10):
-    ...     value = 1 - i/9.02
-    ...     display('{:0.3f}: {}'.format(value, render_bar(value, 70)))
-    1.000: ██████████████████████████████████████████████████████████████████████
-    0.889: ██████████████████████████████████████████████████████████████▏
-    0.778: ██████████████████████████████████████████████████████▍
-    0.667: ██████████████████████████████████████████████▋
-    0.557: ██████████████████████████████████████▉
-    0.446: ███████████████████████████████▏
-    0.335: ███████████████████████▍
-    0.224: ███████████████▋
-    0.113: ███████▉
-    0.002: ▏
-
-If you would like to add delimiters to the bar, you can make each bar fixed 
-width by adding ``fullwidth=True``:
-
-.. code-block:: python
-
-    >>> assets = {'property': 13_194, 'cash': 2846, 'equities': 19_301}
-    >>> total = sum(assets.values())
-    >>> for key, value in assets.items():
-    ...     display(f"{key:>8}: ❭{render_bar(value/total, full_width=True)}❬")
-    property: ❭██████████████████████████▉                                             ❬
-        cash: ❭█████▊                                                                  ❬
-    equities: ❭███████████████████████████████████████▎                                ❬
+    bar(normalized_value, width).render()
 
 
 .. _title_case desc:

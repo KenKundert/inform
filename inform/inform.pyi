@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, Mapping, Sequence, TextIO
+from typing import Any, Callable, Iterable, Literal, Mapping, Sequence, TextIO
 from pathlib import Path
 
 __released__: str
@@ -24,6 +24,27 @@ def is_iterable(obj: Any) -> bool: ...
 def is_collection(obj: Any) -> bool: ...
 def is_mapping(obj: Any) -> bool: ...
 def is_array(obj: Any) -> bool: ...
+
+class bar:
+    def __init__(
+        self,
+        value: float,
+        width: int,
+        pad: bool,
+        clip: float,
+        overflow: Literal[False] | str,
+    ) -> None:
+        ...
+
+    def render(
+        self,
+        value: float,
+        width: int,
+        pad: bool,
+        clip: float,
+        overflow: Literal[False] | str,
+    ) -> str:
+        ...
 
 class Color:
     enable: bool
@@ -169,7 +190,8 @@ def columns(
 def render_bar(
     value: float,
     width: int = ...,
-    full_width: bool = ...
+    full_width: bool = ...,
+    clip: float = ...
 ):
     ...
 
