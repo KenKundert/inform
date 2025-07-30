@@ -9,7 +9,10 @@ Latest development release
     | Version: 1.35b2
     | Released: 2025-07-21
 
-- Added :class:`bar`.
+
+1.35 (2025-07-30)
+-----------------
+- Added :class:`bar`, a generalization of :func:`render_bar()`.
 - The width of the *prefix* is now included in the width of the :class:`ProgressBar`.
 
 
