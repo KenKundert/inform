@@ -1489,6 +1489,9 @@ class plural:
     def __str__(self):
         return self.format()
 
+    def __bool__(self):
+        return bool(self.value)
+
     def __repr__(self):
         return f"{self.__class__.__name__}({self.count})"
 
@@ -1598,11 +1601,11 @@ class truth:
     def __str__(self):
         return self.defaults[0] if self.value else self.defaults[1]
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({bool(self.value)})"
-
     def __bool__(self):
         return bool(self.value)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({bool(self.value)})"
 
 # full_stop {{{2
 def full_stop(sentence, end='.', allow='.?!', remove=r'\\'):
@@ -3267,7 +3270,7 @@ class Inform:
             | 2: invalid invocation
             | 3: panic
 
-        Of, if your program naturally want to signal pass or failure using its exit status:
+        Of, if your program naturally wants to signal pass or failure using its exit status:
             | 0: success
             | 1: failure
             | 2: error

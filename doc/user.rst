@@ -810,7 +810,7 @@ in a pipeline.
 
 If *stream_policy* is 'errors' then all error messages are sent to the standard 
 error stream and all other messages are sent to the standard output.  This is 
-also commonly used for programs that act s filters.
+also commonly used for programs that act as filters.
 
 If *stream_policy* is 'all' stderr is used for all informants that do not 
 explicitly set their stream.  By default, no informants explicitly set their 
