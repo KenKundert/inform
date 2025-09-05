@@ -3,7 +3,6 @@
 # dependency that I have not been able to track down that causes the other tests
 # to fail if it goes first.
 
-import pytest
 import doctest
 import glob
 import sys

@@ -893,19 +893,19 @@ def test_join():
         dict(key='trump'),
     ]
     assert join(
-        key='abby', name='Abby Normal', desc='team captain',
-        template=('{key}: {name} -- {desc}', '{key}: {name}')
+        template=('{key}: {name} -- {desc}', '{key}: {name}'),
+        **disappointments[0]
     ) == 'abby: Abby Normal -- team captain'
 
     assert join(
-        key='dizzy', name='Dizzy Functional',
-        template=('{key}: {name} -- {desc}', '{key}: {name}')
+        template=('{key}: {name} -- {desc}', '{key}: {name}'),
+        **disappointments[1]
     ) == 'dizzy: Dizzy Functional'
 
     with pytest.raises(KeyError) as exception:
         assert join(
-            key='trump',
-            template=('{key}: {name} -- {desc}', '{key}: {name}')
+            template=('{key}: {name} -- {desc}', '{key}: {name}'),
+            **disappointments[2]
         )
     assert str(exception.value) == "'no template match.'"
 
@@ -1267,7 +1267,7 @@ def test_prog_name(capsys):
 
 def test_informer_attributes(capsys):
     with Inform(prog_name='curly', pizza=True) as informer:
-        with pytest.raises(AttributeError) as exception:
+        with pytest.raises(AttributeError):
             informer.__xxx
         assert informer.yep == None
         assert informer.prog_name == 'curly'
@@ -1681,9 +1681,8 @@ def test_paramedic(capsys):
         stop = 1e-6
         step = 1e-9
         value = 0
-        with ProgressBar(stop, prefix='Progress: ') as progress:
+        with ProgressBar(stop, prefix='Progress: '):
             while value <= stop:
-                # progress.draw(value)
                 value += step
         display('after')
         captured = capsys.readouterr()

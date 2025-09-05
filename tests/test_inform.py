@@ -4,7 +4,7 @@
 from inform import (
     Inform, InformantFactory, Error, codicil, dedent, display, done, error,
     errors_accrued, fatal, log, output, terminate, terminate_if_errors, warn,
-    set_culprit, add_culprit, get_culprit, join_culprit, tree
+    set_culprit, add_culprit, get_culprit, join_culprit
 )
 from contextlib import contextmanager
 import sys
@@ -301,7 +301,7 @@ def test_pardon():
             try:
                 rv = done(exit=False)
                 assert rv == 0
-            except SystemExit as e:
+            except SystemExit:
                 assert False
 
             try:
@@ -313,25 +313,25 @@ def test_pardon():
             try:
                 rv = terminate(exit=False)
                 assert rv == 1
-            except SystemExit as e:
+            except SystemExit:
                 assert False
 
             try:
                 rv = terminate(True, exit=False)
                 assert rv == 1
-            except SystemExit as e:
+            except SystemExit:
                 assert False
 
             try:
                 rv = terminate('fuxit', exit=False)
                 assert rv == 1
-            except SystemExit as e:
+            except SystemExit:
                 assert False
 
             try:
                 rv = terminate(6, exit=False)
                 assert rv == 6
-            except SystemExit as e:
+            except SystemExit:
                 assert False
 
             try:
@@ -344,7 +344,7 @@ def test_pardon():
             try:
                 rv = terminate_if_errors(exit=False)
                 assert rv == 1
-            except SystemExit as e:
+            except SystemExit:
                 assert False
 
         try:
