@@ -3,8 +3,9 @@
 #
 # Utilities for communicating directly with the user.
 # Documentation can be found at inform.readthedocs.io.
-#
-# Copyright (c) 2014-2025 Kenneth S. Kundert
+
+# License {{{1
+# Copyright (c) 2014-2026 Kenneth S. Kundert
 # This software is licensed under the `MIT Licents <https://mit-license.org>`_.
 
 # Imports {{{1
@@ -1143,6 +1144,8 @@ def did_you_mean(invalid_str, valid_strs):
 
     """
     from difflib import SequenceMatcher
+    if not valid_strs:
+        return ""  # or "Ø"  # null set
     similarity = lambda x: SequenceMatcher(a=invalid_str, b=x).ratio()
     return max(valid_strs, key=similarity)
 
@@ -3813,3 +3816,5 @@ class Error(Exception):
         if name.startswith('__'):
             raise AttributeError(name)
         return self.kwargs.get(name)
+
+# vim: set sw=4 sts=4 tw=80 fo=ntcqwa12 et spell:
