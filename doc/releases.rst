@@ -9,6 +9,8 @@ Latest development release
     | Version: 1.35
     | Released: 2025-07-30
 
+- Added *is_true* argument and value format specification to :class:`truth`.
+
 
 1.35 (2025-07-30)
 -----------------
