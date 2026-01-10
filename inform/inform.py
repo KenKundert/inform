@@ -18,8 +18,8 @@ from codecs import open
 from textwrap import dedent as tw_dedent, fill
 
 # Globals {{{1
-__version__ = '1.35'
-__released__ = '2025-07-30'
+__version__ = '1.36'
+__released__ = '2026-01-10'
 INFORMER = None
 NOTIFIER = 'notify-send'
 STREAM_POLICIES = {
