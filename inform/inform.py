@@ -6,7 +6,7 @@
 
 # License {{{1
 # Copyright (c) 2014-2026 Kenneth S. Kundert
-# This software is licensed under the `MIT Licents <https://mit-license.org>`_.
+# This software is licensed under the `MIT License <https://mit-license.org>`_.
 
 # Imports {{{1
 import arrow
@@ -14,8 +14,9 @@ import io
 import os
 import re
 import sys
-from codecs import open
+from types import FunctionType, MethodType, ModuleType
 from textwrap import dedent as tw_dedent, fill
+
 
 # Globals {{{1
 __version__ = '1.36'
@@ -147,9 +148,11 @@ def cull(collection, **kwargs):
         if callable(kwargs['remove']):
             remove = kwargs['remove']
         elif is_collection(kwargs['remove']):
-            remove = lambda x: x in kwargs['remove']
+            # need identity check rather than inclusion to distinguish 0 & False
+            remove = lambda x: (any(x is r for r in kwargs['remove']))
         else:
-            remove = lambda x: x == kwargs['remove']
+            # need identity check rather than equality to distinguish 0 & False
+            remove = lambda x: x is kwargs['remove']
     else:
         remove = lambda x: not x
 
@@ -1404,16 +1407,18 @@ class plural:
         >>> str(bears)
         '5 bears'
 
-    If *default* is not specified, the count is returned:
+    If *formatter* is not specified, the count is returned:
 
         >>> str(plural(5))
         '5'
 
-        >>> str(plural(1))
-        '1'
+    You can also cast a *plural* to an integer or Boolean:
 
-        >>> str(plural(0))
-        '0'
+        >>> int(singers)
+        4
+
+        >>> bool(singers)
+        True
 
     The original implementation is from Veedrac on Stack Overflow: 
     http://stackoverflow.com/questions/21872366/plural-string-formatting
@@ -1492,8 +1497,11 @@ class plural:
     def __str__(self):
         return self.format()
 
-    def __bool__(self):
-        return bool(self.value)
+    def __int__(self):
+        try:
+            return len(self.value)
+        except TypeError:
+            return int(self.value)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.count})"
@@ -1564,9 +1572,6 @@ class truth:
         >>> str(in_german)
         'ja'
 
-    If '/', or '%' are inconvenient, you can change them by passing the
-    *slash* and *interpolate* arguments to truth().
-
     By default *bool*() is used to determine whether the value is true or false.
     However you can override this behavior by passing a value to *is_true*.  It
     may be a simple value or it may be a callable that accepts the given value 
@@ -1597,6 +1602,8 @@ class truth:
           0: Lee loses
           ✗: Lita loses (disqualified)
 
+    If '/', or '%' are inconvenient, you can change them by passing the
+    *slash* and *interpolate* arguments to truth().
     """
 
     def __init__(self, value, formatter=None, *, is_true=None, interpolate='%', slash='/'):
@@ -1907,7 +1914,8 @@ def _gen_connectors(width):
     line = "─"      # This is horizontal rule
     connector_seeds = dict(
         item = "├",
-        last_item = "└",
+        # last_item = "└",
+        last_item = "╰",
         lead = "│",
         last_lead = space,
     )
@@ -1963,11 +1971,11 @@ def tree(data, squeeze=False):
             │            Topeka, Kansas 20697
             ├── phone
             │   ├── cell: 1-210-555-5297
-            │   └── work: 1-210-555-8470
+            │   ╰── work: 1-210-555-8470
             ├── email: KateMcD@aol.com
-            └── additional roles
+            ╰── additional roles
                 ├── board member
-                └── chair of strategy subcommittee
+                ╰── chair of strategy subcommittee
 
     """
     return _tree(data, squeeze, top=True)
@@ -2422,7 +2430,6 @@ def vvv(*args):
     all variables are printed. If arguments are given, only the variables whose
     value match an argument are printed.
     '''
-    from types import ModuleType, FunctionType
     import inspect
 
     frame_depth = 1
@@ -2548,10 +2555,24 @@ class InformantFactory:
             *black*, *red*, *green*, *yellow*, *blue*, *magenta*, *cyan* or
             *white*.
 
+        colorize (string):
+            When to use color.  Choices include 'always', 'if_tty', 'never' or
+            None (the default).  If None, the Informer controls whether
+            messages are output in color.
+
         stream (stream):
             Output stream to use. Typically sys.stdout or sys.stderr. If not
             specified, the stream to use will be determined by the stream policy
-            of the active informer.
+            of the active informer.  May be a stream or a function that accepts
+            the informer as an argument and returns a stream.
+
+        formatter (function):
+            Replaces the standard message formatting with a custom format. The
+            function takes three arguments: *action*, *message*, and *kwargs*.
+            *action* is the informant itself, *message* is a string, and
+            *kwargs* are the keyword arguments passed to the informant.
+            The formatter only affects the normal output, not the output to the
+            logfile or the notifier.
 
         clone (informant):
             Clone the attributes of the given informer. Any explicitly specified
@@ -2611,12 +2632,19 @@ class InformantFactory:
         self.is_continuation = False
         self.message_color = None
         self.header_color = None
+        self.colorize = None
         self.stream = None
+        self.formatter = None
 
         # override defaults with values from clone
         clone = kwargs.pop('clone', None)
         if clone:
             self.__dict__.update(clone.__dict__)
+
+        # make formatter a method
+        self.formatter = kwargs.pop('formatter', None)
+        if self.formatter:
+            self.formatter = MethodType(self.formatter, self)
 
         # override with values specified in argument list
         self.__dict__.update(kwargs)
@@ -2624,7 +2652,13 @@ class InformantFactory:
             self.header_color = Color(self.header_color)
         if not isinstance(self.message_color, Color):
             self.message_color = Color(self.message_color)
+        assert self.colorize in ['always', 'if_tty', 'never', None]
 
+    def set_formatter(self, formatter):
+        if formatter:
+            self.formatter = MethodType(formatter, self)
+        else:
+            self.formatter = None
 
     def __call__(self, *args, **kwargs):
         INFORMER._report(args, kwargs, self)
@@ -2816,6 +2850,11 @@ class Inform:
             colorized. Colors are not used if desired output stream is not
             a TTY.
 
+        colorize (string):
+            When to use color.  Choices include 'always', 'if_tty', and 'never'.
+            The default is 'if_tty'.  This setting can be overridden by the
+            informant.
+
         flush (bool):
             Flush the stream after each write. Is useful if your program is
             crashing, causing loss of the latest writes. Can cause programs to
@@ -2902,6 +2941,7 @@ class Inform:
         version = None,
         termination_callback = None,
         colorscheme = 'dark',
+        colorize = 'if_tty',
         flush = False,
         stdout = None,
         stderr = None,
@@ -2960,6 +3000,8 @@ class Inform:
         # Save the color scheme
         assert colorscheme in [None, 'light', 'dark']
         self.colorscheme = colorscheme
+        assert colorize in ['always', 'if_tty', 'never']
+        self.colorize = colorize
 
         # Activate the actions
         global INFORMER
@@ -3019,6 +3061,8 @@ class Inform:
         """
         try:
             cached = self.logfile.drain()
+            if cached[-1] == '\n':
+                cached = cached[:-1]
         except Exception:
             cached = None
         self.close_logfile()
@@ -3058,7 +3102,7 @@ class Inform:
 
         # if previous logger was a cache, copy its contents to new logfile
         if cached:
-            log(cached, end='')
+            log(cached)
             return
 
         # otherwise write header to log file
@@ -3078,8 +3122,11 @@ class Inform:
     # flush_logfile {{{2
     def flush_logfile(self):
         "Flush the logfile."
-        if self.logfile:
-            self.logfile.flush()
+        try:
+            if self.logfile:
+                self.logfile.flush()
+        except OSError as e:
+            _print(os_error(e), file=sys.stderr)
 
     # close_logfile {{{2
     def close_logfile(self, status=None):
@@ -3087,17 +3134,20 @@ class Inform:
 
         If status is given, it is taken to be the exit message or exit status.
         """
-        if not self.logfile:
-            return
-        prog_name = self.prog_name if self.prog_name else sys.argv[0]
-        if is_str(status):
-            log(status, culprit=prog_name)
-        elif status is not None:
-            assert 0 <= status < 128
-            log('terminates with status {}.'.format(status), culprit=prog_name)
-        now = get_datetime()
-        log('log closed {}.'.format(now), culprit=prog_name)
-        self.logfile.close()
+        try:
+            if not self.logfile:
+                return
+            prog_name = self.prog_name if self.prog_name else sys.argv[0]
+            if is_str(status):
+                log(status, culprit=prog_name)
+            elif status is not None:
+                assert 0 <= status < 128
+                log('terminates with status {}.'.format(status), culprit=prog_name)
+            now = get_datetime()
+            log('log closed {}.'.format(now), culprit=prog_name)
+            self.logfile.close()
+        except OSError as e:
+            _print(os_error(e), file=sys.stderr)
         self.logfile = None
 
     # set_stream_policy {{{2
@@ -3142,39 +3192,46 @@ class Inform:
                 codicils = _join(codicils, dict(sep='\n', wrap=kwargs.get('wrap')))
                 if header:
                     codicils = indent(codicils)
-                message = message + '\n' + codicils
+                full_msg = message + '\n' + codicils
+            else:
+                full_msg = message
 
             messege_color = action.message_color
             header_color = action.header_color
             if action._write_output(self):
-                cs = self.colorscheme if Color.isTTY(options['file']) else None
+                if action.formatter:
+                    formatted = action.formatter(message, kwargs)
+                    self._show_msg('', '', formatted, False, False, options)
+                else:
+                    colorize = action.colorize or self.colorize
+                    cs = self.colorscheme
+                    if (
+                        colorize == 'never' or
+                        (colorize == 'if_tty' and not Color.isTTY(options['file']))
+                    ):
+                        cs = False
+
+                    self._show_msg(
+                        header_color(header, scheme=cs) if header else header,
+                        header_color(culprit, scheme=cs) if culprit else culprit,
+                        messege_color(full_msg, scheme=cs) if full_msg else full_msg,
+                        multiline, continuing, options
+                    )
+            if action._write_logfile(self) and self.logfile:
+                options['file'] = self.logfile
                 self._show_msg(
-                    # should probably not be passing in the color scheme as it
-                    # overrides a scheme explicitly specified in the color
-                    # class.  However if I change it it creates numerous errors
-                    # in the tests.  I did not have the time to resolve them, so
-                    # I am leaving it for now.  This results in an awkward bit
-                    # of code in assimilate/overdue.py.
-                    header_color(header, scheme=cs) if header else header,
-                    header_color(culprit, scheme=cs) if culprit else culprit,
-                    messege_color(message, scheme=cs) if message else message,
+                    header,
+                    culprit,
+                    Color.strip_colors(full_msg),
                     multiline, continuing, options
                 )
+
             notify_override = (
                 options['file'] in [self.stdout, self.stderr]   and
                 not Color.isTTY()                               and
                 (self.notify_if_no_tty and not is_continuation) and
                 action.severity
             )
-            if action._write_logfile(self) and self.logfile:
-                options['file'] = self.logfile
-                self._show_msg(
-                    header,
-                    culprit,
-                    Color.strip_colors(message),
-                    multiline, continuing, options
-                )
-
             if action._notify_user(self) or notify_override:
                 import subprocess
                 urgency = kwargs.get('urgency', 'critical' if action.is_error else None)
@@ -3195,14 +3252,18 @@ class Inform:
             end = kwargs.get('end', '\n'),
             flush = kwargs.get('flush', self.flush),
             continuing = kwargs.get('continuing', False),
-        )
             # sep is handled in _render_message
-        if sys.version[0] == '2':  # pragma: no cover
-            opts.pop('flush')  # flush is not supported in python2
+        )
         if 'file' in kwargs:
             opts['file'] = kwargs['file']
         else:
-            opts['file'] = action.stream or self.stream_policy(action, self.stdout, self.stderr)
+            stream = (
+                action.stream or
+                self.stream_policy(action, self.stdout, self.stderr)
+            )
+            if callable(stream):
+                stream = stream(self)
+            opts['file'] = stream
         return opts
 
     # _render_message {{{2
@@ -3241,19 +3302,19 @@ class Inform:
             # when a progress bar is interrupted with an informational message.
             _print(**options)  # start the informational message on a new line
             stream_info.interrupted = True
-        if terminated:
-            stream_info.empty_line = True
-        elif continuing and message:
-            stream_info.empty_line = False
+        stream_info.empty_line = terminated
 
-        if multiline:
-            head = ': '.join(cull([header, culprit]))
-            if head:
-                _print('%s:\n%s' % (head, indent(message)), **options)
+        try:
+            if multiline:
+                head = ': '.join(cull([header, culprit]))
+                if head:
+                    _print('%s:\n%s' % (head, indent(message)), **options)
+                else:
+                    _print(indent(message), **options)
             else:
-                _print(indent(message), **options)
-        else:
-            _print(': '.join(cull([header, culprit, message])), **options)
+                _print(': '.join(cull([header, culprit, message])), **options)
+        except OSError as e:
+            _print(os_error(e), file=sys.stderr)
 
     # done {{{2
     def done(self, exit=True):
@@ -3654,6 +3715,7 @@ class Error(Exception):
     proposed on the Python Ideas mailing list by Ryan Fox
     (https://pypi.org/project/exception-template/).
     """
+    error_informant = error
 
     # constructor {{{3
     def __init__(self, *args, **kwargs):
@@ -3785,7 +3847,7 @@ class Error(Exception):
             kwargs.update(new_kwargs)
         else:
             kwargs = self.kwargs
-        informant = kwargs.get('informant', error)
+        informant = kwargs.get('informant', self.error_informant)
         informant(*self.args, **kwargs)
 
     # terminate {{{3
@@ -3843,11 +3905,11 @@ class Error(Exception):
         if include_codicil:
             codicil = self.get_codicil()
             if codicil:
-                # codicil = '\n\n'.join(cull(codicil))
-                codicil = '\n'.join(codicil)
+                codicil = '\n'.join(str(c) for c in codicil)
                 return f"{message}\n{indent(codicil)}"
         return message
 
+    # dunders {{{3
     def __str__(self):
         return self.render()
 

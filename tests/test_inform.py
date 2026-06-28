@@ -2,9 +2,9 @@
 
 # Imports {{{1
 from inform import (
-    Inform, InformantFactory, Error, codicil, dedent, display, done, error,
-    errors_accrued, fatal, log, output, terminate, terminate_if_errors, warn,
-    set_culprit, add_culprit, get_culprit, join_culprit
+    Inform, InformantFactory, Error, codicil, cull, dedent, display, done,
+    error, errors_accrued, fatal, log, output, terminate, terminate_if_errors,
+    warn, set_culprit, add_culprit, get_culprit, join_culprit
 )
 from contextlib import contextmanager
 import sys
@@ -860,6 +860,108 @@ def test_stripy():
             ack: log opened on <date>
             {expected}
         ''').strip().format(expected=expected)
+
+def test_portico():
+    with messenger() as (msg, stdout, stderr, logfile):
+
+        def json_lines(action, message, kwargs):
+            message = cull(dict(
+                severity = action.severity,
+                message_color = action.message_color.color,
+                header_color = action.header_color.color,
+                message = message,
+                culprit = kwargs.get('culprit'),
+                codicil = kwargs.get('codicil'),
+            ))
+
+            import json
+            return json.dumps(message)
+
+        jdisplay = InformantFactory(clone=display, output=False)
+        jwarn = InformantFactory(clone=warn, formatter=json_lines)
+        jerror = InformantFactory(clone=error, formatter=json_lines)
+
+        jdisplay('DISPLAY 1: SHOULD NOT APPEAR')
+        jwarn('warn 1: should appear', culprit='lions')
+        jerror('error 1: should appear', culprit='tigers')
+        jdisplay('DISPLAY 2: SHOULD NOT APPEAR', end='; ')
+        jwarn('warn 2: should appear', culprit='bears')
+        jerror('error 2: should appear', culprit=('lions', 'tigers', 'bears'), codicil="OH NO!")
+        jdisplay('DISPLAY 3: SHOULD NOT APPEAR')
+
+        assert msg.errors_accrued() == 2
+        assert errors_accrued() == 2
+        assert strip(stdout) == dedent("""
+            {"severity": "warning", "header_color": "yellow", "message": "warn 1: should appear", "culprit": "lions"}
+            {"severity": "error", "header_color": "red", "message": "error 1: should appear", "culprit": "tigers"}
+            {"severity": "warning", "header_color": "yellow", "message": "warn 2: should appear", "culprit": "bears"}
+            {"severity": "error", "header_color": "red", "message": "error 2: should appear", "culprit": ["lions", "tigers", "bears"], "codicil": "OH NO!"}
+        """, strip_nl='b')
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: log opened on <date>
+            DISPLAY 1: SHOULD NOT APPEAR
+            warning: lions: warn 1: should appear
+            error: tigers: error 1: should appear
+            DISPLAY 2: SHOULD NOT APPEAR; 
+            warning: bears: warn 2: should appear
+            error: lions, tigers, bears: error 2: should appear
+                OH NO!
+            DISPLAY 3: SHOULD NOT APPEAR
+        ''').strip()
+
+def test_blemish():
+    with messenger() as (msg, stdout, stderr, logfile):
+
+        def json_lines(action, message, kwargs):
+            message = cull(dict(
+                severity = action.severity,
+                message_color = action.message_color.color,
+                header_color = action.header_color.color,
+                message = message,
+                culprit = kwargs.get('culprit'),
+                codicil = kwargs.get('codicil'),
+            ))
+
+            import json
+            return json.dumps(message)
+
+        jwarn = InformantFactory(clone=warn, formatter=json_lines)
+        jerror = InformantFactory(clone=error, formatter=json_lines)
+
+        display('DISPLAY 1: SHOULD NOT APPEAR')
+        jwarn('warn 1: should appear', culprit='lions')
+        jerror('error 1: should appear', culprit='tigers')
+        display('DISPLAY 2: SHOULD NOT APPEAR', end='; ')
+        jwarn('warn 2: should appear', culprit='bears')
+        jerror('error 2: should appear', culprit=('lions', 'tigers', 'bears'), codicil="OH NO!")
+        display('DISPLAY 3: SHOULD NOT APPEAR')
+
+        assert msg.errors_accrued() == 2
+        assert errors_accrued() == 2
+        assert strip(stdout) == dedent("""
+            DISPLAY 1: SHOULD NOT APPEAR
+            {"severity": "warning", "header_color": "yellow", "message": "warn 1: should appear", "culprit": "lions"}
+            {"severity": "error", "header_color": "red", "message": "error 1: should appear", "culprit": "tigers"}
+            DISPLAY 2: SHOULD NOT APPEAR; 
+            {"severity": "warning", "header_color": "yellow", "message": "warn 2: should appear", "culprit": "bears"}
+            {"severity": "error", "header_color": "red", "message": "error 2: should appear", "culprit": ["lions", "tigers", "bears"], "codicil": "OH NO!"}
+            DISPLAY 3: SHOULD NOT APPEAR
+        """, strip_nl='b')
+        assert strip(stderr) == ''
+        assert log_strip(logfile) == dedent('''
+            ack: invoked as: <exe>
+            ack: log opened on <date>
+            DISPLAY 1: SHOULD NOT APPEAR
+            warning: lions: warn 1: should appear
+            error: tigers: error 1: should appear
+            DISPLAY 2: SHOULD NOT APPEAR; 
+            warning: bears: warn 2: should appear
+            error: lions, tigers, bears: error 2: should appear
+                OH NO!
+            DISPLAY 3: SHOULD NOT APPEAR
+        ''').strip()
 
 def test_capsys_out(capsys):
     output('hello world')

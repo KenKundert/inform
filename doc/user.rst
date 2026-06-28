@@ -652,14 +652,72 @@ voluminous or because it is sensitive. In that case you can simply override the
    output.log = False
 
 Any attribute that can be passed into :class:`InformantFactory` when creating an 
-informant can be overridden. However, when overriding a color you must use 
-a colorizer rather than a color name:
+informant can be overridden except for *formatter*. However, when overriding 
+a color you must use a colorizer rather than a color name:
 
 .. code-block:: python
 
     from inform import comment, Color
     comment.message_color=Color('cyan')
 
+
+Formatters
+""""""""""
+
+You can replace the *Inform* formatting for messages by providing a formatter to 
+an informant.  The formatting is only replaced for normal output, not output to 
+the logfile or a notifier.  This feature can be used to covert the messages 
+*Inform* would normally produce, which are meant to be consumed by people, into 
+messages more easily read by other programs.  For example, consider the 
+following example:
+
+.. code-block:: python
+
+    >>> from inform import cull, display, warn, error
+
+    >>> audience = 'machines'
+
+    >>> if audience == 'machines':
+    ...     import json
+    ...
+    ...     def json_lines(action, message, kwargs):
+    ...         return json.dumps(cull(dict(
+    ...             severity = action.severity,
+    ...             message_color = action.message_color.color,
+    ...             header_color = action.header_color.color,
+    ...             message = message,
+    ...             culprits = kwargs.get('culprit'),
+    ...             codicils = kwargs.get('codicil'),
+    ...         )))
+    ...
+    ...     display.output = False
+    ...     warn.set_formatter(json_lines)
+    ...     error.set_formatter(json_lines)
+
+    >>> display("apple")
+
+    >>> warn("nut")
+    {"severity": "warning", "header_color": "yellow", "message": "nut"}
+
+    >>> error("poison")
+    {"severity": "error", "header_color": "red", "message": "poison"}
+
+In this example if *audience* is set to *people*, inform behaves normally, 
+producing messages that are easy for people to read.  When *audience* is set to 
+*machines* it suppresses conversational messages and outputs errors and warnings 
+in a format called `JSON Lines <https://jsonlines.org`_, which is easy for 
+machines to read and process.  With *JSON Lines* each line is output as 
+a complete JSON document.
+
+You can restore normal formatting by setting the formatter to *None*.
+
+.. reset display, warn, error
+
+    Restore informant to their normal behavior for remaining tests
+
+    >>> display.output = lambda inform: not inform.quiet and not inform.mute
+    >>> warn.formatter = None
+    >>> error.formatter = None
 
 .. informers:
 
@@ -2176,11 +2234,11 @@ Example:
     │            Topeka, Kansas 20697
     ├── phone
     │   ├── cell: 1-210-555-5297
-    │   └── work: 1-210-555-8470
+    │   ╰── work: 1-210-555-8470
     ├── email: KateMcD@aol.com
-    └── additional roles
+    ╰── additional roles
         ├── board member
-        └── chair of strategy subcommittee
+        ╰── chair of strategy subcommittee
 
 .. _truth desc:
 
@@ -2254,6 +2312,36 @@ Converting truth to a Boolean returns True or False.
     >>> in_german = truth(True, formatter="ja/nein")
     >>> str(in_german)
     'ja'
+
+By default *bool*() is used to determine whether the value is true or false.
+However you can override this behavior by passing a value to *is_true*.  It
+may be a simple value or it may be a callable that accepts the given value 
+as its only argument.
+
+The formatter may contain a third section, which if present is taken to be a
+format specification that is applied to value before it is interpolated into
+the output.
+
+As an example of these features, consider this example:
+
+    >>> contestants = [
+    ...     dict(name="Elinor", index=27, wins="car" ),
+    ...     dict(name="Vernon", index=130, wins="phone"),
+    ...     dict(name="Lee",    index=0),
+    ...     dict(name="Lita", comment='disqualified'),
+    ... ]
+
+    >>> for contestant in contestants:
+    ...     name = contestant.get('name')
+    ...     index = contestant.get('index')
+    ...     index = truth(index, is_true=index is not None)
+    ...     wins = truth(contestant.get('wins'))
+    ...     comment = truth(contestant.get('comment'))
+    ...     print(f"{index:%/  ✗/>3}: {name}{wins: wins a %/ loses}{comment: (%)/}")
+     27: Elinor wins a car
+    130: Vernon wins a phone
+      0: Lee loses
+      ✗: Lita loses (disqualified)
 
 If '/', or '%' are inconvenient, you can change them by passing the
 *slash* and *interpolate* arguments to truth().

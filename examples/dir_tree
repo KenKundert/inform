@@ -29,6 +29,6 @@ def file_hierarchy(top):
         return result
 
 cmdline = docopt(__doc__)
-top = cmdline['<path>']
+top = cmdline['<path>'] or '.'
 hierarchy = file_hierarchy(top)
 print(tree({top: hierarchy}))

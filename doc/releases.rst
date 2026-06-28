@@ -10,6 +10,14 @@ Latest development release
     | Released: 2026-01-10
 
 
+1.37 (2026-06-28)
+-----------------
+- Allow stream argument to :class:`InformantFactory` to be a function.
+- Add *colorize* argument to :class:`InformantFactory` and :class:`Inform`.
+- Allow informant to be set on :class:`Error`.
+- Add *formatter* argument to :class:`InformantFactory`.
+
+
 1.36 (2026-01-10)
 -----------------
 - Added *is_true* argument and value format specification to :class:`truth`.

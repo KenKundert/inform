@@ -1866,34 +1866,34 @@ def test_tree():
         alist
         ├── 1
         ├── 2
-        └── 3
+        ╰── 3
         adict
         ├── 1: one
         ├── 2: two
         ├── 3: three
-        └── four
+        ╰── four
     ''').strip()
     assert result == expected
 
     result = tree(data)
     expected = dedent('''
         str
-        └── text
+        ╰── text
         mlstr
-        └── line 1
+        ╰── line 1
             line 2
         alist
         ├── 1
         ├── 2
-        └── 3
+        ╰── 3
         adict
         ├── 1
-        │   └── one
+        │   ╰── one
         ├── 2
-        │   └── two
+        │   ╰── two
         ├── 3
-        │   └── three
-        └── four
+        │   ╰── three
+        ╰── four
     ''').strip()
     assert result == expected
 
@@ -1906,12 +1906,12 @@ def test_tree():
         ├── alist
         │   ├── 1
         │   ├── 2
-        │   └── 3
-        └── adict
+        │   ╰── 3
+        ╰── adict
             ├── 1: one
             ├── 2: two
             ├── 3: three
-            └── four
+            ╰── four
     ''').strip()
     assert result == expected
 
@@ -1919,22 +1919,22 @@ def test_tree():
     expected = dedent('''
         root
         ├── str
-        │   └── text
+        │   ╰── text
         ├── mlstr
-        │   └── line 1
+        │   ╰── line 1
         │       line 2
         ├── alist
         │   ├── 1
         │   ├── 2
-        │   └── 3
-        └── adict
+        │   ╰── 3
+        ╰── adict
             ├── 1
-            │   └── one
+            │   ╰── one
             ├── 2
-            │   └── two
+            │   ╰── two
             ├── 3
-            │   └── three
-            └── four
+            │   ╰── three
+            ╰── four
     ''').strip()
     assert result == expected
 

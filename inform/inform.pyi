@@ -242,14 +242,17 @@ def sss() -> None: ...
 class InformantFactory:
     severity: str
     is_error: bool
-    log: bool
-    output: bool
-    notify: bool
+    log: bool | Callable
+    output: bool | Callable
+    notify: bool | Callable
     terminate: bool
     is_continuation: bool
     message_color: Color
     header_color: Color
-    stream: TextIO
+    colorize: str
+    stream: TextIO | Callable
+    formatter: Callable
+    clone: InformantFactory
     def __init__(self, **kwargs) -> None: ...
     def __call__(self, *args, **kwargs) -> None: ...
 
