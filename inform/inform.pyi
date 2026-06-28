@@ -10,14 +10,12 @@ def indent(
     first: int = ...,
     stops: int = ...,
     sep: str = ...
-) -> str:
-    ...
+) -> str: ...
 
 def cull(
         collection: Sequence,
         **kwargs
-) -> Sequence:
-    ...
+) -> Sequence: ...
 
 def is_str(arg: Any) -> bool: ...
 def is_iterable(obj: Any) -> bool: ...
@@ -33,8 +31,7 @@ class bar:
         pad: bool,
         clip: float,
         overflow: Literal[False] | str,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def render(
         self,
@@ -43,8 +40,7 @@ class bar:
         pad: bool,
         clip: float,
         overflow: Literal[False] | str,
-    ) -> str:
-        ...
+    ) -> str: ...
 
 class Color:
     enable: bool
@@ -55,8 +51,7 @@ class Color:
         *,
         scheme: str = ...,
         enable: bool = ...
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __call__(self, *args, **kwargs) -> str: ...
 
@@ -79,8 +74,7 @@ def render(
     sort: bool = ...,
     level: int = ...,
     tab: str = ...
-) -> str:
-    ...
+) -> str: ...
 
 def fmt(message: str, *args, **kwargs) -> str: ...
 
@@ -90,8 +84,7 @@ def dedent(
     *,
     bolm: str = ...,
     wrap: bool = ...
-) -> str:
-    ...
+) -> str: ...
 
 def os_error(e: OSError) -> str: ...
 
@@ -101,20 +94,17 @@ def conjoin(
     sep: str = ...,
     end: str = ...,
     fmt: str = ...
-) -> str:
-    ...
+) -> str: ...
 
 def title_case(
     s: str,
     exceptions: Sequence[str] =...
-) -> str:
-    ...
+) -> str: ...
 
 def did_you_mean(
     invalid_str: str,
     valid_strs: Sequence[str]
-) -> str:
-    ...
+) -> str: ...
 
 def parse_range(
     items_str: str,
@@ -122,8 +112,7 @@ def parse_range(
     range: Callable = ...,
     block_delim: str = ...,
     range_delim: str = ...,
-) -> set:
-    ...
+) -> set: ...
 
 def format_range(
     items: Iterable,
@@ -132,8 +121,7 @@ def format_range(
     str: Callable = ...,
     block_delim: str = ...,
     range_delim: str = ...,
-) -> str:
-    ...
+) -> str: ...
 
 class plural:
     def __init__(
@@ -143,8 +131,7 @@ class plural:
         num: str = ...,
         invert: str = ...,
         slash: str = ...
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def format(self, formatter: str) -> str: ...
 
@@ -159,8 +146,7 @@ class truth:
         *,
         interpolate: str = ...,
         slash: str = ...
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def format(self, formatter: str) -> str: ...
 
@@ -174,8 +160,7 @@ def full_stop(
     sentence: str | Exception,
     end: str = ...,
     allow: str = ...
-) -> str:
-    ...
+) -> str: ...
 
 def columns(
     array: Sequence[str],
@@ -212,15 +197,13 @@ class ProgressBar:
         width: int = ...,
         informant: InformantFactory = ...,
         markers: Mapping[str, tuple[str, str | Color | None]] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def draw(
         self,
         abscissa: float,
         marker: str = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def done(self) -> None: ...
 
@@ -253,7 +236,24 @@ class InformantFactory:
     stream: TextIO | Callable
     formatter: Callable
     clone: InformantFactory
-    def __init__(self, **kwargs) -> None: ...
+
+    def __init__(
+        self,
+        severity: str = ...,
+        is_error: bool = ...,
+        log: bool | Callable = ...,
+        output: bool | Callable = ...,
+        notify: bool | Callable = ...,
+        terminate: bool = ...,
+        is_continuation: bool = ...,
+        message_color: str = ...,
+        header_color: str = ...,
+        colorize: str = ...,
+        stream: TextIO | Callable = ...,
+        formatter: Callable = ...,
+        clone: InformantFactory = ...,
+    ) -> None: ...
+
     def __call__(self, *args, **kwargs) -> None: ...
 
 log: InformantFactory
@@ -285,6 +285,7 @@ class Inform:
         version: str = ...,
         termination_callback: Callable = ...,
         colorscheme: str | None = ...,
+        colorize: str = ...,
         flush: bool = ...,
         stdout: TextIO = ...,
         stderr: TextIO = ...,
@@ -294,8 +295,7 @@ class Inform:
         notify_if_no_tty: bool = ...,
         notifier: str =...,
         **kwargs,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __getattr__(self, name: str) -> Any: ...
 
@@ -312,8 +312,7 @@ class Inform:
         logfile: str | Path | TextIO | bool,
         prev_logfile_suffix: str = ...,
         encoding: str = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def flush_logfile(self) -> None: ...
 
