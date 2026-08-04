@@ -50,7 +50,17 @@ These are used to configure inform for doctests:
 def _print(*args, **kwargs):
     "This is the system print function with handling for BrokenPipeError"
     try:
-        print(*args, **kwargs)
+        try:
+            print(*args, **kwargs)
+        except UnicodeEncodeError:  # pragma: no cover
+            # stdout has an unexpected encoding, adapt to it.
+            encoding = sys.stdout.encoding or "ascii"
+            escaped = [
+                a.encode(encoding, "backslashreplace").decode(encoding)
+                if isinstance(a, str) else a
+                for a in args
+            ]
+            print(*escaped, **kwargs)
     except BrokenPipeError:  # pragma: no cover
         # try to ignore further writing to this stream to avoid another BPE
         stream = kwargs.get('file', sys.stdout)
